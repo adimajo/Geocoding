@@ -12,14 +12,14 @@ Attributes:
 
 """
 import os
-import numpy as np
-import kdquery
 
-from . import utils
-from . import distance
-from .similarity import Similarity
-from .datatypes import dtypes
-from .datapaths import paths
+import kdquery
+import numpy as np
+
+from geocoder.geocoding import distance, utils
+from geocoder.geocoding.datapaths import paths
+from geocoder.geocoding.datatypes import dtypes
+from geocoder.geocoding.similarity import Similarity
 
 data = {}
 limits = {}
@@ -175,7 +175,7 @@ def select_commune(postal_id, commune):
     ref_element = data['postal'][postal_id]
     start, end = ref_element['start'], ref_element['end']
 
-    if end-start < 2:
+    if end - start < 2:
         return start
 
     if commune is None:

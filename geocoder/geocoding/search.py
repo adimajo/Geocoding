@@ -4,9 +4,7 @@
 This module defines the logic of the two most relevant methods of this package:
 the position method and the reverse method.
 """
-from . import normalize
-from . import query
-from . import result
+from geocoder.geocoding import result, normalize, query
 
 
 def preprocessing(code_postal, commune, adresse):
@@ -84,7 +82,7 @@ def position(code_postal=None, commune=None, adresse=None):
         }
 
     Example:
-        >>> from geocoding import search
+        >>> from geocoder.geocoding import search
         >>> search.position('91120', 'Palaiseau', '12, Bd des Maréchaux')
 
     """
@@ -169,7 +167,7 @@ def reverse(position):
         }
 
     Example:
-        >>> from geocoding import search
+        >>> from geocoder.geocoding import search
         >>> search.reverse((2.21, 48))
 
     """

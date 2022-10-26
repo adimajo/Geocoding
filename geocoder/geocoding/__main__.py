@@ -1,10 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys
 
-from .download import get_ban_file, decompress, remove_downloaded_raw_ban_files
-from .index import process_files, create_database
-from .activate_reverse import create_kdtree
-
+from geocoder.geocoding.activate_reverse import create_kdtree
+from geocoder.geocoding.download import get_ban_file, decompress, remove_downloaded_raw_ban_files
+from geocoder.geocoding.index import process_files, create_database
 
 commands = {
     'download': [get_ban_file],

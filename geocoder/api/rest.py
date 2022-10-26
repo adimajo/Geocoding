@@ -1,13 +1,17 @@
+import json
+from datetime import datetime
+
+import pandas as pd
+from Geocoding_utils import ADDRESS, POSTAL_CODE, CITY
 from flask import Blueprint
 from flask import jsonify
 from flask import redirect
 from flask import render_template
 from flask import request
 from flask import url_for
-from datetime import datetime
-from api.Geocoder import Geocoder
-from api.conf import *
-from Geocoding_utils import *
+
+from geocoder.api.Geocoder import Geocoder
+from geocoder.api.conf import VERSION, QUALITY
 
 api_rest = Blueprint(
     "rest",
@@ -58,7 +62,7 @@ def geocode_file():
     json_as_str = request.get_json(force=True)
     try:
         data = json.loads(json_as_str)
-    except:
+    except (json.JSONDecodeError, TypeError):
         data = json.loads(json.dumps(json_as_str))
     data_to_geocode = pd.json_normalize(data)
     geocoder = Geocoder(data_to_geocode)

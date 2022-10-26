@@ -1,0 +1,28 @@
+[[source]]
+name = "artifactory_mirror"
+url = "${PYPI_REMOTE}"
+verify_ssl = false
+
+[dev-packages]
+pytest = "*"
+coverage = "*"
+sphinx = "*"
+sphinx-rtd-theme = "*"
+flake8 = "*"
+numpydoc = "*"
+bandit = "*"
+
+[packages]
+werkzeug = "==2.1.2"
+loguru = "*"
+gunicorn = "*"
+flask = "*"
+flask_restx = "*"
+flask_wtf = "*"
+kdquery = "*"
+numpy = "*"
+pandas = "*"
+requests = "*"
+sortedcontainers = "*"
+unidecode = "*"
+Geocoding-utils = {git = "https://github.com/chrlryo/Geocoding-utils", ref = "master"}

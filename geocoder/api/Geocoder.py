@@ -1,9 +1,10 @@
 import uuid
-import geocoding
-import numpy as np
-
 from datetime import datetime
-from Geocoding_utils import *
+
+import numpy as np
+from Geocoding_utils import ADDRESS, POSTAL_CODE, CITY
+
+import geocoder
 
 
 class Geocoder:
@@ -51,7 +52,7 @@ class Geocoder:
                 if args[0] == '98000':
                     return np.nan, np.nan, np.nan
                 else:
-                    res = geocoding.find(*args)
+                    res = geocoder.find(*args)
                     return res.get('longitude', np.nan), res.get('latitude', np.nan), res.get('quality', np.nan)
 
             geocoded_fields = [find(args) for args in self.data[[POSTAL_CODE, CITY, ADDRESS]].fillna('').values]

@@ -1,6 +1,6 @@
 from flask import Flask
-from api.rest import api_rest
 
+from geocoder.api.rest import api_rest
 
 app = Flask(
     __name__,

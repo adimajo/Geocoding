@@ -1,13 +1,13 @@
 import gc
-import numpy as np
 
+import numpy as np
 from kdquery import Tree
 
-from .index import create_dat_file
-from .datatypes import dtypes
 from .datapaths import paths
-from .utils import pre_order, degree_to_int
+from .datatypes import dtypes
 from .download import completion_bar
+from .index import create_dat_file
+from .utils import pre_order, degree_to_int
 
 
 def node_to_tuple(node):

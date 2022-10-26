@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+from loguru import logger
 from sortedcontainers import SortedDict, SortedSet
 
-from .utils import degree_to_int
-from . import normalize as norm
-
+from geocoder.geocoding import normalize as norm
+from geocoder.geocoding.utils import degree_to_int
 
 line_specs = {
-    "nom_voie": 7,
-    "numero": 5,
-    "repetition": 6,
-    "code_insee": 10,
-    "code_postal": 8,
-    "longitude": 15,
-    "latitude": 16,
-    "nom_commune": 9,
-    "nom_complementaire": 11
+    "nom_voie": 4,
+    "numero": 2,
+    "repetition": 3,
+    "code_insee": 6,
+    "code_postal": 5,
+    "longitude": 12,
+    "latitude": 13,
+    "nom_commune": 7,
+    "nom_complementaire": 16
 }
 
 types = {
@@ -96,11 +96,12 @@ def update(dpt_nom, csv_file_path, processed_files):
         next(f)
         for line in f:
             attributes = get_attributes(line.strip().split(';'))
+            logger.debug(attributes)
             if attributes is None:
                 continue
             postal_key = attributes[:1]
-            commune_key = attributes[1: 4]
-            voie_key = attributes[4: 6]
+            commune_key = attributes[1:4]
+            voie_key = attributes[4:6]
             localisation = attributes[6:]
 
             if postal_key not in postal_dict:

@@ -13,8 +13,8 @@ Attributes:
 
 """
 import re
-from unidecode import unidecode
 
+from unidecode import unidecode
 
 dictionary = {
     "ALL": "ALLEE",

@@ -3,18 +3,27 @@
 
 """
 import gzip
+import hashlib
 import os
 import shutil
 import sys
-import requests
-import hashlib
 
-from .datapaths import here
+import requests
+from loguru import logger
+from urllib3 import disable_warnings
+from urllib3.exceptions import InsecureRequestWarning
+
+from geocoder.geocoding.datapaths import here
+
+SSL_VERIFICATION = os.environ.get("SSL_VERIFICATION", False)
+
+if not SSL_VERIFICATION:
+    disable_warnings(InsecureRequestWarning)
 
 raw_data_folder_path = os.path.join(here, 'raw')
-ban_url = 'https://adresse.data.gouv.fr/data/ban/export-api-gestion/latest/ban/{}'
-ban_dpt_gz_file_name = 'ban-{}.csv.gz'
-ban_dpt_file_name = 'ban-{}.csv'
+ban_url = 'https://adresse.data.gouv.fr/data/ban/adresses-odbl/latest/csv/{}'
+ban_dpt_gz_file_name = ['adresses-{}.csv.gz', 'lieux-dits-{}-beta.csv.gz']
+ban_dpt_file_name = [filegz[:-3] for filegz in ban_dpt_gz_file_name]
 content_folder_path = os.path.join(here, 'content')
 server_content_file_name = os.path.join(content_folder_path, 'server_content_v2.txt')
 local_content_file_name = os.path.join(content_folder_path, 'local_content_v2.txt')
@@ -28,7 +37,7 @@ dpt_list = ["01", "02", "03", "04", "05", "06", "07", "08", "09",
             "70", "71", "72", "73", "74", "75", "76", "77", "78", "79",
             "80", "81", "82", "83", "84", "85", "86", "87", "88", "89",
             "90", "91", "92", "93", "94", "95",
-            "971", "972", "973", "974", "975", "976"]
+            "971", "972", "973", "974", "975", "976", "977", "978", "984", "986", "987", "988", "989"]
 
 
 def completion_bar(msg, fraction):
@@ -44,7 +53,7 @@ def completion_bar(msg, fraction):
 
 
 def md5(fname):
-    md5_hash = hashlib.md5()
+    md5_hash = hashlib.md5()  # nosec
     with open(fname, "rb") as f:
         for chunk in iter(lambda: f.read(4096), b""):
             md5_hash.update(chunk)
@@ -52,11 +61,14 @@ def md5(fname):
 
 
 def update_ban_file(url, file_name):
-    r = requests.get(url)
-
-    if r.status_code != 200:
-        raise Exception('Unable to join BAN address website ({}). Status error code: {}'.format(url,
-                                                                                                r.status_code))
+    try:
+        msg = 'Unable to join BAN address website ({}).'.format(url)
+        r = requests.get(url, verify=SSL_VERIFICATION)
+        msg += ' Status error code: {}'.format(r.status_code)
+        if r.status_code != 200:
+            raise ConnectionError(msg)
+    except (requests.exceptions.ConnectionError, requests.exceptions.SSLError, requests.exceptions.HTTPError):
+        raise ConnectionError(msg)
 
     with open(file_name, 'w') as file:
         file.write(r.text)
@@ -77,7 +89,7 @@ def need_to_download():
         update_server_content_file()
 
         if md5(server_content_file_name) == md5(local_content_file_name):
-            print('BAN database is already up to date. No need to download it again.')
+            logger.info('BAN database is already up to date. No need to download it again.')
             os.remove(server_content_file_name)
             return False
 
@@ -86,10 +98,11 @@ def need_to_download():
 
 def download_ban_dpt_file(ban_dpt_file_name):
     with open(os.path.join(raw_data_folder_path, ban_dpt_file_name), 'wb') as ban_dpt_file:
-        response = requests.get(ban_url.format(ban_dpt_file_name), stream=True)
+        response = requests.get(ban_url.format(ban_dpt_file_name), stream=True,
+                                verify=SSL_VERIFICATION)
 
         if not response.ok:
-            print('Download {} unsuccessful: bad response'.format(ban_dpt_file_name))
+            logger.info('Download {} unsuccessful: bad response'.format(ban_dpt_file_name))
             return False
 
         done, total_size = 0, int(response.headers.get('content-length'))
@@ -98,7 +111,7 @@ def download_ban_dpt_file(ban_dpt_file_name):
             done += len(block)
 
     if done != total_size:
-        print('Download {} unsuccessful: incomplete'.format(ban_dpt_file_name))
+        logger.error('Download {} unsuccessful: incomplete'.format(ban_dpt_file_name))
         return False
 
     return True
@@ -111,7 +124,7 @@ def get_ban_file():
     if not need_to_download():
         return False
 
-    print('A new version of BAN base is available.')
+    logger.info('A new version of BAN base is available.')
 
     update_local_content_file()
 
@@ -122,9 +135,10 @@ def get_ban_file():
 
     count = 0
     for dpt in dpt_list:
-        downloading_ban_dpt_gz_file_name = ban_dpt_gz_file_name.format(dpt)
-        if not download_ban_dpt_file(downloading_ban_dpt_gz_file_name):
-            raise Exception('Impossible to download {}'.format(downloading_ban_dpt_gz_file_name))
+        for ban_dpt_gz_file_name_type in ban_dpt_gz_file_name:
+            downloading_ban_dpt_gz_file_name = ban_dpt_gz_file_name_type.format(dpt)
+            if not download_ban_dpt_file(downloading_ban_dpt_gz_file_name):
+                logger.error('Impossible to download {}'.format(downloading_ban_dpt_gz_file_name))
         count += 1
         completion_bar('Downloading BAN files', count / len(dpt_list))
 
@@ -132,34 +146,39 @@ def get_ban_file():
 
 
 def decompress():
+    count = 0
     for dpt in dpt_list:
         # Certifies the existence of the subdirectory.
-        dpt_gz_file_path = os.path.join(raw_data_folder_path, ban_dpt_gz_file_name.format(dpt))
-        if not os.path.isfile(dpt_gz_file_path):
-            print('Decompression unsuccessful: nonexistent file {}'.format(dpt_gz_file_path))
-            return False
+        for ban_dpt_gz_file_name_type in ban_dpt_gz_file_name:
+            dpt_gz_file_path = os.path.join(raw_data_folder_path, ban_dpt_gz_file_name_type.format(dpt))
+            if not os.path.isfile(dpt_gz_file_path):
+                logger.error('Decompression unsuccessful: nonexistent file {}'.format(dpt_gz_file_path))
+                count += 1
 
-        # Decompress each file within gzip
-        with gzip.open(dpt_gz_file_path, 'rb') as f_in:
-            dpt_file_path = os.path.join(raw_data_folder_path, ban_dpt_file_name.format(dpt))
-            print('Extracting file {}'.format(ban_dpt_gz_file_name.format(dpt)))
-            with open(dpt_file_path, 'wb') as f_out:
-                shutil.copyfileobj(f_in, f_out)
+            else:  # Decompress each file within gzip
+                with gzip.open(dpt_gz_file_path, 'rb') as f_in:
+                    dpt_file_path = os.path.join(raw_data_folder_path, ban_dpt_gz_file_name_type.format(dpt)[:-3])
+                    logger.info('Extracting file {}'.format(ban_dpt_gz_file_name_type.format(dpt)[:-3]))
+                    with open(dpt_file_path, 'wb') as f_out:
+                        shutil.copyfileobj(f_in, f_out)
 
-        remove_file(dpt_gz_file_path)
+                remove_file(dpt_gz_file_path)
 
+    if count:
+        return False
     return True
 
 
 def remove_file(file_path):
-    print('Deleting file {}'.format(file_path))
+    logger.info('Deleting file {}'.format(file_path))
     try:
         os.remove(file_path)
-    except Exception:
+    except Exception:  # nosec
         pass
 
 
 def remove_downloaded_raw_ban_files():
     for dpt in dpt_list:
-        remove_file(os.path.join(raw_data_folder_path, ban_dpt_file_name.format(dpt)))
+        for ban_dpt_gz_file_name_type in ban_dpt_gz_file_name:
+            remove_file(os.path.join(raw_data_folder_path, ban_dpt_gz_file_name_type.format(dpt)))
     return True

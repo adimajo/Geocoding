@@ -8,7 +8,7 @@ Attributes:
         table that we want to include in the output.
 
 """
-from . import query
+from geocoder.geocoding import query
 from .utils import int_to_degree
 
 tables = ['departement', 'postal', 'commune', 'voie', 'localisation']
@@ -108,8 +108,8 @@ def get_output(status, quality):
         start, end = element['start'], element['end']
         lons = [query.data['commune'][i]["longitude"] for i in range(start, end)]
         lats = [query.data['commune'][i]["latitude"] for i in range(start, end)]
-        output['longitude'] = int_to_degree(int(sum(lons)/len(lons)))
-        output['latitude'] = int_to_degree(int(sum(lats)/len(lats)))
+        output['longitude'] = int_to_degree(int(sum(lons) / len(lons)))
+        output['latitude'] = int_to_degree(int(sum(lats) / len(lats)))
 
     # Get the required information
     for table in output_specs:

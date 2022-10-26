@@ -1,0 +1,431 @@
+.common_python: &common_python
+  image:
+    name: ${DOCKER_REGISTRY}python:3.8-slim
+
+.ci_tools: &ci_tools
+  image:
+    name: layer-kraft.registry.saas.cagip.group.gca/ci-tools:latest
+
+variables:
+  CURRENT_TAG: $CURRENT_TAG
+  WORKON_HOME: "$CI_PROJECT_DIR/.cache/venvs"
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  PIPENV_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pipenv"
+  PIPENV_PIPFILE: "$CI_PROJECT_DIR/geocoder/Pipfile"
+
+.common_tag: &common_tag
+  tags:
+  - $CURRENT_TAG
+
+.common_deploy: &common_deploy
+  before_script:
+    # Install ssh-agent if not already installed, it is required by Docker.
+    # (change apt-get to yum if you use a CentOS-based image)
+    - 'which ssh-agent || ( apk --update add openssh-client )'
+    # Run ssh-agent (inside the build environment)
+    - eval $(ssh-agent -s)
+    # Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store
+    - echo "$GITLAB_SSH_KEY" |  tr -d ' ' | base64 -d | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan gitlab.ca.cib >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - apk add --no-cache git
+    - git config --global user.name "$GITLAB_USER_NAME"
+    - git config --global user.email "$GITLAB_USER_EMAIL"
+
+cache:
+  paths:
+    - .cache/pip
+    - .cache/pipenv
+    - .cache/venvs
+
+stages:
+  - lint
+  - versionning
+  - test
+  - security
+  - sonar_check
+  - document
+  - build
+  - deploy_dev
+  - promote_staging
+  - promote_stable
+
+lint:
+  stage: lint
+  <<: *common_python
+  <<: *common_tag
+  script:
+    - pip install flake8
+    - flake8 geocoder --count --select=E9,F63,F7,F82 --show-source --statistics
+    - flake8 --ignore=W504 geocoder --count --max-complexity=10 --max-line-length=120 --statistics
+  only:
+    refs:
+      - branches
+    changes:
+      - .gitlab-ci.yml
+      - geocoder/**/*
+
+generate_tag:
+  artifacts:
+    paths:
+      - build.env
+      - geocoder/Pipfile.lock
+      - geocoder/Pipfile
+  stage: versionning
+  <<: *common_python
+  <<: *common_tag
+  only:
+   - master
+  script:
+    - pip install pipenv
+    - sed -i 's|${PYPI_REMOTE}|'${PYPI_REMOTE}'|g' geocoder/Pipfile
+    - pipenv install
+    - echo export APPLICATION_TAG_VERSION=`python -c 'import geocoder; print(geocoder.__version__)'` >> build.env
+
+test:
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    paths:
+      - coverage.xml
+  stage: test
+  <<: *common_python
+  <<: *common_tag
+  script:
+    - pip install pipenv
+    - pipenv install -d --skip-lock
+    - pipenv run coverage run --source geocoder/ -m pytest
+    - pipenv run coverage report
+    - pipenv run coverage xml
+  only:
+    refs:
+      - branches
+    changes:
+      - .gitlab-ci.yml
+      - geocoder/**/*
+      - tests/**/*
+
+security:
+  stage: security
+  <<: *common_python
+  <<: *common_tag
+  script:
+  - pip install pipenv
+  - pipenv run bandit -r geocoder
+  only:
+    refs:
+      - branches
+    changes:
+      - .gitlab-ci.yml
+      - geocoder/**/*
+
+quality_check:
+  stage: sonar_check
+  image:
+    name: ${DOCKER_REGISTRY_BIS}sonarsource/sonar-scanner-cli:4.6
+  <<: *common_tag
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar" # Defines the location of the analysis task cache
+    GIT_DEPTH: 0 # Tells git to fetch all the branches of the project, required by the analysis task
+  script:
+    - . ./build.env
+    - apk --update add java-common
+    - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
+    - if [ ! -z $GITLAB_SRV_ACCOUNT ]; then wget -qO - ${PKI}/cacreditagricoleserver.crt >> cacreditagricoleserver.crt ; fi
+    - if [ ! -z $GITLAB_SRV_ACCOUNT ]; then keytool -import -alias mycert -file cacreditagricoleserver.crt -storetype jks -trustcacerts -noprompt -keypass keypass -keystore cacerts -storepass test@123 ; fi
+    - if [ ! -z $GITLAB_SRV_ACCOUNT ]; then export SONAR_SCANNER_OPTS="-Djavax.net.ssl.trustStore=cacerts" ; fi
+    - sonar-scanner -Dsonar.exclusions=tests/**,docs/**,coverage.xml,setup.py -Dsonar.organization=${DOCKER_CI_REGISTRY_USER} -Dsonar.python.coverage.reportPaths=coverage.xml -Dsonar.qualitygate.wait=true -Dsonar.projectKey=${DOCKER_CI_REGISTRY_USER}_${CI_PROJECT_NAME} -Dsonar.projectVersion=$APPLICATION_TAG_VERSION
+  only:
+   - master
+
+pages:
+  stage: document
+  rules:
+    - if: $GITLAB_SRV_ACCOUNT == null
+  <<: *common_python
+  <<: *common_tag
+  script:
+    - . ./build.env
+    - apt update
+    - apt install -y make
+    - pip install pipenv
+    - cd docs
+    - pipenv run make clean
+    - pipenv run make html
+    - cd ..
+    - mv docs/build/html public
+  artifacts:
+    paths:
+      - public
+    expire_in: 1 week
+
+document_cagip:
+  stage: document
+  rules:
+    - if: $GITLAB_SRV_ACCOUNT
+      changes:
+        - .gitlab-ci.yml
+        - geocoder/**/*
+        - docs/**/*
+  <<: *common_python
+  <<: *common_tag
+  script:
+    - . ./build.env
+    - apt update
+    - apt install -y make git
+    - pip install pipenv
+    - cd docs
+    - pipenv run make clean
+    - pipenv run make html
+    - git config --global http.sslverify false
+    - git config --global user.name "$GITLAB_USER_NAME"
+    - git config --global user.email "$GITLAB_USER_EMAIL"
+    - git clone https://$GITLAB_SRV_ACCOUNT:$GITLAB_CAGIP_TOKEN@$GITLAB_DOCS_REPO docs_to_publish
+    - rm -rf docs_to_publish/public
+    - mkdir docs_to_publish/public
+    - cp -r build/html/* docs_to_publish/public/
+    - cd docs_to_publish
+    - git add -A
+    - |-
+        if ! git diff-index --quiet HEAD --; then
+            git commit -am "Rollout version $APPLICATION_TAG_VERSION"
+            git push
+        else
+            echo "Nothing to push"
+        fi
+build geocoder:
+  cache: []
+  stage: build
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "master" && $GITLAB_SRV_ACCOUNT
+      changes:
+        - .gitlab-ci.yml
+        - geocoder/**/*
+  <<: *common_tag
+  image:
+    name: ${DOCKER_REGISTRY_BIS}kaniko-project/executor:debug-v1.0.0
+    entrypoint: [""]
+  script:
+    - . ./build.env
+    - cd geocoder
+    - mkdir -p /kaniko/.docker
+    - |-
+       KANIKOPROXYBUILDARGS=""
+       KANIKOCFG="{\"auths\":{\"https://$ARTI_SCRATCH_REGISTRY.$ARTI_REGISTRY\":{\"auth\":\"$(echo -n $ARTI_USER:$ARTI_PASSWORD | base64 | tr -d '\n')\"}}}"
+       if [ "x${http_proxy}" != "x" -o "x${https_proxy}" != "x" ]; then
+         KANIKOCFG="${KANIKOCFG}, \"proxies\": { \"default\": { \"httpProxy\": \"${http_proxy}\", \"httpsProxy\": \"${https_proxy}\", \"noProxy\": \"${no_proxy}\"}}"
+         KANIKOPROXYBUILDARGS="--build-arg http_proxy=${http_proxy} --build-arg https_proxy=${https_proxy} --build-arg no_proxy=${no_proxy}"
+       fi
+       KANIKOCFG="${KANIKOCFG} }"
+       echo "${KANIKOCFG}" >> /kaniko/.docker/config.json
+    - wget -qO - ${PKI}/cacreditagricoleserver.crt >> /kaniko/ssl/certs/additional-ca-cert-bundle.crt
+    - /kaniko/executor --context . --dockerfile Dockerfile $KANIKOPROXYBUILDARGS --build-arg DOCKER_REGISTRY=$DOCKER_REGISTRY --build-arg PYPI_REMOTE=$PYPI_REMOTE --destination $ARTI_SCRATCH_REGISTRY.$ARTI_REGISTRY/$ARTI_REPO:$APPLICATION_TAG_VERSION
+
+build_and_deploy_gitlab_registry:
+  cache: []
+  stage: deploy_dev
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "master" && $GITLAB_SRV_ACCOUNT == null
+  <<: *common_tag
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - - . ./build.env
+    - cd geocoder
+    - echo $CI_REGISTRY_USER
+    - docker build --pull -t "${CI_REGISTRY}/${DOCKER_CI_REGISTRY_USER}/${CI_PROJECT_NAME}:${APPLICATION_TAG_VERSION}" .
+    - docker push "${CI_REGISTRY}/${DOCKER_CI_REGISTRY_USER}/${CI_PROJECT_NAME}:${APPLICATION_TAG_VERSION}"
+
+build_and_deploy_dockerhub:
+  cache: []
+  stage: deploy_dev
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "master" && $GITLAB_SRV_ACCOUNT == null
+  <<: *common_tag
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
+  script:
+    - - . ./build.env
+    - cd geocoder
+    - docker build --pull -t "${DOCKER_CI_REGISTRY_USER}/${CI_PROJECT_NAME}:${APPLICATION_TAG_VERSION}" .
+    - docker push "${DOCKER_CI_REGISTRY_USER}/${CI_PROJECT_NAME}:${APPLICATION_TAG_VERSION}"
+
+deploy_dev:
+  cache: []
+  stage: deploy_dev
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "master" && $GITLAB_SRV_ACCOUNT
+  <<: *ci_tools
+  <<: *common_tag
+  <<: *common_deploy
+  script:
+    - . ./build.env
+    - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
+    - git clone $GITLAB_DEPLOY_REPO yaml_deploy_folder
+    - cd yaml_deploy_folder/dev
+    - kustomize edit set image $ARTI_SCRATCH_REGISTRY.$ARTI_REGISTRY/$ARTI_REPO=$ARTI_SCRATCH_REGISTRY.$ARTI_REGISTRY/$ARTI_REPO:$APPLICATION_TAG_VERSION
+    - |-
+        if ! git diff-index --quiet HEAD --; then
+            git commit -am "Rollout version $APPLICATION_TAG_VERSION"
+            git push
+        else
+            echo "Nothing to push"
+        fi
+promote_staging:
+  cache: []
+  stage: promote_staging
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "master" && $GITLAB_SRV_ACCOUNT
+      when: manual
+  <<: *ci_tools
+  <<: *common_tag
+  variables:
+    CREDS: "${ARTI_USER}:${ARTI_PASSWORD}"
+    SOURCE_REPO: "${ARTI_SCRATCH_REGISTRY}"
+    TARGET_REPO: "${ARTI_STAGING_REGISTRY}"
+  script:
+    - . ./build.env
+    - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
+    - 'curl -S -k -u ${CREDS} -XPOST https://$ARTI_REGISTRY/api/docker/$SOURCE_REPO/v2/promote -H "Content-Type: application/json" -d"{\"targetRepo\":\"${TARGET_REPO}\",\"dockerRepository\":\"${ARTI_REPO}\",\"tag\":\"${APPLICATION_TAG_VERSION}\",\"copy\":true}"'
+
+#deploy_int:
+#  cache: []
+#  stage: deploy_int
+#  when: manual
+#  <<: *ci_tools
+#  <<: *common_tag
+#  <<: *common_deploy
+#  script:
+#    - APPLICATION_TAG_VERSION=`cat $VERSION_FILE`
+#    - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
+#    - git clone $GITLAB_DEPLOY_REPO yaml_deploy_folder
+#    - cd yaml_deploy_folder/int
+#    - kustomize edit set image $ARTI_SCRATCH_REGISTRY.$ARTI_REGISTRY/$ARTI_REPO=$ARTI_STAGING_REGISTRY.$ARTI_REGISTRY/$ARTI_REPO:$APPLICATION_TAG_VERSION
+#    - |-
+#        if ! git diff-index --quiet HEAD --; then
+#            git commit -am "Rollout version $APPLICATION_TAG_VERSION"
+#            git -c http.sslVerify=false push
+#        else
+#            echo "Nothing to push"
+#        fi
+#  only:
+#   - master
+#
+#deploy_uat:
+#  cache: []
+#  stage: deploy_uat
+#  when: manual
+#  <<: *ci_tools
+#  <<: *common_tag
+#  <<: *common_deploy
+#  script:
+#    - APPLICATION_TAG_VERSION=`cat $VERSION_FILE`
+#    - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
+#    - git clone $GITLAB_DEPLOY_REPO yaml_deploy_folder
+#    - cd yaml_deploy_folder/uat
+#    - kustomize edit set image $ARTI_SCRATCH_REGISTRY.$ARTI_REGISTRY/$ARTI_REPO=$ARTI_STAGING_REGISTRY.$ARTI_REGISTRY/$ARTI_REPO:$APPLICATION_TAG_VERSION
+#    - |-
+#        if ! git diff-index --quiet HEAD --; then
+#            git commit -am "Rollout version $APPLICATION_TAG_VERSION"
+#            git push
+#        else
+#            echo "Nothing to push"
+#        fi
+#  only:
+#   - master
+
+promote_stable:
+  cache: []
+  stage: promote_stable
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "master" && $GITLAB_SRV_ACCOUNT
+      when: manual
+  <<: *ci_tools
+  <<: *common_tag
+  variables:
+    SOURCE_REPO: "${ARTI_STAGING_REGISTRY}"
+    TARGET_REPO: "${ARTI_STABLE_REGISTRY}"
+    IMAGE: "${ARTI_REPO}"
+  script:
+    - . ./build.env
+    - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
+    - docker-promote --tag=$APPLICATION_TAG_VERSION
+
+#deploy_preprod:
+#  cache: []
+#  stage: deploy_pprd
+#  when: manual
+#  <<: *ci_tools
+#  <<: *common_tag
+#  script:
+#    - APPLICATION_TAG_VERSION=`cat $VERSION_FILE`
+#    - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
+#    - git -c http.sslVerify=false clone $GITLAB_DEPLOY_REPO yaml_deploy_folder
+#    - cd yaml_deploy_folder/pprd
+#    - kustomize edit set image $ARTI_SCRATCH_REGISTRY.$ARTI_REGISTRY/$ARTI_REPO=$STABLE_REGISTRY.$ARTI_REGISTRY/$ARTI_REPO:$APPLICATION_TAG_VERSION
+#    - |-
+#        if ! git -c http.sslVerify=false diff-index --quiet HEAD --; then
+#            git config --global user.name "$GITLAB_USER_NAME"
+#            git config --global user.email "$GITLAB_USER_EMAIL"
+#            git commit -am "Rollout version $APPLICATION_TAG_VERSION"
+#            git -c http.sslVerify=false push
+#            cd ..
+#            git clone $GITLAB_CAGIP_DEPLOY_REPO preprod_deploy_folder
+#            cd preprod_deploy_folder
+#            git checkout preprod
+#            mkdir -p base preproduction
+#            cp -a ../base/. base/
+#            cp -a ../pprd/. preproduction/
+#            git config --global user.name "$GITLAB_USER_NAME"
+#            git config --global user.email "$GITLAB_USER_EMAIL"
+#            git add -A
+#            git commit -m "Rollout version $APPLICATION_TAG_VERSION on preproduction environment"
+#            git push
+#        else
+#           echo "Nothing to push"
+#        fi
+#  only:
+#   - master
+#
+#deploy_prod:
+#  cache: []
+#  stage: deploy_prd
+#  when: manual
+#  <<: *ci_tools
+#  <<: *common_tag
+#  script:
+#    - APPLICATION_TAG_VERSION=`cat $VERSION_FILE`
+#    - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
+#    - git -c http.sslVerify=false clone $GITLAB_DEPLOY_REPO yaml_deploy_folder
+#    - cd yaml_deploy_folder/prd
+#    - kustomize edit set image $ARTI_SCRATCH_REGISTRY.$ARTI_REGISTRY/$ARTI_REPO=$STABLE_REGISTRY.$ARTI_REGISTRY/$ARTI_REPO:$APPLICATION_TAG_VERSION
+#    - |-
+#        if ! git -c http.sslVerify=false diff-index --quiet HEAD --; then
+#            git config --global user.name "$GITLAB_USER_NAME"
+#            git config --global user.email "$GITLAB_USER_EMAIL"
+#            git commit -am "Rollout version $APPLICATION_TAG_VERSION"
+#            git -c http.sslVerify=false push
+#            cd ..
+#            git clone $GITLAB_CAGIP_DEPLOY_REPO prod_deploy_folder
+#            cd prod_deploy_folder
+#            git checkout prod
+#            mkdir -p base production
+#            cp -a ../base/. base/
+#            cp -a ../prd/. production/
+#            git config --global user.name "$GITLAB_USER_NAME"
+#            git config --global user.email "$GITLAB_USER_EMAIL"
+#            git add -A
+#            git commit -m "Rollout version $APPLICATION_TAG_VERSION on production environment"
+#            git push
+#        else
+#            echo "Nothing to push"
+#        fi
+#  only:
+#   - master

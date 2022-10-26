@@ -8,13 +8,15 @@ files using tools from the package numpy.
 """
 
 import os
-import numpy as np
-from collections import deque
+from collections import deque, defaultdict
 
-from .datatypes import dtypes
-from .datapaths import paths, database
-from .download import completion_bar, raw_data_folder_path
-from . import ban_processing
+import numpy as np
+from loguru import logger
+
+from geocoder.geocoding import ban_processing
+from geocoder.geocoding.datapaths import paths, database
+from geocoder.geocoding.datatypes import dtypes
+from geocoder.geocoding.download import completion_bar, raw_data_folder_path
 
 file_names = ['departement', 'postal', 'commune', 'voie', 'localisation']
 processed_files = {}
@@ -24,11 +26,11 @@ def process_files():
     for file in file_names:
         processed_files[file] = deque()
 
-    ban_files = {}
+    ban_files = defaultdict(list)
 
     # Check if the folder with the data to process exists
     if not os.path.exists(raw_data_folder_path):
-        print('Execute : geocoding download')
+        logger.info('Data not found - execute: geocoding download')
         return False
 
     # Open each csv file
@@ -37,18 +39,24 @@ def process_files():
             if filename.endswith('.csv'):
                 file_path = os.path.join(dirname, filename)
                 dpt_name = filename.split('-')[-1].split('.')[0]
-                ban_files[dpt_name] = file_path
+                ban_files[dpt_name].append(file_path)
+
+    logger.debug(ban_files)
 
     # Check if the folder was not empty
     if not ban_files:
-        print('Execute : geocoding decompress')
+        logger.info('No CSV file - execute: geocoding decompress')
         return False
 
     departements = list(ban_files.keys())
     departements.sort()
 
     for i, departement in enumerate(departements):
-        ban_processing.update(departement, ban_files[departement], processed_files)
+        for file in ban_files[departement]:
+            logger.debug(departement)
+            logger.debug(file)
+            logger.debug(processed_files)
+            ban_processing.update(departement, file, processed_files)
         completion_bar('Processing BAN', (i + 1) / len(departements))
 
     return True
@@ -97,6 +105,6 @@ def create_dat_file(lst, out_filename, dtype):
         dtype: The type of the numpy array.
     """
     with open(out_filename, 'wb+') as out_file:
-        dat_file = np.memmap(out_file, dtype=dtype, shape=(len(lst),))
+        dat_file = np.memmap(out_file, dtype=dtype, shape=(len(lst), ))
         dat_file[:] = lst[:]
         dat_file.flush()
