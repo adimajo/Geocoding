@@ -287,7 +287,9 @@ def complete_voie_selection(code_postal, commune, voie):
     code_postal.
 
     Args:
+        code_postal (str): The postcode.
         commune (str): The city name.
+        voie (str): The street name.
 
     Returns:
         commune_id (int): The index of the record if the search was succeeded,

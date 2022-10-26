@@ -85,12 +85,12 @@ def add_index_tables():
     index_tables = ['postal', 'commune', 'voie']
 
     # Index tables creation
-    for i, table in enumerate(index_tables):
-        sort_method = (lambda i: processed_files[table][i])
+    for i, current_table in enumerate(index_tables):
+        sort_method = (lambda i, table=current_table: processed_files[table][i])
 
         # Sort table and add it to the module level dict processed_files
-        processed_files[table + '_index'] = \
-            sorted(range(len(processed_files[table])), key=sort_method)
+        processed_files[current_table + '_index'] = \
+            sorted(range(len(processed_files[current_table])), key=sort_method)
 
         completion_bar('Indexing tables', (i + 1) / len(index_tables))
 

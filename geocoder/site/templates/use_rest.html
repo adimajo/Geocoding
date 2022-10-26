@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
     <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}" />
@@ -18,7 +19,7 @@
             <li>http://localhost:8088/geocode/&lt;address&gt;/&lt;postal_code&gt;/&lt;city&gt;</li>
         </ul>
     </li>
-    <li>Exemple:
+    <li>Example:
         <ul>
             <li>http://localhost:8088/geocode/12, Bd des Maréchaux/91120/Palaiseau</li>
         </ul>
@@ -34,7 +35,7 @@
                 http://localhost:8088/geocode_file</li>
         </ul>
     </li>
-    <li>Exemple:
+    <li>Example:
         <ul>
             <li>curl --header "Content-Type: application/json" \<br/>
                 --request POST \<br/>
@@ -51,7 +52,7 @@
                 <pre>
 {
     "uuid": "ea65498a-9b76-11eb-88e2-0242ac110002",
-    "api_version": "2.0.0",
+    "api_version": "2.0.1",
     "geocoded_time": "2021-04-12 10:07:40.592207",
     "data": [{"cp": "91120", "lat": 48.7099138, "lon": 2.2099342, "quality": 1, "ville": "Palaiseau", "voie": "12, Bd des Maréchaux"}],
     "quality": {"1": "Successful",

@@ -126,13 +126,10 @@ def find_voie_type(words):
     """Find the type of the street using the module level variables voie_type_1
     and voie_type_2.
     """
-    voie_type_index = None
     for i in range(len(words) - 2, -1, -1):
         if words[i] in voie_type_1 or (words[i], words[i + 1]) in voie_type_2:
-            voie_type_index = i
             return i
-
-    return voie_type_index
+    return None
 
 
 def mine(text):

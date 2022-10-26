@@ -9,7 +9,7 @@ Attributes:
 
 """
 from geocoder.geocoding import query
-from .utils import int_to_degree
+from geocoder.geocoding.utils import int_to_degree
 
 tables = ['departement', 'postal', 'commune', 'voie', 'localisation']
 output_specs = {
