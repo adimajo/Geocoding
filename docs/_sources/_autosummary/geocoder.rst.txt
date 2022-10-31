@@ -1,0 +1,30 @@
+﻿geocoder
+========
+
+.. automodule:: geocoder
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      find
+      near
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
