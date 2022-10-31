@@ -1,3 +1,11 @@
+"""
+defines all routes
+
+.. autosummary::
+    get_jsoned_geocoded_data
+    geocode_one
+    geocode_file
+"""
 import json
 from datetime import datetime
 
@@ -11,7 +19,15 @@ from flask import request
 from flask import url_for
 
 from geocoder.api.Geocoder import Geocoder
-from geocoder.api.conf import VERSION, QUALITY
+from geocoder import __version__
+
+
+QUALITY = {'1': 'Successful',
+           '2': 'Precise number was not found',
+           '3': 'Precise number was not found and there was no number in the input',
+           '4': 'Street was not found',
+           '5': 'City was not found',
+           '6': 'Nothing was found'}
 
 api_rest = Blueprint(
     "rest",
@@ -21,12 +37,12 @@ api_rest = Blueprint(
 
 @api_rest.route("/")
 def home():
-    return render_template("index.html", version=VERSION)
+    return render_template("index.html", version=__version__)
 
 
 @api_rest.route("/version")
 def version():
-    return jsonify(version=VERSION)
+    return jsonify(version=__version__)
 
 
 @api_rest.route("/use")
@@ -40,19 +56,19 @@ def handle_404(error):
 
 
 def get_jsoned_geocoded_data(geocoder):
-    json = {
-        'uuid': geocoder.get_uuid(),
+    output_json = {
+        'uuid': geocoder.uuid,
         'geocoded_time': datetime.strftime(geocoder.get_geocoded_date_time(), '%Y-%m-%d %H:%M:%S.%f%z'),
-        'api_version': VERSION,
+        'api_version': __version__,
         'quality': QUALITY,
     }
-    if geocoder.is_geocoded():
-        json['data'] = geocoder.get_geocoded_data().to_dict('records')
+    if geocoder.geocoded:
+        output_json['data'] = geocoder.get_geocoded_data().to_dict('records')
     elif geocoder.has_errors():
-        json['errors'] = geocoder.get_errors()
+        output_json['errors'] = geocoder.get_errors()
     else:
-        json['errors'] = 'Data not geocoded !'
-    return json
+        output_json['errors'] = 'Data not geocoded !'
+    return output_json
 
 
 @api_rest.route("/geocode/<address>/<postal_code>/<city>", methods=["GET"])

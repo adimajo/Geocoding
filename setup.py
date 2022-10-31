@@ -1,13 +1,13 @@
 """
-A setuptools based setup module.
+A setuptools based setup module to install geocoder as a package.
 """
+import codecs
 import os
 import re
-import codecs
-from setuptools import setup
 
+from setuptools import setup, find_packages
 
-here = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+here = os.path.abspath(os.path.dirname(__file__))
 
 
 def long_description():
@@ -16,7 +16,7 @@ def long_description():
     return long_description
 
 
-def find_version(file_path, file_name):
+def find_version(file_path, file_name: str = "__init__.py"):
     """
     Get the version from __init__.py file
 
@@ -43,13 +43,13 @@ with open('requirements.txt') as fp:
 if __name__ == "__main__":
     setup(
         setup_requires=["wheel"],
-        name='Geocoding',
-        version=find_version(here, "__init__.py"),
-        description='geocoding is an address search engine for France',
+        name='geocoder',
+        version=find_version(os.path.join(here, "geocoder")),
+        description='geocoder is a (reverse) address to geolocation mapping tool for France',
         long_description=long_description(),
-        url='https://github.com/adimajo/geocoding',
-        authors=['Paulo Emilio de Vilhena', 'Adrien Ehrhardt'],
-        author_emails=['pevilhena2@gmail.com', 'adrien.ehrhardt@credit-agricole-sa.fr'],
+        url='https://github.com/adimajo/geocoder',
+        author='Paulo Emilio de Vilhena, Adrien Ehrhardt',
+        author_email='pevilhena2@gmail.com, adrien.ehrhardt@credit-agricole-sa.fr',
         license='Apache Software License',
         classifiers=[
             "Development Status :: 4 - Beta",
@@ -62,14 +62,14 @@ if __name__ == "__main__":
             'Programming Language :: Python :: 3.8',
             'Programming Language :: Python :: 3.9',
         ],
-        keywords='Geocoder.py France',
-        packages=['geocoding'],
+        keywords='Geocoder France',
+        packages=find_packages(),
         install_requires=install_requires,
         test_suite="pytest-runner",
         tests_require=["pytest", "coverage"],
         entry_points={
             'console_scripts': [
-                'geocoding = geocoding.__main__:main'
+                'geocoder = geocoder.geocoding.__main__:main'
             ]
         },
     )

@@ -1,3 +1,6 @@
+"""
+create app object
+"""
 import os
 
 from flask import Flask
@@ -12,6 +15,7 @@ from geocoder.geocoding.datapaths import here
 def create_app():
     """
     Creates the model serving Flask app
+
     :return: Flask app
     """
     app = Flask(__name__,
@@ -32,7 +36,3 @@ def create_app():
 
 
 app = create_app()
-
-
-def get_app():
-    return app

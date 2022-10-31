@@ -6,15 +6,15 @@ import gzip
 import hashlib
 import os
 import shutil
-import sys
 
 import requests
 from loguru import logger
+from tqdm import tqdm
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 
-from geocoder.geocoding.datapaths import here, database
 from geocoder.geocoding import DEBUG
+from geocoder.geocoding.datapaths import here, database
 
 SSL_VERIFICATION = os.environ.get("SSL_VERIFICATION", False)
 
@@ -44,19 +44,13 @@ else:  # pragma: no cover
                 "971", "972", "973", "974", "975", "976", "977", "978", "984", "986", "987", "988", "989"]
 
 
-def completion_bar(msg, fraction):
-    percent = int(100 * fraction)
-    size = int(50 * fraction)
-    sys.stdout.write("\r%-16s: %3d%%[%s%s]\n" %
-                     (msg, percent, '=' * size, ' ' * (50 - size)))
-    sys.stdout.flush()
-
-    # New line if bar is complete
-    if fraction == 1.:
-        print('')
-
-
 def md5(fname):
+    """
+    Calculates md5 hash of file
+
+    Args:
+        fname: file path
+    """
     md5_hash = hashlib.md5()  # nosec
     with open(fname, "rb") as f:
         for chunk in iter(lambda: f.read(4096), b""):
@@ -65,6 +59,13 @@ def md5(fname):
 
 
 def update_ban_file(url, file_name):
+    """
+    Check which files are present
+
+    Args:
+        url (str): URL of BAN database
+        file_name (os.Path): name of the file to write
+    """
     try:
         msg = 'Unable to join BAN address website ({}).'.format(url)
         r = requests.get(url, verify=SSL_VERIFICATION)
@@ -87,6 +88,11 @@ def update_server_content_file():
 
 
 def need_to_download():
+    """
+    Defines whether new data needs to be downloaded
+
+    :rtype: bool
+    """
     if not os.path.exists(local_content_file_name):
         return True
     else:
@@ -101,6 +107,14 @@ def need_to_download():
 
 
 def download_ban_dpt_file(ban_dpt_file_name):
+    """
+    Downloads a single file from BAN
+
+    Args:
+        ban_dpt_file_name (str): name of file to download
+
+    :rtype: bool
+    """
     with open(os.path.join(raw_data_folder_path, ban_dpt_file_name), 'wb') as ban_dpt_file:
         response = requests.get(ban_url.format(ban_dpt_file_name), stream=True,
                                 verify=SSL_VERIFICATION)
@@ -122,6 +136,12 @@ def download_ban_dpt_file(ban_dpt_file_name):
 
 
 def get_ban_file():
+    """
+    Downloads everything if necessary
+
+    Returns: whether a download has been preformed
+    :rtype: bool
+    """
     if not os.path.exists(content_folder_path):
         os.mkdir(content_folder_path)
 
@@ -137,19 +157,22 @@ def get_ban_file():
 
     os.mkdir(raw_data_folder_path)
 
-    count = 0
-    for dpt in dpt_list:
+    for dpt in tqdm(dpt_list):
         for ban_dpt_gz_file_name_type in ban_dpt_gz_file_name:
             downloading_ban_dpt_gz_file_name = ban_dpt_gz_file_name_type.format(dpt)
             if not download_ban_dpt_file(downloading_ban_dpt_gz_file_name):
                 logger.error('Impossible to download {}'.format(downloading_ban_dpt_gz_file_name))
-        count += 1
-        completion_bar('Downloading BAN files', count / len(dpt_list))
 
     return True
 
 
 def decompress():
+    """
+    Decompress every downloaded archive
+
+    Returns: whether decompression was successful
+    :rtype: bool
+    """
     count = 0
     for dpt in dpt_list:
         # Certifies the existence of the subdirectory.
@@ -174,6 +197,12 @@ def decompress():
 
 
 def remove_file(file_path):
+    """
+    Delete file
+
+    Args:
+        file_path (os.Path): path to file to be deleted
+    """
     logger.info('Deleting file {}'.format(file_path))
     try:
         os.remove(file_path)
@@ -182,6 +211,12 @@ def remove_file(file_path):
 
 
 def remove_downloaded_raw_ban_files():
+    """
+    Removes all raw files (compressed and uncompressed)
+
+    Returns: whether removing was successful
+    :rtype: bool
+    """
     for dpt in dpt_list:
         for ban_dpt_gz_file_name_type in ban_dpt_gz_file_name:
             remove_file(os.path.join(raw_data_folder_path, ban_dpt_gz_file_name_type.format(dpt)))

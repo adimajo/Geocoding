@@ -1,6 +1,6 @@
 .common_python: &common_python
   image:
-    name: ${DOCKER_REGISTRY}python:3.8-slim
+    name: ${DOCKER_REGISTRY}python:3.8.13-alpine3.16
 
 .ci_tools: &ci_tools
   image:
@@ -9,10 +9,11 @@
 variables:
   CURRENT_TAG: $CURRENT_TAG
   DEBUG: "true"
+  LOGURU_LEVEL: "INFO"
   WORKON_HOME: "$CI_PROJECT_DIR/.cache/venvs"
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   PIPENV_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pipenv"
-  PIPENV_PIPFILE: "$CI_PROJECT_DIR/geocoder/Pipfile"
+  PIPENV_PIPFILE: "$CI_PROJECT_DIR/Pipfile"
 
 .common_tag: &common_tag
   tags:
@@ -83,8 +84,8 @@ generate_tag:
   artifacts:
     paths:
       - build.env
-      - geocoder/Pipfile.lock
-      - geocoder/Pipfile
+      - Pipfile.lock
+      - Pipfile
   stage: versionning
   <<: *global_cache
   <<: *common_python
@@ -92,10 +93,12 @@ generate_tag:
   only:
    - master
   script:
+    - apk --update add --no-cache git openblas-dev linux-headers build-base
     - pip install pipenv
-    - sed -i 's|${PYPI_REMOTE}|'${PYPI_REMOTE}'|g' geocoder/Pipfile
+    - sed -i 's|${PYPI_REMOTE}|'${PYPI_REMOTE}'|g' Pipfile
     - pipenv install
-    - echo export APPLICATION_TAG_VERSION=`python -c 'import geocoder; print(geocoder.__version__)'` >> build.env
+    - pipenv run python -c 'import geocoder; print(geocoder.__version__)'  # otherwise next line doesn't error
+    - echo export APPLICATION_TAG_VERSION=`pipenv run python -c 'import geocoder; print(geocoder.__version__)'` >> build.env
 
 test:
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
@@ -107,6 +110,7 @@ test:
   <<: *common_python
   <<: *common_tag
   script:
+    - apk --update add --no-cache git openblas-dev linux-headers build-base
     - pip install pipenv
     - pipenv install -d --skip-lock
     - pipenv run coverage run --source geocoder/ -m pytest
@@ -145,12 +149,13 @@ quality_check:
     GIT_DEPTH: 0 # Tells git to fetch all the branches of the project, required by the analysis task
   script:
     - . ./build.env
-    - apk --update add java-common
+    - apk --update add --no-cache java-common
     - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
     - if [ ! -z $GITLAB_SRV_ACCOUNT ]; then wget -qO - ${PKI}/cacreditagricoleserver.crt >> cacreditagricoleserver.crt ; fi
     - if [ ! -z $GITLAB_SRV_ACCOUNT ]; then keytool -import -alias mycert -file cacreditagricoleserver.crt -storetype jks -trustcacerts -noprompt -keypass keypass -keystore cacerts -storepass test@123 ; fi
     - if [ ! -z $GITLAB_SRV_ACCOUNT ]; then export SONAR_SCANNER_OPTS="-Djavax.net.ssl.trustStore=cacerts" ; fi
-    - sonar-scanner -Dsonar.exclusions=tests/**,docs/**,coverage.xml,setup.py -Dsonar.organization=${DOCKER_CI_REGISTRY_USER} -Dsonar.python.coverage.reportPaths=coverage.xml -Dsonar.qualitygate.wait=true -Dsonar.projectKey=${DOCKER_CI_REGISTRY_USER}_${CI_PROJECT_NAME} -Dsonar.projectVersion=$APPLICATION_TAG_VERSION
+    # - -Dsonar.organization=${DOCKER_CI_REGISTRY_USER} ${DOCKER_CI_REGISTRY_USER}_${CI_PROJECT_NAME}
+    - sonar-scanner -Dsonar.exclusions=tests/**,docs/**,coverage.xml,setup.py,geocoder/__main__.py -Dsonar.python.coverage.reportPaths=coverage.xml -Dsonar.qualitygate.wait=true -Dsonar.projectKey=$SONAR_KEY -Dsonar.projectVersion=$APPLICATION_TAG_VERSION
   only:
    - master
 
@@ -163,8 +168,7 @@ pages:
   <<: *common_tag
   script:
     - . ./build.env
-    - apt update
-    - apt install -y make
+    - apk --update add --no-cache make
     - pip install pipenv
     - cd docs
     - pipenv run make clean
@@ -189,8 +193,7 @@ document_cagip:
   <<: *common_tag
   script:
     - . ./build.env
-    - apt update
-    - apt install -y make git
+    - apk --update add --no-cache make make git
     - pip install pipenv
     - cd docs
     - pipenv run make clean
@@ -220,17 +223,19 @@ build geocoder:
       changes:
         - .gitlab-ci.yml
         - geocoder/**/*
+        - Pipfile
+        - setup.py
+        - .pypirc
   <<: *common_tag
   image:
     name: ${DOCKER_REGISTRY_BIS}kaniko-project/executor:debug-v1.0.0
     entrypoint: [""]
   script:
     - . ./build.env
-    - cd geocoder
     - mkdir -p /kaniko/.docker
     - |-
        KANIKOPROXYBUILDARGS=""
-       KANIKOCFG="{\"auths\":{\"https://$ARTI_SCRATCH_REGISTRY.$ARTI_REGISTRY\":{\"auth\":\"$(echo -n $ARTI_USER:$ARTI_PASSWORD | base64 | tr -d '\n')\"}}}"
+       KANIKOCFG="{\"auths\":{\"https://${ARTI_SCRATCH_REGISTRY}.${ARTI_REGISTRY}\":{\"auth\":\"$(echo -n ${ARTI_USER}:${ARTI_PASSWORD} | base64 | tr -d '\n')\"}}}"
        if [ "x${http_proxy}" != "x" -o "x${https_proxy}" != "x" ]; then
          KANIKOCFG="${KANIKOCFG}, \"proxies\": { \"default\": { \"httpProxy\": \"${http_proxy}\", \"httpsProxy\": \"${https_proxy}\", \"noProxy\": \"${no_proxy}\"}}"
          KANIKOPROXYBUILDARGS="--build-arg http_proxy=${http_proxy} --build-arg https_proxy=${https_proxy} --build-arg no_proxy=${no_proxy}"
@@ -238,7 +243,8 @@ build geocoder:
        KANIKOCFG="${KANIKOCFG} }"
        echo "${KANIKOCFG}" >> /kaniko/.docker/config.json
     - wget -qO - ${PKI}/cacreditagricoleserver.crt >> /kaniko/ssl/certs/additional-ca-cert-bundle.crt
-    - /kaniko/executor --context . --dockerfile Dockerfile $KANIKOPROXYBUILDARGS --build-arg DOCKER_REGISTRY=$DOCKER_REGISTRY --build-arg PYPI_REMOTE=$PYPI_REMOTE --destination $ARTI_SCRATCH_REGISTRY.$ARTI_REGISTRY/$ARTI_REPO:$APPLICATION_TAG_VERSION
+    - /kaniko/executor --context . --dockerfile Dockerfile ${KANIKOPROXYBUILDARGS} --build-arg DOCKER_REGISTRY=${DOCKER_REGISTRY} --destination ${ARTI_SCRATCH_REGISTRY}.${ARTI_REGISTRY}/${ARTI_REPO}:${APPLICATION_TAG_VERSION}
+  timeout: 2h
 
 build_and_deploy_gitlab_registry:
   # cache: []
@@ -253,10 +259,9 @@ build_and_deploy_gitlab_registry:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
     - - . ./build.env
-    - cd geocoder
-    - echo $CI_REGISTRY_USER
     - docker build --pull -t "${CI_REGISTRY}/${DOCKER_CI_REGISTRY_USER}/${CI_PROJECT_NAME}:${APPLICATION_TAG_VERSION}" .
     - docker push "${CI_REGISTRY}/${DOCKER_CI_REGISTRY_USER}/${CI_PROJECT_NAME}:${APPLICATION_TAG_VERSION}"
+  timeout: 2h
 
 build_and_deploy_dockerhub:
   # cache: []
@@ -271,11 +276,11 @@ build_and_deploy_dockerhub:
     - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
   script:
     - - . ./build.env
-    - cd geocoder
     - docker build --pull -t "${DOCKER_CI_REGISTRY_USER}/${CI_PROJECT_NAME}:${APPLICATION_TAG_VERSION}" .
     - docker push "${DOCKER_CI_REGISTRY_USER}/${CI_PROJECT_NAME}:${APPLICATION_TAG_VERSION}"
+  timeout: 2h
 
-deploy_dev:
+deploy_dev_api:
   # cache: []
   stage: deploy_dev
   rules:
@@ -298,22 +303,19 @@ deploy_dev:
         fi
 
 deploy_dev_package:
-  image:
-    name: ${DOCKER_REGISTRY}python:3.8-slim
   artifacts:
     paths:
       - dist/
   stage: deploy_dev
+  <<: *pull_cache
   <<: *common_tag
   script:
-    - apt-get update
-    - apt-get install -y wget
-    - pip install pipenv==2021.5.29
-    - pipenv install -d --skip-lock
+    - apk --update add --no-cache wget
+    - pip install pipenv
     - pipenv run pipenv_to_requirements
     - pipenv run python3 setup.py sdist bdist_wheel
     - python3 setup.py sdist bdist_wheel
-    - wget -qO - http://crl-priv-pki.credit-agricole.fr/ca/cacreditagricoleserver.crt >> cacreditagricoleserver.crt
+    - wget -qO - ${PKI}cacreditagricoleserver.crt >> cacreditagricoleserver.crt
     - export CURL_CA_BUNDLE=""
     - echo "${ARTI_REGISTRY}" >> .pypirc
     - echo "/artifactory/api/pypi/" >> .pypirc
@@ -324,6 +326,7 @@ deploy_dev_package:
 
 promote_staging_api:
   # cache: []
+  needs: ["deploy_dev_api"]
   stage: promote_staging
   rules:
     - if: $CI_COMMIT_REF_NAME == "master" && $GITLAB_SRV_ACCOUNT
@@ -340,6 +343,7 @@ promote_staging_api:
     - 'curl -S -k -u ${CREDS} -XPOST https://$ARTI_REGISTRY/api/docker/$SOURCE_REPO/v2/promote -H "Content-Type: application/json" -d"{\"targetRepo\":\"${TARGET_REPO}\",\"dockerRepository\":\"${ARTI_REPO}\",\"tag\":\"${APPLICATION_TAG_VERSION}\",\"copy\":true}"'
 
 promote_staging_package:
+  needs: ["deploy_dev_package"]
   stage: promote_staging
   when: manual
   <<: *ci_tools
@@ -360,6 +364,7 @@ promote_staging_package:
 
 promote_stable_package:
   stage: promote_stable
+  needs: ["promote_staging_package"]
   when: manual
   <<: *ci_tools
   <<: *common_tag
@@ -424,8 +429,9 @@ promote_stable_package:
 #  only:
 #   - master
 
-promote_stable:
+promote_stable_api:
   # cache: []
+  needs: ["promote_staging_api"]
   stage: promote_stable
   rules:
     - if: $CI_COMMIT_REF_NAME == "master" && $GITLAB_SRV_ACCOUNT

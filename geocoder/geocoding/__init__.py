@@ -1,3 +1,24 @@
+"""
+original geocoding module
+
+.. autosummary::
+    :toctree:
+
+    __main__
+    activate_reverse
+    ban_processing
+    datapaths
+    datatypes
+    distance
+    download
+    index
+    normalize
+    query
+    result
+    search
+    similarity
+    utils
+"""
 import os
 
 try:
