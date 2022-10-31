@@ -3,6 +3,7 @@ FROM ${DOCKER_REGISTRY}python:3.8.13-alpine3.16 as build
 ENV PIPENV_PIPFILE geocoder/Pipfile
 COPY . geocoder/
 
+RUN apk --update add --no-cache git openblas-dev linux-headers build-base
 RUN pip install --upgrade pip && pip install pipenv
 RUN PIPENV_PIPFILE=geocoder/Pipfile pipenv install --system --deploy
 RUN chown nobody:nogroup /geocoder
