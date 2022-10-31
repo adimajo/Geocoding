@@ -92,8 +92,8 @@ generate_tag:
   only:
    - master
   script:
-    - apk --update add --no-cache git
-    - pip install pipenv
+    - apk --update add --no-cache git openblas-dev linux-headers
+    - pip install pipenv --skip-lock
     - sed -i 's|${PYPI_REMOTE}|'${PYPI_REMOTE}'|g' geocoder/Pipfile
     - pipenv install
     - echo export APPLICATION_TAG_VERSION=`python -c 'import geocoder; print(geocoder.__version__)'` >> build.env
