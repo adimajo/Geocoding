@@ -92,7 +92,7 @@ generate_tag:
   only:
    - master
   script:
-    - apk --update add --no-cache git openblas-dev linux-headers
+    - apk --update add --no-cache git openblas-dev linux-headers build-base
     - pip install pipenv
     - sed -i 's|${PYPI_REMOTE}|'${PYPI_REMOTE}'|g' geocoder/Pipfile
     - pipenv install --skip-lock
