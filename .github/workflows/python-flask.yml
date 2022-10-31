@@ -36,26 +36,26 @@ jobs:
           echo "PIPENV_PIPFILE=$PIPENV_PIPFILE" >> $GITHUB_ENV
           pipenv install
           pipenv install --dev --skip-lock
-          export APPLICATION_TAG_VERSION=`python -c 'import geocoding; print(geocoding.__version__)'`
+          export APPLICATION_TAG_VERSION=`python -c 'import geocoder; print(geocoder.__version__)'`
           echo "APPLICATION_TAG_VERSION=$APPLICATION_TAG_VERSION" >> $GITHUB_ENV
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
-          pipenv run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=tests/conftest.py
+          pipenv run flake8 geocoder --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=tests/conftest.py
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          pipenv run flake8 --ignore=W504 . --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics --exclude=tests/conftest.py
+          pipenv run flake8 --ignore=W504 geocoder --max-complexity=10 --max-line-length=120 --statistics --exclude=tests/conftest.py
       - name: Test with coverage and pytest
         run: |
-          pipenv run coverage run --source geocoding -m pytest
+          pipenv run coverage run --source geocoder -m pytest
           pipenv run coverage report
           pipenv run coverage xml
       - name: Test security
         run: |
-          pipenv run bandit -r geocoding
+          pipenv run bandit -r geocoder
       - name: Build documentation
         run: |
           cd docs
-          PIPENV_PIPFILE=../geocoding/Pipfile pipenv run make html
+          PIPENV_PIPFILE=../geocoder/Pipfile pipenv run make html
           cd ..
       - name: Upload documentation
         run: |
