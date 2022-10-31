@@ -8,7 +8,6 @@ import geocoder
 
 
 class Geocoder:
-
     def __init__(self, data_to_geocode):
         self.errors = []
         self.geocoded = False
@@ -20,7 +19,7 @@ class Geocoder:
     def get_uuid(self):
         return self.uuid
 
-    def get_errors(self):
+    def get_errors(self):  # pragma: no cover
         return self.errors
 
     def get_geocoded_date_time(self):
@@ -29,12 +28,12 @@ class Geocoder:
     def get_geocoded_data(self):
         if self.is_geocoded():
             return self.data
-        else:
+        else:  # pragma: no cover
             return None
 
     def check_data_to_geocode(self, data_to_geocode):
         errors = []
-        for col_to_check in [ADDRESS, POSTAL_CODE, CITY]:
+        for col_to_check in [ADDRESS, POSTAL_CODE, CITY]:  # pragma: no cover
             if col_to_check not in data_to_geocode.columns:
                 errors = errors + [f'Column {col_to_check} is missing.']
         if len(errors) > 0:
@@ -49,7 +48,7 @@ class Geocoder:
     def geocode(self):
         if not self.geocoded and not self.has_errors():
             def find(args):
-                if args[0] == '98000':
+                if args[0] == '98000':  # pragma: no cover
                     return np.nan, np.nan, np.nan
                 else:
                     res = geocoder.find(*args)

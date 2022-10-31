@@ -10,7 +10,8 @@ commands = {
     'decompress': [decompress],
     'index': [process_files, create_database],
     'reverse': [create_kdtree],
-    'update': [get_ban_file, decompress, process_files, create_database, remove_downloaded_raw_ban_files],
+    'update': [get_ban_file, decompress, process_files,
+               create_database, create_kdtree, remove_downloaded_raw_ban_files],
     'clean': [remove_downloaded_raw_ban_files],
 }
 

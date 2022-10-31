@@ -24,6 +24,11 @@ def home():
     return render_template("index.html", version=VERSION)
 
 
+@api_rest.route("/version")
+def version():
+    return jsonify(version=VERSION)
+
+
 @api_rest.route("/use")
 def use():
     return render_template("use_rest.html")
@@ -52,7 +57,10 @@ def get_jsoned_geocoded_data(geocoder):
 
 @api_rest.route("/geocode/<address>/<postal_code>/<city>", methods=["GET"])
 def geocode_one(address, postal_code, city):
-    geocoder = Geocoder(pd.DataFrame(data={ADDRESS: address, POSTAL_CODE: postal_code, CITY: city}))
+    print(address)
+    print(postal_code)
+    print(city)
+    geocoder = Geocoder(pd.DataFrame(data={ADDRESS: address, POSTAL_CODE: postal_code, CITY: city}, index=[0]))
     geocoder.geocode()
     return jsonify(get_jsoned_geocoded_data(geocoder))
 

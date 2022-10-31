@@ -8,6 +8,7 @@ files using tools from the package numpy.
 """
 
 import os
+import shutil
 from collections import deque, defaultdict
 
 import numpy as np
@@ -29,7 +30,7 @@ def process_files():
     ban_files = defaultdict(list)
 
     # Check if the folder with the data to process exists
-    if not os.path.exists(raw_data_folder_path):
+    if not os.path.exists(raw_data_folder_path):  # pragma: no cover
         logger.info('Data not found - execute: geocoding download')
         return False
 
@@ -38,13 +39,16 @@ def process_files():
         for filename in files:
             if filename.endswith('.csv'):
                 file_path = os.path.join(dirname, filename)
-                dpt_name = filename.split('-')[-1].split('.')[0]
+                if "adresses" in filename:
+                    dpt_name = filename.split('-')[-1].split('.')[0]
+                else:
+                    dpt_name = filename.split('-')[-2].split('.')[0]
                 ban_files[dpt_name].append(file_path)
 
-    logger.debug(ban_files)
+    logger.debug(f"Fichiers : {ban_files}")
 
     # Check if the folder was not empty
-    if not ban_files:
+    if not ban_files:  # pragma: no cover
         logger.info('No CSV file - execute: geocoding decompress')
         return False
 
@@ -53,9 +57,8 @@ def process_files():
 
     for i, departement in enumerate(departements):
         for file in ban_files[departement]:
-            logger.debug(departement)
-            logger.debug(file)
-            logger.debug(processed_files)
+            logger.debug(f"Département : {departement}")
+            logger.debug(f"Fichier : {file}")
             ban_processing.update(departement, file, processed_files)
         completion_bar('Processing BAN', (i + 1) / len(departements))
 
@@ -63,18 +66,23 @@ def process_files():
 
 
 def create_database():
-    if not os.path.exists(database):
-        os.mkdir(database)
+    if os.path.exists(database):
+        try:
+            shutil.rmtree(database)
+        except PermissionError as e:  # pragma: no cover
+            logger.error('Windows sucks, remove database folder manually and proceed.')
+            raise e
+    os.mkdir(database)
 
-    if not processed_files:
+    if not processed_files:  # pragma: no cover
         return False
 
     add_index_tables()
 
     count = 0
     for table, processed_file in processed_files.items():
+        logger.debug(list(processed_file))
         create_dat_file(list(processed_file), paths[table], dtypes[table])
-
         count += 1
         completion_bar('Storing data', count / len(processed_files))
 
@@ -104,7 +112,6 @@ def create_dat_file(lst, out_filename, dtype):
             directory.
         dtype: The type of the numpy array.
     """
-    with open(out_filename, 'wb+') as out_file:
-        dat_file = np.memmap(out_file, dtype=dtype, shape=(len(lst), ))
-        dat_file[:] = lst[:]
-        dat_file.flush()
+    dat_file = np.memmap(out_filename, mode='w+', dtype=dtype, shape=(len(lst), ))
+    dat_file[:] = lst[:]
+    dat_file.flush()

@@ -2,6 +2,7 @@ import gc
 
 import numpy as np
 from kdquery import Tree
+from loguru import logger
 
 from geocoder.geocoding.datapaths import paths
 from geocoder.geocoding.datatypes import dtypes
@@ -42,9 +43,8 @@ def create_kdtree():
     del tree
     gc.collect()
 
-    print('Storing ...')
+    logger.info('Saving kdtree...')
     create_dat_file(tuple_list, paths['kdtree'], dtypes['kdtree'])
-
-    print('Done')
+    logger.info('Done')
 
     return True

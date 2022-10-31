@@ -8,6 +8,7 @@
 
 variables:
   CURRENT_TAG: $CURRENT_TAG
+  DEBUG: "true"
   WORKON_HOME: "$CI_PROJECT_DIR/.cache/venvs"
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   PIPENV_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pipenv"

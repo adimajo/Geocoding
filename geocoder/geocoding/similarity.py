@@ -81,7 +81,7 @@ class Similarity():
             intersection_score
 
         # The union_score is zero only if both s and t are empty
-        if union_score == 0:
+        if union_score == 0:  # pragma: no cover
             return 0
 
         return intersection_score / union_score
