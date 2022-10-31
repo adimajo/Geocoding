@@ -36,7 +36,7 @@ jobs:
           echo "PIPENV_PIPFILE=$PIPENV_PIPFILE" >> $GITHUB_ENV
           pipenv install
           pipenv install --dev --skip-lock
-          export APPLICATION_TAG_VERSION=`python -c 'import geocoder; print(geocoder.__version__)'`
+          export APPLICATION_TAG_VERSION=`pipenv run python -c 'import geocoder; print(geocoder.__version__)'`
           echo "APPLICATION_TAG_VERSION=$APPLICATION_TAG_VERSION" >> $GITHUB_ENV
       - name: Lint with flake8
         run: |
