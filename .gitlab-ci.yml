@@ -15,7 +15,7 @@ variables:
 
 .common_tag: &common_tag
   tags:
-  - $CURRENT_TAG
+  - kubernetes
 
 .common_deploy: &common_deploy
   before_script:
@@ -34,11 +34,21 @@ variables:
     - git config --global user.name "$GITLAB_USER_NAME"
     - git config --global user.email "$GITLAB_USER_EMAIL"
 
-cache:
-  paths:
-    - .cache/pip
-    - .cache/pipenv
-    - .cache/venvs
+.global_cache: &global_cache
+  cache:
+    paths:
+      - .cache/pip
+      - .cache/pipenv
+      - .cache/venvs
+    policy: pull-push
+
+.pull_cache: &pull_cache
+  cache:
+    paths:
+      - .cache/pip
+      - .cache/pipenv
+      - .cache/venvs
+    policy: pull
 
 stages:
   - lint
@@ -54,6 +64,7 @@ stages:
 
 lint:
   stage: lint
+  <<: *global_cache
   <<: *common_python
   <<: *common_tag
   script:
@@ -74,6 +85,7 @@ generate_tag:
       - geocoder/Pipfile.lock
       - geocoder/Pipfile
   stage: versionning
+  <<: *global_cache
   <<: *common_python
   <<: *common_tag
   only:
@@ -90,6 +102,7 @@ test:
     paths:
       - coverage.xml
   stage: test
+  <<: *global_cache
   <<: *common_python
   <<: *common_tag
   script:
@@ -108,6 +121,7 @@ test:
 
 security:
   stage: security
+  <<: *pull_cache
   <<: *common_python
   <<: *common_tag
   script:
@@ -143,6 +157,7 @@ pages:
   stage: document
   rules:
     - if: $GITLAB_SRV_ACCOUNT == null
+  <<: *pull_cache
   <<: *common_python
   <<: *common_tag
   script:
@@ -168,6 +183,7 @@ document_cagip:
         - .gitlab-ci.yml
         - geocoder/**/*
         - docs/**/*
+  <<: *pull_cache
   <<: *common_python
   <<: *common_tag
   script:
@@ -194,8 +210,9 @@ document_cagip:
         else
             echo "Nothing to push"
         fi
+
 build geocoder:
-  cache: []
+  # cache: []
   stage: build
   rules:
     - if: $CI_COMMIT_REF_NAME == "master" && $GITLAB_SRV_ACCOUNT
@@ -223,7 +240,7 @@ build geocoder:
     - /kaniko/executor --context . --dockerfile Dockerfile $KANIKOPROXYBUILDARGS --build-arg DOCKER_REGISTRY=$DOCKER_REGISTRY --build-arg PYPI_REMOTE=$PYPI_REMOTE --destination $ARTI_SCRATCH_REGISTRY.$ARTI_REGISTRY/$ARTI_REPO:$APPLICATION_TAG_VERSION
 
 build_and_deploy_gitlab_registry:
-  cache: []
+  # cache: []
   stage: deploy_dev
   rules:
     - if: $CI_COMMIT_REF_NAME == "master" && $GITLAB_SRV_ACCOUNT == null
@@ -241,7 +258,7 @@ build_and_deploy_gitlab_registry:
     - docker push "${CI_REGISTRY}/${DOCKER_CI_REGISTRY_USER}/${CI_PROJECT_NAME}:${APPLICATION_TAG_VERSION}"
 
 build_and_deploy_dockerhub:
-  cache: []
+  # cache: []
   stage: deploy_dev
   rules:
     - if: $CI_COMMIT_REF_NAME == "master" && $GITLAB_SRV_ACCOUNT == null
@@ -258,7 +275,7 @@ build_and_deploy_dockerhub:
     - docker push "${DOCKER_CI_REGISTRY_USER}/${CI_PROJECT_NAME}:${APPLICATION_TAG_VERSION}"
 
 deploy_dev:
-  cache: []
+  # cache: []
   stage: deploy_dev
   rules:
     - if: $CI_COMMIT_REF_NAME == "master" && $GITLAB_SRV_ACCOUNT
@@ -278,8 +295,34 @@ deploy_dev:
         else
             echo "Nothing to push"
         fi
-promote_staging:
-  cache: []
+
+deploy_dev_package:
+  image:
+    name: ${DOCKER_REGISTRY}python:3.8-slim
+  artifacts:
+    paths:
+      - dist/
+  stage: deploy_dev
+  <<: *common_tag
+  script:
+    - apt-get update
+    - apt-get install -y wget
+    - pip install pipenv==2021.5.29
+    - pipenv install -d --skip-lock
+    - pipenv run pipenv_to_requirements
+    - pipenv run python3 setup.py sdist bdist_wheel
+    - python3 setup.py sdist bdist_wheel
+    - wget -qO - http://crl-priv-pki.credit-agricole.fr/ca/cacreditagricoleserver.crt >> cacreditagricoleserver.crt
+    - export CURL_CA_BUNDLE=""
+    - echo "${ARTI_REGISTRY}" >> .pypirc
+    - echo "/artifactory/api/pypi/" >> .pypirc
+    - echo "${ARTI_PYPI_SCRATCH_REGISTRY}" >> .pypirc
+    - pipenv run twine upload --cert cacreditagricoleserver.crt --config-file .pypirc --repository arti dist/*
+  only:
+   - master
+
+promote_staging_api:
+  # cache: []
   stage: promote_staging
   rules:
     - if: $CI_COMMIT_REF_NAME == "master" && $GITLAB_SRV_ACCOUNT
@@ -294,6 +337,45 @@ promote_staging:
     - . ./build.env
     - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
     - 'curl -S -k -u ${CREDS} -XPOST https://$ARTI_REGISTRY/api/docker/$SOURCE_REPO/v2/promote -H "Content-Type: application/json" -d"{\"targetRepo\":\"${TARGET_REPO}\",\"dockerRepository\":\"${ARTI_REPO}\",\"tag\":\"${APPLICATION_TAG_VERSION}\",\"copy\":true}"'
+
+promote_staging_package:
+  stage: promote_staging
+  when: manual
+  <<: *ci_tools
+  <<: *common_tag
+  variables:
+    CREDS: "${ARTI_USER}:${ARTI_PASSWORD}"
+    SOURCE_REPO: "${ARTI_PYPI_SCRATCH_REGISTRY}"
+    TARGET_REPO: "${ARTI_PYPI_STAGING_REGISTRY}"
+    IMAGE: casa-rse-nard-api
+  script:
+    - . ./build.env
+    - 'echo SOURCE REPOSITORY : ${SOURCE_REPO}'
+    - 'echo TARGET REPOSITORY : ${TARGET_REPO}'
+    - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
+    - if [[ $(curl -S -k -u ${CREDS} -XPOST https://${ARTI_REGISTRY}/api/copy/${SOURCE_REPO}/${IMAGE}?to=/${TARGET_REPO} | jq --raw-output '.messages[0].level') = "INFO" ]]; then { echo "Success"; exit 0; }; else { echo >&2 "Error in promote"; exit 1; }; fi
+  only:
+   - master
+
+promote_stable_package:
+  stage: promote_stable
+  when: manual
+  <<: *ci_tools
+  <<: *common_tag
+  variables:
+    SOURCE_REPO: "${ARTI_PYPI_STAGING_REGISTRY}"
+    TARGET_REPO: "${ARTI_PYPI_STABLE_REGISTRY}"
+    IMAGE: casa-rse-nard-api
+  script:
+    - . ./build.env
+    - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
+    - jfrog config add rt-server --artifactory-url=https://${ARTI_REGISTRY} --user=${ARTI_USER} --password=${ARTI_PASSWORD} --interactive=false
+    - jfrog config use rt-server
+    - jfrog rt ping
+    - jfrog rt pip-config --server-id-resolve rt-server --repo-resolve ${TARGET_REPO}
+    - if [[ $(jfrog rt u dist/ ${TARGET_REPO}/${IMAGE}/${APPLICATION_TAG_VERSION}/ --build-name=${IMAGE} --build-number=${APPLICATION_TAG_VERSION} --module=${IMAGE} | jq --raw-output '.status') = "success" ]]; then { echo "Success"; exit 0; }; else { echo >&2 "Error in promote"; exit 1; }; fi
+  only:
+   - master
 
 #deploy_int:
 #  cache: []
@@ -342,7 +424,7 @@ promote_staging:
 #   - master
 
 promote_stable:
-  cache: []
+  # cache: []
   stage: promote_stable
   rules:
     - if: $CI_COMMIT_REF_NAME == "master" && $GITLAB_SRV_ACCOUNT

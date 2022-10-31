@@ -9,7 +9,6 @@ venv
 build
 dist
 data/
-tests
 geocoding/database
 __pycache__/
 .idea/

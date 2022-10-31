@@ -86,7 +86,7 @@ def add_index_tables():
 
     # Index tables creation
     for i, current_table in enumerate(index_tables):
-        sort_method = (lambda i, table=current_table: processed_files[table][i])
+        sort_method = (lambda j, table=current_table: processed_files[table][j])
 
         # Sort table and add it to the module level dict processed_files
         processed_files[current_table + '_index'] = \

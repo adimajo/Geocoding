@@ -3,41 +3,24 @@ from setuptools import setup
 with open('README.rst') as reader:
     readme = reader.read()
 
-with open('version.txt') as reader:
-    version = reader.read()
-
-requirements = [
-    'flask',
-    'Geocoding-utils',
-    'kdquery',
-    'numpy',
-    'pandas',
-    'requests',
-    'sortedcontainers',
-    'unidecode',
-]
-
 setup(
     name='Geocoding',
     version=version,
     description='geocoding is an address search engine for France',
     long_description=readme,
-    url='https://github.com/DeVilhena-Paulo/Geocoding',
-    author='Paulo Emilio de Vilhena',
-    author_email='pevilhena2@gmail.com',
+    url='https://github.com/adimajo/geocoding',
+    authors=['Paulo Emilio de Vilhena', '', 'Adrien Ehrhardt'],
+    author_emails=['pevilhena2@gmail.com', '', 'adrien.ehrhardt@credit-agricole-sa.fr'],
     license='Apache Software License',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 3 - Beta',
         'Intended Audience :: Financial and Insurance Industry',
         'Topic :: Utilities',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
     keywords='Geocoder.py France',
     packages=['geocoding'],

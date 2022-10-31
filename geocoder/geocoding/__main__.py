@@ -11,7 +11,7 @@ commands = {
     'index': [process_files, create_database],
     'reverse': [create_kdtree],
     'update': [get_ban_file, decompress, process_files, create_database, remove_downloaded_raw_ban_files],
-    'remove_non_necessary_files': [remove_downloaded_raw_ban_files],
+    'clean': [remove_downloaded_raw_ban_files],
 }
 
 
