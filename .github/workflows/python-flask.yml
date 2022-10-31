@@ -31,8 +31,8 @@ jobs:
           pip install pipenv
           export PYPI_REMOTE=https://pypi.org/simple
           echo "PYPI_REMOTE=$PYPI_REMOTE" >> $GITHUB_ENV
-          sed -i 's|${PYPI_REMOTE}|'$PYPI_REMOTE'|g' geocoding/Pipfile
-          export PIPENV_PIPFILE=geocoding/Pipfile
+          sed -i 's|${PYPI_REMOTE}|'$PYPI_REMOTE'|g' geocoder/Pipfile
+          export PIPENV_PIPFILE=geocoder/Pipfile
           echo "PIPENV_PIPFILE=$PIPENV_PIPFILE" >> $GITHUB_ENV
           pipenv install
           pipenv install --dev --skip-lock
@@ -85,7 +85,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
-          context: geocoding
+          context: geocoder
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.APPLICATION_TAG_VERSION }}
           build-args: PYPI_REMOTE=${{ env.PYPI_REMOTE }}

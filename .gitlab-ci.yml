@@ -152,7 +152,8 @@ quality_check:
     - if [ ! -z $GITLAB_SRV_ACCOUNT ]; then wget -qO - ${PKI}/cacreditagricoleserver.crt >> cacreditagricoleserver.crt ; fi
     - if [ ! -z $GITLAB_SRV_ACCOUNT ]; then keytool -import -alias mycert -file cacreditagricoleserver.crt -storetype jks -trustcacerts -noprompt -keypass keypass -keystore cacerts -storepass test@123 ; fi
     - if [ ! -z $GITLAB_SRV_ACCOUNT ]; then export SONAR_SCANNER_OPTS="-Djavax.net.ssl.trustStore=cacerts" ; fi
-    - sonar-scanner -Dsonar.exclusions=tests/**,docs/**,coverage.xml,setup.py -Dsonar.organization=${DOCKER_CI_REGISTRY_USER} -Dsonar.python.coverage.reportPaths=coverage.xml -Dsonar.qualitygate.wait=true -Dsonar.projectKey=${DOCKER_CI_REGISTRY_USER}_${CI_PROJECT_NAME} -Dsonar.projectVersion=$APPLICATION_TAG_VERSION
+    # - -Dsonar.organization=${DOCKER_CI_REGISTRY_USER} ${DOCKER_CI_REGISTRY_USER}_${CI_PROJECT_NAME}
+    - sonar-scanner -Dsonar.exclusions=tests/**,docs/**,coverage.xml,geocoder/setup.py -Dsonar.python.coverage.reportPaths=coverage.xml -Dsonar.qualitygate.wait=true -Dsonar.projectKey=$SONAR_KEY -Dsonar.projectVersion=$APPLICATION_TAG_VERSION
   only:
    - master
 
@@ -238,7 +239,7 @@ build geocoder:
        KANIKOCFG="${KANIKOCFG} }"
        echo "${KANIKOCFG}" >> /kaniko/.docker/config.json
     - wget -qO - ${PKI}/cacreditagricoleserver.crt >> /kaniko/ssl/certs/additional-ca-cert-bundle.crt
-    - /kaniko/executor --context . --dockerfile Dockerfile $KANIKOPROXYBUILDARGS --build-arg DOCKER_REGISTRY=$DOCKER_REGISTRY --build-arg PYPI_REMOTE=$PYPI_REMOTE --destination $ARTI_SCRATCH_REGISTRY.$ARTI_REGISTRY/$ARTI_REPO:$APPLICATION_TAG_VERSION
+    - /kaniko/executor --context . --dockerfile Dockerfile $KANIKOPROXYBUILDARGS --build-arg DOCKER_REGISTRY=$DOCKER_REGISTRY --destination $ARTI_SCRATCH_REGISTRY.$ARTI_REGISTRY/$ARTI_REPO:$APPLICATION_TAG_VERSION
 
 build_and_deploy_gitlab_registry:
   # cache: []
