@@ -26,6 +26,11 @@ def node_to_tuple(node):
 
 
 def create_kdtree():
+    """
+    Creates and stores a kd-tree as a dat file on disk for reverse search of addresses given geolocation
+
+    :rtype: bool
+    """
     table = np.memmap(paths['localisation'], dtype=dtypes['localisation'])
     indices = np.argsort(table, order='longitude').astype('int32')
 

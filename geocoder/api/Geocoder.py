@@ -1,8 +1,5 @@
 """
 implementation of class Geocoder which will deal with requests
-
-.. autoclass::
-    Geocoder
 """
 import uuid
 from datetime import datetime
@@ -14,45 +11,54 @@ import geocoder
 
 
 class Geocoder:
+    """
+    class to handle geocoding of addresses through API
+    """
     def __init__(self, data_to_geocode):
+        """
+        Initialize geocoder with data and utility attributes
+
+        :param pandas.DataFrame data_to_geocode: must contain {"address": "...", "postal_code": "...", "city": "..."}
+        """
         self.errors = []
         self.geocoded = False
         self.uuid = str(uuid.uuid1())
         self.data = data_to_geocode
         self.geocoded_date_time = None
-        self.check_data_to_geocode(data_to_geocode)
-
-    def get_uuid(self):
-        return self.uuid
-
-    def get_errors(self):  # pragma: no cover
-        return self.errors
+        self.check_data_to_geocode()
 
     def get_geocoded_date_time(self):
         return self.geocoded_date_time
 
     def get_geocoded_data(self):
-        if self.is_geocoded():
+        """
+        Returns the object's data attribute
+
+        :return: dataframe if already geocoded otherwise None
+        :rtype: pandas.DataFrame
+        """
+        if self.geocoded:
             return self.data
         else:  # pragma: no cover
             return None
 
-    def check_data_to_geocode(self, data_to_geocode):
+    def check_data_to_geocode(self):
+        """
+        Checks input data and increment :code:`errors` attribute
+        .. todo:: should be replaced by argument parser
+        """
         errors = []
         for col_to_check in [ADDRESS, POSTAL_CODE, CITY]:  # pragma: no cover
-            if col_to_check not in data_to_geocode.columns:
+            if col_to_check not in self.data.columns:
                 errors = errors + [f'Column {col_to_check} is missing.']
         if len(errors) > 0:
             self.errors = errors
 
-    def has_errors(self):
-        return len(self.errors) > 0
-
-    def is_geocoded(self):
-        return self.geocoded
-
     def geocode(self):
-        if not self.geocoded and not self.has_errors():
+        """
+        Geocode data if not already geocoded and no read error(s) by calling geocoder.find
+        """
+        if not self.geocoded and not self.errors:
             def find(args):
                 if args[0] == '98000':  # pragma: no cover
                     return np.nan, np.nan, np.nan

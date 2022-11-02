@@ -36,7 +36,3 @@ def create_app():
 
 
 app = create_app()
-
-
-def get_app():
-    return app

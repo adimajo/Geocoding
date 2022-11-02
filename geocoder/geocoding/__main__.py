@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""
+defines entrypoints
+"""
 import sys
 
 from geocoder.geocoding.activate_reverse import create_kdtree

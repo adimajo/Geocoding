@@ -5,7 +5,6 @@ geocoding API
     :toctree:
 
     app
-    conf
     Geocoder
     rest
 """

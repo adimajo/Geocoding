@@ -17,7 +17,7 @@ process decompressed files into a database
 # -*- coding: utf-8 -*-
 import numpy as np
 from sortedcontainers import SortedDict, SortedSet
-
+from typing import Literal
 from geocoder.geocoding import normalize as norm
 from geocoder.geocoding.utils import degree_to_int
 
@@ -56,7 +56,14 @@ voie_fields = ['nom_voie']
 commune_fields = ['nom_complementaire', 'nom_commune']
 
 
-def test(fields, lieu):
+def test(fields: list, lieu: Literal["adresses", "lieux-dits"]):
+    """
+    Checks if fields are of correct type
+
+    :param list fields: extracted fields
+    :param str lieu: adresses or lieux-dits
+    :rtype: bool
+    """
     for field in types:
         try:
             types[field](fields[line_specs[lieu][field]])
@@ -65,7 +72,17 @@ def test(fields, lieu):
     return True
 
 
-def get_field(field_name, fields, normalization_method, lieu, size_limit=None):
+def get_field(field_name, fields, normalization_method, lieu: Literal["adresses", "lieux-dits"], size_limit=None):
+    """
+    Gets field and try to normalize
+
+    :param str field_name: name of the field to parse
+    :param list fields: all fields obtained
+    :param fun normalization_method: function to normalize the parsed string
+    :param str lieu: adresses or lieux-dits
+    :param int size_limit: max length of resulting string
+    :rtype: (str, str)
+    """
     field = line_specs[lieu][field_name]
     if field is None:  # pragma: no cover
         return None, None
@@ -78,7 +95,10 @@ def get_field(field_name, fields, normalization_method, lieu, size_limit=None):
     return None, None
 
 
-def get_voie(fields, lieu):
+def get_voie(fields, lieu: Literal["adresses", "lieux-dits"]):
+    """
+    Gets "voie" by calling :code:`get_field`
+    """
     for field_name in voie_fields:
         voie_nom, voie_normalise = get_field(field_name,
                                              fields,
@@ -90,7 +110,10 @@ def get_voie(fields, lieu):
     return None, None  # pragma: no cover
 
 
-def get_commune(fields, lieu):
+def get_commune(fields, lieu: Literal["adresses", "lieux-dits"]):
+    """
+    Gets "commune" by calling :code:`get_field`
+    """
     for field_name in commune_fields:
         commune_nom, commune_normalise = get_field(field_name,
                                                    fields,
@@ -101,7 +124,14 @@ def get_commune(fields, lieu):
     return None, None  # pragma: no cover
 
 
-def get_attributes(fields, lieu: str = "adresses"):
+def get_attributes(fields, lieu: Literal["adresses", "lieux-dits"] = "adresses"):
+    """
+    Parse attributes from fields
+
+    :param list fields: all fields obtained
+    :param str lieu: adresses or lieux-dits
+    :rtype: tuple
+    """
     if not test(fields, lieu):
         return None  # pragma: no cover
 
@@ -128,7 +158,14 @@ def get_attributes(fields, lieu: str = "adresses"):
             voie_normalise, voie_nom, numero, repetition, lon, lat)
 
 
-def update(dpt_nom, csv_file_path, processed_files):
+def update(dpt_nom: str, csv_file_path, processed_files: dict):
+    """
+    Update processed_files iteratively for each file
+
+    :param str dpt_nom: departement
+    :param os.Path csv_file_path: path to CSV file to read and update processed_files
+    :param dict processed_files: databases
+    """
     postal_dict = SortedDict()
 
     with open(csv_file_path, 'r', encoding='UTF-8') as f:
@@ -202,7 +239,6 @@ def update_voie(id_ref, processed_files, voie_dict):
         start = len(processed_files['localisation'])
         update_localisation(current_id, processed_files, voie_dict[key])
         lon, lat = tuple_list_mean(voie_dict[key], range(2, 4))
-
         end = len(processed_files['localisation'])
 
         tuple_value = key + (lon, lat, start, end, id_ref)
