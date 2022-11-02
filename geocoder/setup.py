@@ -1,12 +1,11 @@
 """
 A setuptools based setup module to install geocoder as a package.
 """
-import sys
+import codecs
 import os
 import re
-import codecs
-from setuptools import setup
 
+from setuptools import setup
 
 here = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
