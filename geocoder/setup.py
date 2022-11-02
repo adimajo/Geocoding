@@ -7,7 +7,7 @@ import re
 
 from setuptools import setup
 
-here = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+here = os.path.abspath(os.path.dirname(__file__))
 
 
 def long_description():
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     setup(
         setup_requires=["wheel"],
         name='Geocoding',
-        version=find_version(os.path.join(here, "geocoder")),
+        version=find_version(here),
         description='geocoding is an address search engine for France',
         long_description=long_description(),
         url='https://github.com/adimajo/geocoding',

@@ -55,6 +55,7 @@ jobs:
           cd docs
           PIPENV_PIPFILE=../geocoder/Pipfile pipenv run make html
           cd ..
+          cp README.rst geocoder/README.rst
       - name: Upload documentation
         run: |
           export LATEST_COMMITER_EMAIL=`git --no-pager log -1 -s --format="%ae"`
