@@ -1,3 +1,9 @@
+"""
+create kdtree for reverse search
+
+.. autosummary::
+    create_kdtree
+"""
 import gc
 
 import numpy as np

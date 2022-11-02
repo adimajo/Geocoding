@@ -1,3 +1,19 @@
+"""
+process decompressed files into a database
+
+.. autosummary::
+    test
+    get_gield
+    get_voie
+    get_commune
+    get_attributes
+    update
+    update_departement
+    update_postal
+    update_commune
+    update_voie
+    update_localisation
+"""
 # -*- coding: utf-8 -*-
 import numpy as np
 from sortedcontainers import SortedDict, SortedSet

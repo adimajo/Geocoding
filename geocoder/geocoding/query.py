@@ -379,14 +379,13 @@ def get_properties(node_id):
     Returns:
         (:obj:`tuple`)
         (point (:obj:`tuple` of float): Longitude and latitude of the node,
-         region (:ob:`list` of :obj:`list` of float): The region of the Earth`s
-             surface that the node belongs to,
+            region (:ob:`list` of :obj:`list` of float): The region of the Earth`s
+            surface that the node belongs to,
          dimension (int): The dimension of the surface divided by this node,
          active (bool): True if the node will be consider in the computation of
-             the nearest point,
+            the nearest point,
          left (int): Index to left child,
          right (int): Index to right child)
-
     """
     table_node = data['kdtree'][node_id]
 

@@ -1,3 +1,11 @@
 """
-API de geocoding
+geocoding API
+
+.. autosummary::
+    :toctree:
+
+    app
+    conf
+    Geocoder
+    rest
 """

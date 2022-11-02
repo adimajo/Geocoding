@@ -1,3 +1,6 @@
+"""
+A simple wsgi server
+"""
 import os
 
 from geocoder.api.app import get_app

@@ -1,3 +1,13 @@
+"""
+geocoder modules and API
+
+.. autosummary::
+    :toctree:
+
+    api
+    geocoding
+    wsgi
+"""
 from loguru import logger
 from geocoder.geocoding import search, query
 

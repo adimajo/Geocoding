@@ -1,3 +1,9 @@
+"""
+implementation of class Geocoder which will deal with requests
+
+.. autoclass::
+    Geocoder
+"""
 import uuid
 from datetime import datetime
 

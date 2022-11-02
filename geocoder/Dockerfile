@@ -6,6 +6,7 @@ COPY . geocoder/
 RUN apk --update add --no-cache git openblas-dev linux-headers build-base
 RUN pip install --upgrade pip && pip install pipenv
 RUN PIPENV_PIPFILE=geocoder/Pipfile pipenv install --system --deploy
+RUN touch geocoder/requirements.txt && python3 -m pip install -e geocoder
 RUN chown nobody:nogroup /geocoder
 RUN geocoder download
 RUN geocoder decompress

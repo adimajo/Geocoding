@@ -1,6 +1,7 @@
 """
-A setuptools based setup module.
+A setuptools based setup module to install geocoder as a package.
 """
+import sys
 import os
 import re
 import codecs
@@ -16,7 +17,7 @@ def long_description():
     return long_description
 
 
-def find_version(file_path, file_name):
+def find_version(file_path, file_name: str = "__init__.py"):
     """
     Get the version from __init__.py file
 
@@ -44,7 +45,7 @@ if __name__ == "__main__":
     setup(
         setup_requires=["wheel"],
         name='Geocoding',
-        version=find_version(here, "__init__.py"),
+        version=find_version(here),
         description='geocoding is an address search engine for France',
         long_description=long_description(),
         url='https://github.com/adimajo/geocoding',

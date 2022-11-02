@@ -1,3 +1,8 @@
+"""
+configuration stuff
+
+.. todo:: to move in app or rest
+"""
 from geocoder import __version__
 
 
