@@ -227,7 +227,6 @@ build geocoder:
     entrypoint: [""]
   script:
     - . ./build.env
-    - cd geocoder
     - mkdir -p /kaniko/.docker
     - |-
        KANIKOPROXYBUILDARGS=""

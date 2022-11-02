@@ -1,7 +1,8 @@
 ARG DOCKER_REGISTRY
 FROM ${DOCKER_REGISTRY}python:3.8.13-alpine3.16 as build
 ENV PIPENV_PIPFILE geocoder/Pipfile
-COPY . geocoder/
+COPY geocoder geocoder/
+COPY README.rst README.rst
 
 RUN apk --update add --no-cache git openblas-dev linux-headers build-base
 RUN pip install --upgrade pip && pip install pipenv
