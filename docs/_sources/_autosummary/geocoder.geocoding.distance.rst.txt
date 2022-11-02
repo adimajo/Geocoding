@@ -1,0 +1,35 @@
+geocoder.geocoding.distance
+===========================
+
+.. automodule:: geocoder.geocoding.distance
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      atan2
+      cos
+      degree
+      radian
+      sin
+      spherical
+      sqrt
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

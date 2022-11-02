@@ -1,0 +1,40 @@
+geocoder.geocoding.index
+========================
+
+.. automodule:: geocoder.geocoding.index
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      add_index_tables
+      completion_bar
+      create_dat_file
+      create_database
+      process_files
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      defaultdict
+      deque
+   
+   
+
+   
+   
+   
+
+
+

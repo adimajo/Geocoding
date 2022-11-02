@@ -1,0 +1,48 @@
+geocoder.geocoding.ban\_processing
+==================================
+
+.. automodule:: geocoder.geocoding.ban_processing
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      degree_to_int
+      get_attributes
+      get_commune
+      get_field
+      get_voie
+      test
+      tuple_list_mean
+      update
+      update_commune
+      update_departement
+      update_localisation
+      update_postal
+      update_voie
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      SortedDict
+      SortedSet
+   
+   
+
+   
+   
+   
+
+
+

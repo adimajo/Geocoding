@@ -1,0 +1,23 @@
+geocoder.geocoding.datatypes
+============================
+
+.. automodule:: geocoder.geocoding.datatypes
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

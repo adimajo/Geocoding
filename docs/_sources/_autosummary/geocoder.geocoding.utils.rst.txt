@@ -1,0 +1,34 @@
+geocoder.geocoding.utils
+========================
+
+.. automodule:: geocoder.geocoding.utils
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      binary_search
+      degree_to_int
+      int_to_degree
+      most_similar
+      pre_order
+      search
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

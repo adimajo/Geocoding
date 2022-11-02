@@ -1,0 +1,23 @@
+geocoder.geocoding.datapaths
+============================
+
+.. automodule:: geocoder.geocoding.datapaths
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

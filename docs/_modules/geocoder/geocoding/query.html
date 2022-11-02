@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geocoder.geocoding.query &mdash; Geocoder 2.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Geocoder
+          </a>
+              <div class="version">
+                2.0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/geocoder.html">geocoder</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Geocoder</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">geocoder.geocoding.query</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for geocoder.geocoding.query</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Interface to query for data.</span>
+
+<span class="sd">This module defines the query methods for each table in the database.</span>
+
+<span class="sd">Attributes:</span>
+<span class="sd">    data (:obj:`dict` of :obj:`numpy.ndarray`): The database is formed by numpy</span>
+<span class="sd">        arrays. Each of them is identified by a name and accessible by this</span>
+<span class="sd">        dictionary with data[name].</span>
+<span class="sd">    limits (:obj:`dict` of :obj:`tuple` of int): limits[table] stores the</span>
+<span class="sd">        limits of the numpy array called table.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">kdquery</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">geocoder.geocoding</span> <span class="kn">import</span> <span class="n">distance</span><span class="p">,</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">geocoder.geocoding.datapaths</span> <span class="kn">import</span> <span class="n">paths</span>
+<span class="kn">from</span> <span class="nn">geocoder.geocoding.datatypes</span> <span class="kn">import</span> <span class="n">dtypes</span>
+<span class="kn">from</span> <span class="nn">geocoder.geocoding.similarity</span> <span class="kn">import</span> <span class="n">Similarity</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">limits</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+<div class="viewcode-block" id="setup"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.query.html#geocoder.geocoding.query.setup">[docs]</a><span class="k">def</span> <span class="nf">setup</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Initialize the module level variables.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">limits</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">paths</span><span class="p">[</span><span class="n">table</span><span class="p">]):</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">table</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">memmap</span><span class="p">(</span><span class="n">paths</span><span class="p">[</span><span class="n">table</span><span class="p">],</span> <span class="n">dtypes</span><span class="p">[</span><span class="n">table</span><span class="p">])</span>
+                <span class="n">limits</span><span class="p">[</span><span class="n">table</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">table</span><span class="p">]))</span></div>
+
+
+<div class="viewcode-block" id="select"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.query.html#geocoder.geocoding.query.select">[docs]</a><span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Search for a record on table with field column equals to element.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        table (str): The name of the numpy array.</span>
+<span class="sd">        column (str): The field to consider.</span>
+<span class="sd">        start (int): The bottom limit index to look in the table.</span>
+<span class="sd">        end (int): The top limit index to look in the table.</span>
+<span class="sd">        element (str or int): The element to search for.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (:obj:`tuple`)</span>
+<span class="sd">        (pos (int): the position of the record in the table,</span>
+<span class="sd">         found (bool): true if the search was succeeded)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Binary search</span>
+    <span class="n">i</span><span class="p">,</span> <span class="n">pos</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">),</span> <span class="n">data</span><span class="p">[</span><span class="n">table</span><span class="p">][</span><span class="n">column</span><span class="p">])</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="p">(</span><span class="n">pos</span> <span class="o">&lt;</span> <span class="n">end</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="n">table</span><span class="p">][</span><span class="n">column</span><span class="p">][</span><span class="n">pos</span><span class="p">]</span> <span class="o">==</span> <span class="n">element</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pos</span><span class="p">,</span> <span class="n">found</span></div>
+
+
+<div class="viewcode-block" id="heuristics"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.query.html#geocoder.geocoding.query.heuristics">[docs]</a><span class="k">def</span> <span class="nf">heuristics</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">narrow</span><span class="p">,</span> <span class="n">wide</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Search record on table with field column the most similar to element.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        table (str): The name of the numpy array.</span>
+<span class="sd">        column (str): The field to consider.</span>
+<span class="sd">        narrow (:obj:`tuple`): Tuple of length 3 with setting for the narrow</span>
+<span class="sd">            search.</span>
+<span class="sd">            first element (int): The bottom limit index to look in the table in</span>
+<span class="sd">                the narrow search.</span>
+<span class="sd">            second element (int): The top limit index to look in the table in</span>
+<span class="sd">                the narrow search.</span>
+<span class="sd">            third element (float): The threshold for the similarity score in</span>
+<span class="sd">                the narrow search.</span>
+<span class="sd">        wide (:obj:`tuple`): Tuple of length 3 with setting for the wide</span>
+<span class="sd">            search (when the narrow is not successful).</span>
+<span class="sd">            first element (int): The bottom limit index to look in the table in</span>
+<span class="sd">                the wide search.</span>
+<span class="sd">            second element (int): The top limit index to look in the table in</span>
+<span class="sd">                the wide search.</span>
+<span class="sd">            third element (float): The threshold for the similarity score in</span>
+<span class="sd">                the wide search.</span>
+<span class="sd">        element (str): The element to search for.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (:obj:`tuple`)</span>
+<span class="sd">        (element_id (int): the position of the record in the table,</span>
+<span class="sd">         found (bool): true if the search was succeeded)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Similarity function</span>
+    <span class="n">similarity</span> <span class="o">=</span> <span class="n">Similarity</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">score</span>
+
+    <span class="c1"># Narrow search</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">narrow</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">narrow</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">score</span><span class="p">,</span> <span class="n">rang</span><span class="p">,</span> <span class="n">element_id</span> <span class="o">=</span> \
+        <span class="n">utils</span><span class="o">.</span><span class="n">most_similar</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">table</span><span class="p">][</span><span class="n">column</span><span class="p">],</span> <span class="n">similarity</span><span class="p">)</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="p">(</span><span class="n">score</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">score</span> <span class="o">&gt;=</span> <span class="n">narrow</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="c1"># Wide search</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span> <span class="ow">and</span> <span class="n">wide</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">wide</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">wide</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">score</span><span class="p">,</span> <span class="n">rang</span><span class="p">,</span> <span class="n">element_id</span> <span class="o">=</span> \
+            <span class="n">utils</span><span class="o">.</span><span class="n">most_similar</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">table</span><span class="p">][</span><span class="n">column</span><span class="p">],</span> <span class="n">similarity</span><span class="p">)</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="p">(</span><span class="n">score</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">score</span> <span class="o">&gt;=</span> <span class="n">wide</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">element_id</span><span class="p">,</span> <span class="n">found</span></div>
+
+
+<div class="viewcode-block" id="select_departement"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.query.html#geocoder.geocoding.query.select_departement">[docs]</a><span class="k">def</span> <span class="nf">select_departement</span><span class="p">(</span><span class="n">dpt_code</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Select record on department table with field code equals to dpt_code.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dpt_code (str): The code of the department.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dpt_id (int): The index of the record if the search was succeeded,</span>
+<span class="sd">            None otherwise.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">dpt_code</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">dpt_code</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">limits</span><span class="p">[</span><span class="s1">&#39;departement&#39;</span><span class="p">]</span>
+    <span class="n">dpt_id</span><span class="p">,</span> <span class="n">found</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="s1">&#39;departement&#39;</span><span class="p">,</span> <span class="s1">&#39;code&#39;</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">dpt_code</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dpt_id</span> <span class="k">if</span> <span class="n">found</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="select_code_postal"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.query.html#geocoder.geocoding.query.select_code_postal">[docs]</a><span class="k">def</span> <span class="nf">select_code_postal</span><span class="p">(</span><span class="n">code_postal</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Select record on postal table with field code equals to code_postal.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        code_postal (int): The postal code.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        postal_id (int): The index of the record if the search was succeeded,</span>
+<span class="sd">            None otherwise.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">code_postal</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Binary search with index list, because the postal table is not</span>
+    <span class="c1"># entirely sorted.</span>
+    <span class="n">i</span><span class="p">,</span> <span class="n">postal_id</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">code_postal</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;postal_index&#39;</span><span class="p">],</span>
+                                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;postal&#39;</span><span class="p">][</span><span class="s1">&#39;code&#39;</span><span class="p">],</span> <span class="nb">sorted</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">limits</span><span class="p">[</span><span class="s1">&#39;postal_index&#39;</span><span class="p">]</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">end</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;postal&#39;</span><span class="p">][</span><span class="s1">&#39;code&#39;</span><span class="p">][</span><span class="n">postal_id</span><span class="p">]</span> <span class="o">==</span> <span class="n">code_postal</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+        <span class="c1"># Compute the difference to the nearest values from code_postal</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">abs</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;postal&#39;</span><span class="p">][</span><span class="s1">&#39;code&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">code_postal</span><span class="p">),</span> <span class="n">j</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">start</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">end</span><span class="p">))]</span>
+        <span class="n">min_value</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span>
+        <span class="n">postal_id</span> <span class="o">=</span> <span class="n">min_value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="p">(</span><span class="n">min_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">postal_id</span> <span class="k">if</span> <span class="n">found</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="select_commune"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.query.html#geocoder.geocoding.query.select_commune">[docs]</a><span class="k">def</span> <span class="nf">select_commune</span><span class="p">(</span><span class="n">postal_id</span><span class="p">,</span> <span class="n">commune</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Select record on commune table with field normalize equals to commune or</span>
+<span class="sd">    sufficiently similar.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        postal_id (int): The index of the code postal that commune belongs to.</span>
+<span class="sd">        commune (str): The city name.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        commune_id (int): The index of the record if the search was succeeded,</span>
+<span class="sd">            None otherwise.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">postal_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">ref_element</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;postal&#39;</span><span class="p">][</span><span class="n">postal_id</span><span class="p">]</span>
+    <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">ref_element</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">],</span> <span class="n">ref_element</span><span class="p">[</span><span class="s1">&#39;end&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">start</span>
+
+    <span class="k">if</span> <span class="n">commune</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Binary search</span>
+    <span class="n">commune_id</span><span class="p">,</span> <span class="n">found</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="s1">&#39;commune&#39;</span><span class="p">,</span> <span class="s1">&#39;normalise&#39;</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">commune</span><span class="p">)</span>
+
+    <span class="c1"># Heuristics search with string similarity</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+        <span class="n">narrow</span> <span class="o">=</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">commune_id</span> <span class="o">-</span> <span class="mi">2</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">commune_id</span> <span class="o">+</span> <span class="mi">2</span><span class="p">),</span> <span class="mf">0.7</span><span class="p">)</span>
+        <span class="n">wide</span> <span class="o">=</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">commune_id</span><span class="p">,</span> <span class="n">found</span> <span class="o">=</span> <span class="n">heuristics</span><span class="p">(</span><span class="s1">&#39;commune&#39;</span><span class="p">,</span> <span class="s1">&#39;normalise&#39;</span><span class="p">,</span> <span class="n">narrow</span><span class="p">,</span> <span class="n">wide</span><span class="p">,</span>
+                                       <span class="n">commune</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">commune_id</span> <span class="k">if</span> <span class="n">found</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="complete_commune_selection"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.query.html#geocoder.geocoding.query.complete_commune_selection">[docs]</a><span class="k">def</span> <span class="nf">complete_commune_selection</span><span class="p">(</span><span class="n">commune</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Select record on commune table with field normalize the most similar to</span>
+<span class="sd">    commune.</span>
+
+<span class="sd">    Search for commune in the entire commune table. This method is the</span>
+<span class="sd">    option to find the commune once the method select_commune has failed.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        commune (str): The city name.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        commune_id (int): The index of the record if the search was succeeded,</span>
+<span class="sd">            None otherwise.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">commune</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Binary search with index list, because the commune table is not</span>
+    <span class="c1"># entirely sorted.</span>
+    <span class="n">i</span><span class="p">,</span> <span class="n">commune_id</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">commune</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;commune_index&#39;</span><span class="p">],</span>
+                                 <span class="n">data</span><span class="p">[</span><span class="s1">&#39;commune&#39;</span><span class="p">][</span><span class="s1">&#39;normalise&#39;</span><span class="p">],</span>
+                                 <span class="nb">sorted</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;commune&#39;</span><span class="p">][</span><span class="s1">&#39;normalise&#39;</span><span class="p">][</span><span class="n">commune_id</span><span class="p">]</span> <span class="o">==</span> <span class="n">commune</span><span class="p">)</span>
+
+    <span class="c1"># Heuristics</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+        <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">limits</span><span class="p">[</span><span class="s1">&#39;commune_index&#39;</span><span class="p">]</span>
+        <span class="n">similarity</span> <span class="o">=</span> <span class="n">Similarity</span><span class="p">(</span><span class="n">commune</span><span class="p">)</span><span class="o">.</span><span class="n">score</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;commune_index&#39;</span><span class="p">][</span><span class="nb">max</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">2</span><span class="p">):</span> <span class="nb">min</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)]</span>
+        <span class="n">score</span><span class="p">,</span> <span class="n">rang</span><span class="p">,</span> <span class="n">commune_id</span> <span class="o">=</span> \
+            <span class="n">utils</span><span class="o">.</span><span class="n">most_similar</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;commune&#39;</span><span class="p">][</span><span class="s1">&#39;normalise&#39;</span><span class="p">],</span>
+                               <span class="n">similarity</span><span class="p">)</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="p">(</span><span class="n">score</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">score</span> <span class="o">&gt;=</span> <span class="mf">0.7</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">commune_id</span> <span class="k">if</span> <span class="n">found</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="select_voie"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.query.html#geocoder.geocoding.query.select_voie">[docs]</a><span class="k">def</span> <span class="nf">select_voie</span><span class="p">(</span><span class="n">commune_id</span><span class="p">,</span> <span class="n">voie</span><span class="p">,</span> <span class="n">voie_type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Select record on voie table with field normalize equals to voie or</span>
+<span class="sd">    sufficiently similar.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        commune_id (int): The index of the commune that the street belongs to.</span>
+<span class="sd">        voie (str): The street name.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        voie_id (int): The index of the record if the search was succeeded,</span>
+<span class="sd">            None otherwise.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">commune_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">voie</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Binary search</span>
+    <span class="n">ref_element</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;commune&#39;</span><span class="p">][</span><span class="n">commune_id</span><span class="p">]</span>
+    <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">ref_element</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">],</span> <span class="n">ref_element</span><span class="p">[</span><span class="s1">&#39;end&#39;</span><span class="p">]</span>
+    <span class="n">voie_id</span><span class="p">,</span> <span class="n">found</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="s1">&#39;voie&#39;</span><span class="p">,</span> <span class="s1">&#39;normalise&#39;</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">voie</span><span class="p">)</span>
+
+    <span class="c1"># Heuristics</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+        <span class="n">start_type</span><span class="p">,</span> <span class="n">end_type</span> <span class="o">=</span> <span class="n">voie_id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">voie_id</span>
+        <span class="k">if</span> <span class="n">voie_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">while</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;voie&#39;</span><span class="p">][</span><span class="s1">&#39;normalise&#39;</span><span class="p">][</span><span class="n">start_type</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">voie_type</span><span class="p">):</span>
+                <span class="n">start_type</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="n">start_type</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">while</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;voie&#39;</span><span class="p">][</span><span class="s1">&#39;normalise&#39;</span><span class="p">][</span><span class="n">end_type</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">voie_type</span><span class="p">):</span>
+                <span class="n">end_type</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">end_type</span> <span class="o">-</span> <span class="n">start_type</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">narrow_start</span><span class="p">,</span> <span class="n">narrow_end</span> <span class="o">=</span> <span class="n">start_type</span><span class="p">,</span> <span class="n">end_type</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">narrow_start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">voie_id</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="n">narrow_end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">voie_id</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span>
+
+        <span class="n">narrow</span> <span class="o">=</span> <span class="p">(</span><span class="n">narrow_start</span><span class="p">,</span> <span class="n">narrow_end</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">)</span>
+        <span class="n">wide</span> <span class="o">=</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">)</span>
+
+        <span class="n">voie_id</span><span class="p">,</span> <span class="n">found</span> <span class="o">=</span> <span class="n">heuristics</span><span class="p">(</span><span class="s1">&#39;voie&#39;</span><span class="p">,</span> <span class="s1">&#39;normalise&#39;</span><span class="p">,</span> <span class="n">narrow</span><span class="p">,</span> <span class="n">wide</span><span class="p">,</span> <span class="n">voie</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">voie_id</span> <span class="k">if</span> <span class="n">found</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="complete_voie_selection"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.query.html#geocoder.geocoding.query.complete_voie_selection">[docs]</a><span class="k">def</span> <span class="nf">complete_voie_selection</span><span class="p">(</span><span class="n">code_postal</span><span class="p">,</span> <span class="n">commune</span><span class="p">,</span> <span class="n">voie</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Select record on voie table with field normalise most similar to voie.</span>
+
+<span class="sd">    Search for voie in the entire voie table. This method is the option to find</span>
+<span class="sd">    the voie once the method select_voie has failed. It first tries to find the</span>
+<span class="sd">    voie belonging to the commune the most similar to commune and if this step</span>
+<span class="sd">    fails it will try to find the voie belonging to a postal code similar to</span>
+<span class="sd">    code_postal.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        code_postal (str): The postcode.</span>
+<span class="sd">        commune (str): The city name.</span>
+<span class="sd">        voie (str): The street name.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        commune_id (int): The index of the record if the search was succeeded,</span>
+<span class="sd">            None otherwise.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">voie</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Binary search</span>
+    <span class="n">i</span><span class="p">,</span> <span class="n">voie_id</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">voie</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;voie_index&#39;</span><span class="p">],</span>
+                              <span class="n">data</span><span class="p">[</span><span class="s1">&#39;voie&#39;</span><span class="p">][</span><span class="s1">&#39;normalise&#39;</span><span class="p">],</span>
+                              <span class="nb">sorted</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># If the search was successful and there is no code_postal or commune</span>
+    <span class="c1"># to continue, we finish.</span>
+    <span class="k">if</span> <span class="n">code_postal</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">commune</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">voie_id</span> <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;voie&#39;</span><span class="p">][</span><span class="s1">&#39;normalise&#39;</span><span class="p">][</span><span class="n">voie_id</span><span class="p">]</span> <span class="o">==</span> <span class="n">voie</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="c1"># Indices of voie table to consider in the heuristics step</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;voie&#39;</span><span class="p">][</span><span class="s1">&#39;normalise&#39;</span><span class="p">][</span><span class="n">voie_id</span><span class="p">]</span> <span class="o">==</span> <span class="n">voie</span><span class="p">:</span>
+        <span class="c1"># If the search was successful, find the greatest interval of equality</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="k">while</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;voie&#39;</span><span class="p">][</span><span class="s1">&#39;normalise&#39;</span><span class="p">][</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;voie_index&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">]]</span> <span class="o">==</span> <span class="n">voie</span><span class="p">:</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">voie_indices</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;voie_index&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">:</span> <span class="n">j</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># If the search wasn&#39;t successful, pick some near indices from the</span>
+        <span class="c1"># search result</span>
+        <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">limits</span><span class="p">[</span><span class="s1">&#39;voie_index&#39;</span><span class="p">]</span>
+        <span class="n">voie_indices</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;voie_index&#39;</span><span class="p">][</span><span class="nb">max</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">2</span><span class="p">):</span> <span class="nb">min</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)]</span>
+
+    <span class="n">commune_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;voie&#39;</span><span class="p">][</span><span class="s1">&#39;ref_id&#39;</span><span class="p">][</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">voie_indices</span><span class="p">]</span>
+
+    <span class="c1"># First heuristics: apply similarity to commune</span>
+    <span class="k">if</span> <span class="n">commune</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">similarity</span> <span class="o">=</span> <span class="n">Similarity</span><span class="p">(</span><span class="n">commune</span><span class="p">)</span><span class="o">.</span><span class="n">score</span>
+        <span class="n">score</span><span class="p">,</span> <span class="n">rang</span><span class="p">,</span> <span class="n">commune_id</span> <span class="o">=</span> \
+            <span class="n">utils</span><span class="o">.</span><span class="n">most_similar</span><span class="p">(</span><span class="n">commune_indices</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;commune&#39;</span><span class="p">][</span><span class="s1">&#39;normalise&#39;</span><span class="p">],</span>
+                               <span class="n">similarity</span><span class="p">)</span>
+        <span class="n">voie_id</span> <span class="o">=</span> <span class="n">voie_indices</span><span class="p">[</span><span class="n">rang</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">score</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">score</span> <span class="o">&gt;=</span> <span class="mf">0.7</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">voie_id</span>
+
+    <span class="c1"># Second heuristics: consider the postal code</span>
+    <span class="k">if</span> <span class="n">code_postal</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">postal_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;commune&#39;</span><span class="p">][</span><span class="s1">&#39;ref_id&#39;</span><span class="p">][</span><span class="n">commune_id</span><span class="p">]</span>
+                          <span class="k">for</span> <span class="n">commune_id</span> <span class="ow">in</span> <span class="n">commune_indices</span><span class="p">]</span>
+        <span class="n">first_algs</span> <span class="o">=</span> <span class="n">code_postal</span> <span class="o">//</span> <span class="mi">1000</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">postal_indices</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">first_algs</span> <span class="o">==</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;postal&#39;</span><span class="p">][</span><span class="s1">&#39;code&#39;</span><span class="p">][</span><span class="n">postal_indices</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">//</span> <span class="mi">1000</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">voie_indices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="select_localisation"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.query.html#geocoder.geocoding.query.select_localisation">[docs]</a><span class="k">def</span> <span class="nf">select_localisation</span><span class="p">(</span><span class="n">voie_id</span><span class="p">,</span> <span class="n">numero</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Select record on localisation table with field numero equals to numero.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        voie_id (int): The index of the street that the numero belongs to.</span>
+<span class="sd">        numero (int): The street number.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        localisation_id (int): The index of the record if the search was</span>
+<span class="sd">            succeeded, None otherwise.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">voie_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">numero</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Binary search</span>
+    <span class="n">ref_element</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;voie&#39;</span><span class="p">][</span><span class="n">voie_id</span><span class="p">]</span>
+    <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">ref_element</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">],</span> <span class="n">ref_element</span><span class="p">[</span><span class="s1">&#39;end&#39;</span><span class="p">]</span>
+    <span class="n">localisation_id</span><span class="p">,</span> <span class="n">found</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="s1">&#39;localisation&#39;</span><span class="p">,</span> <span class="s1">&#39;numero&#39;</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span>
+                                    <span class="n">numero</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">localisation_id</span> <span class="k">if</span> <span class="n">found</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="get_properties"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.query.html#geocoder.geocoding.query.get_properties">[docs]</a><span class="k">def</span> <span class="nf">get_properties</span><span class="p">(</span><span class="n">node_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Auxiliary method to the nearest_point method from kdquery package.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        node_id (int): Index of a node in the internal representation of the</span>
+<span class="sd">            kd-tree using a numpy array.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (:obj:`tuple`)</span>
+<span class="sd">        (point (:obj:`tuple` of float): Longitude and latitude of the node,</span>
+<span class="sd">            region (:ob:`list` of :obj:`list` of float): The region of the Earth`s</span>
+<span class="sd">            surface that the node belongs to,</span>
+<span class="sd">         dimension (int): The dimension of the surface divided by this node,</span>
+<span class="sd">         active (bool): True if the node will be consider in the computation of</span>
+<span class="sd">            the nearest point,</span>
+<span class="sd">         left (int): Index to left child,</span>
+<span class="sd">         right (int): Index to right child)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">table_node</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;kdtree&#39;</span><span class="p">][</span><span class="n">node_id</span><span class="p">]</span>
+
+    <span class="n">limit_left</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">int_to_degree</span><span class="p">(</span><span class="n">table_node</span><span class="p">[</span><span class="s1">&#39;limit_left&#39;</span><span class="p">])</span>
+    <span class="n">limit_right</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">int_to_degree</span><span class="p">(</span><span class="n">table_node</span><span class="p">[</span><span class="s1">&#39;limit_left&#39;</span><span class="p">])</span>
+    <span class="n">limit_bottom</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">int_to_degree</span><span class="p">(</span><span class="n">table_node</span><span class="p">[</span><span class="s1">&#39;limit_bottom&#39;</span><span class="p">])</span>
+    <span class="n">limit_top</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">int_to_degree</span><span class="p">(</span><span class="n">table_node</span><span class="p">[</span><span class="s1">&#39;limit_top&#39;</span><span class="p">])</span>
+
+    <span class="c1"># The region of the space defined by the node</span>
+    <span class="n">region</span> <span class="o">=</span> <span class="p">[[</span><span class="n">limit_left</span><span class="p">,</span> <span class="n">limit_right</span><span class="p">],</span> <span class="p">[</span><span class="n">limit_bottom</span><span class="p">,</span> <span class="n">limit_top</span><span class="p">]]</span>
+
+    <span class="c1"># The position of the point in the space</span>
+    <span class="n">point</span> <span class="o">=</span> <span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">int_to_degree</span><span class="p">(</span><span class="n">table_node</span><span class="p">[</span><span class="s1">&#39;longitude&#39;</span><span class="p">]),</span>
+             <span class="n">utils</span><span class="o">.</span><span class="n">int_to_degree</span><span class="p">(</span><span class="n">table_node</span><span class="p">[</span><span class="s1">&#39;latitude&#39;</span><span class="p">]))</span>
+
+    <span class="c1"># The dimension divided by this node</span>
+    <span class="n">dimension</span> <span class="o">=</span> <span class="n">table_node</span><span class="p">[</span><span class="s1">&#39;dimension&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Indices to left and right children</span>
+    <span class="n">left</span> <span class="o">=</span> <span class="n">table_node</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">table_node</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">right</span> <span class="o">=</span> <span class="n">table_node</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">table_node</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">point</span><span class="p">,</span> <span class="n">region</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span></div>
+
+
+<div class="viewcode-block" id="nearest_point_from"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.query.html#geocoder.geocoding.query.nearest_point_from">[docs]</a><span class="k">def</span> <span class="nf">nearest_point_from</span><span class="p">(</span><span class="n">query</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Find the nearest node in the internal kd-tree to a given query.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        query (:obj:`tuple` of float): Longitude and latitude of the position</span>
+<span class="sd">            in this order.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (:obj:`tuple`)</span>
+<span class="sd">        (node_id (int): Index of the nearest node in the internal kd-tree,</span>
+<span class="sd">         dist (float): The distance between the query and the nearest node)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">kdquery</span><span class="o">.</span><span class="n">nearest_point</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">get_properties</span><span class="p">,</span> <span class="n">distance</span><span class="o">.</span><span class="n">spherical</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, GRO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

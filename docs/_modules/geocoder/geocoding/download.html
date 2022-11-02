@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geocoder.geocoding.download &mdash; Geocoder 2.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Geocoder
+          </a>
+              <div class="version">
+                2.0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/geocoder.html">geocoder</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Geocoder</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">geocoder.geocoding.download</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for geocoder.geocoding.download</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Update the raw data used as the main source of information.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">gzip</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">urllib3</span> <span class="kn">import</span> <span class="n">disable_warnings</span>
+<span class="kn">from</span> <span class="nn">urllib3.exceptions</span> <span class="kn">import</span> <span class="n">InsecureRequestWarning</span>
+
+<span class="kn">from</span> <span class="nn">geocoder.geocoding.datapaths</span> <span class="kn">import</span> <span class="n">here</span><span class="p">,</span> <span class="n">database</span>
+<span class="kn">from</span> <span class="nn">geocoder.geocoding</span> <span class="kn">import</span> <span class="n">DEBUG</span>
+
+<span class="n">SSL_VERIFICATION</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SSL_VERIFICATION&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">SSL_VERIFICATION</span><span class="p">:</span>
+    <span class="n">disable_warnings</span><span class="p">(</span><span class="n">InsecureRequestWarning</span><span class="p">)</span>
+
+<span class="n">raw_data_folder_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">here</span><span class="p">,</span> <span class="s1">&#39;raw&#39;</span><span class="p">)</span>
+<span class="n">ban_url</span> <span class="o">=</span> <span class="s1">&#39;https://adresse.data.gouv.fr/data/ban/adresses-odbl/latest/csv/</span><span class="si">{}</span><span class="s1">&#39;</span>
+<span class="n">ban_dpt_gz_file_name</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;adresses-</span><span class="si">{}</span><span class="s1">.csv.gz&#39;</span><span class="p">,</span> <span class="s1">&#39;lieux-dits-</span><span class="si">{}</span><span class="s1">-beta.csv.gz&#39;</span><span class="p">]</span>
+<span class="n">ban_dpt_file_name</span> <span class="o">=</span> <span class="p">[</span><span class="n">filegz</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">filegz</span> <span class="ow">in</span> <span class="n">ban_dpt_gz_file_name</span><span class="p">]</span>
+<span class="n">content_folder_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">here</span><span class="p">,</span> <span class="s1">&#39;content&#39;</span><span class="p">)</span>
+<span class="n">server_content_file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">content_folder_path</span><span class="p">,</span> <span class="s1">&#39;server_content_v2.txt&#39;</span><span class="p">)</span>
+<span class="n">local_content_file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">content_folder_path</span><span class="p">,</span> <span class="s1">&#39;local_content_v2.txt&#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">DEBUG</span><span class="p">:</span>
+    <span class="n">dpt_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;01&quot;</span><span class="p">]</span>
+<span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="n">dpt_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;01&quot;</span><span class="p">,</span> <span class="s2">&quot;02&quot;</span><span class="p">,</span> <span class="s2">&quot;03&quot;</span><span class="p">,</span> <span class="s2">&quot;04&quot;</span><span class="p">,</span> <span class="s2">&quot;05&quot;</span><span class="p">,</span> <span class="s2">&quot;06&quot;</span><span class="p">,</span> <span class="s2">&quot;07&quot;</span><span class="p">,</span> <span class="s2">&quot;08&quot;</span><span class="p">,</span> <span class="s2">&quot;09&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;10&quot;</span><span class="p">,</span> <span class="s2">&quot;11&quot;</span><span class="p">,</span> <span class="s2">&quot;12&quot;</span><span class="p">,</span> <span class="s2">&quot;13&quot;</span><span class="p">,</span> <span class="s2">&quot;14&quot;</span><span class="p">,</span> <span class="s2">&quot;15&quot;</span><span class="p">,</span> <span class="s2">&quot;16&quot;</span><span class="p">,</span> <span class="s2">&quot;17&quot;</span><span class="p">,</span> <span class="s2">&quot;18&quot;</span><span class="p">,</span> <span class="s2">&quot;19&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;2A&quot;</span><span class="p">,</span> <span class="s2">&quot;2B&quot;</span><span class="p">,</span> <span class="s2">&quot;21&quot;</span><span class="p">,</span> <span class="s2">&quot;22&quot;</span><span class="p">,</span> <span class="s2">&quot;23&quot;</span><span class="p">,</span> <span class="s2">&quot;24&quot;</span><span class="p">,</span> <span class="s2">&quot;25&quot;</span><span class="p">,</span> <span class="s2">&quot;26&quot;</span><span class="p">,</span> <span class="s2">&quot;27&quot;</span><span class="p">,</span> <span class="s2">&quot;28&quot;</span><span class="p">,</span> <span class="s2">&quot;29&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;30&quot;</span><span class="p">,</span> <span class="s2">&quot;31&quot;</span><span class="p">,</span> <span class="s2">&quot;32&quot;</span><span class="p">,</span> <span class="s2">&quot;33&quot;</span><span class="p">,</span> <span class="s2">&quot;34&quot;</span><span class="p">,</span> <span class="s2">&quot;35&quot;</span><span class="p">,</span> <span class="s2">&quot;36&quot;</span><span class="p">,</span> <span class="s2">&quot;37&quot;</span><span class="p">,</span> <span class="s2">&quot;38&quot;</span><span class="p">,</span> <span class="s2">&quot;39&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;40&quot;</span><span class="p">,</span> <span class="s2">&quot;41&quot;</span><span class="p">,</span> <span class="s2">&quot;42&quot;</span><span class="p">,</span> <span class="s2">&quot;43&quot;</span><span class="p">,</span> <span class="s2">&quot;44&quot;</span><span class="p">,</span> <span class="s2">&quot;45&quot;</span><span class="p">,</span> <span class="s2">&quot;46&quot;</span><span class="p">,</span> <span class="s2">&quot;47&quot;</span><span class="p">,</span> <span class="s2">&quot;48&quot;</span><span class="p">,</span> <span class="s2">&quot;49&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;50&quot;</span><span class="p">,</span> <span class="s2">&quot;51&quot;</span><span class="p">,</span> <span class="s2">&quot;52&quot;</span><span class="p">,</span> <span class="s2">&quot;53&quot;</span><span class="p">,</span> <span class="s2">&quot;54&quot;</span><span class="p">,</span> <span class="s2">&quot;55&quot;</span><span class="p">,</span> <span class="s2">&quot;56&quot;</span><span class="p">,</span> <span class="s2">&quot;57&quot;</span><span class="p">,</span> <span class="s2">&quot;58&quot;</span><span class="p">,</span> <span class="s2">&quot;59&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;60&quot;</span><span class="p">,</span> <span class="s2">&quot;61&quot;</span><span class="p">,</span> <span class="s2">&quot;62&quot;</span><span class="p">,</span> <span class="s2">&quot;63&quot;</span><span class="p">,</span> <span class="s2">&quot;64&quot;</span><span class="p">,</span> <span class="s2">&quot;65&quot;</span><span class="p">,</span> <span class="s2">&quot;66&quot;</span><span class="p">,</span> <span class="s2">&quot;67&quot;</span><span class="p">,</span> <span class="s2">&quot;68&quot;</span><span class="p">,</span> <span class="s2">&quot;69&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;70&quot;</span><span class="p">,</span> <span class="s2">&quot;71&quot;</span><span class="p">,</span> <span class="s2">&quot;72&quot;</span><span class="p">,</span> <span class="s2">&quot;73&quot;</span><span class="p">,</span> <span class="s2">&quot;74&quot;</span><span class="p">,</span> <span class="s2">&quot;75&quot;</span><span class="p">,</span> <span class="s2">&quot;76&quot;</span><span class="p">,</span> <span class="s2">&quot;77&quot;</span><span class="p">,</span> <span class="s2">&quot;78&quot;</span><span class="p">,</span> <span class="s2">&quot;79&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;80&quot;</span><span class="p">,</span> <span class="s2">&quot;81&quot;</span><span class="p">,</span> <span class="s2">&quot;82&quot;</span><span class="p">,</span> <span class="s2">&quot;83&quot;</span><span class="p">,</span> <span class="s2">&quot;84&quot;</span><span class="p">,</span> <span class="s2">&quot;85&quot;</span><span class="p">,</span> <span class="s2">&quot;86&quot;</span><span class="p">,</span> <span class="s2">&quot;87&quot;</span><span class="p">,</span> <span class="s2">&quot;88&quot;</span><span class="p">,</span> <span class="s2">&quot;89&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;90&quot;</span><span class="p">,</span> <span class="s2">&quot;91&quot;</span><span class="p">,</span> <span class="s2">&quot;92&quot;</span><span class="p">,</span> <span class="s2">&quot;93&quot;</span><span class="p">,</span> <span class="s2">&quot;94&quot;</span><span class="p">,</span> <span class="s2">&quot;95&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;971&quot;</span><span class="p">,</span> <span class="s2">&quot;972&quot;</span><span class="p">,</span> <span class="s2">&quot;973&quot;</span><span class="p">,</span> <span class="s2">&quot;974&quot;</span><span class="p">,</span> <span class="s2">&quot;975&quot;</span><span class="p">,</span> <span class="s2">&quot;976&quot;</span><span class="p">,</span> <span class="s2">&quot;977&quot;</span><span class="p">,</span> <span class="s2">&quot;978&quot;</span><span class="p">,</span> <span class="s2">&quot;984&quot;</span><span class="p">,</span> <span class="s2">&quot;986&quot;</span><span class="p">,</span> <span class="s2">&quot;987&quot;</span><span class="p">,</span> <span class="s2">&quot;988&quot;</span><span class="p">,</span> <span class="s2">&quot;989&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="completion_bar"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.download.html#geocoder.geocoding.download.completion_bar">[docs]</a><span class="k">def</span> <span class="nf">completion_bar</span><span class="p">(</span><span class="n">msg</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fraction</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Writes a completion bar to std out</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        msg (str): message to write</span>
+<span class="sd">        fraction (float): fraction of job done</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">percent</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">fraction</span><span class="p">)</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">50</span> <span class="o">*</span> <span class="n">fraction</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r</span><span class="si">%-16s</span><span class="s2">: </span><span class="si">%3d%%</span><span class="s2">[</span><span class="si">%s%s</span><span class="s2">]</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">percent</span><span class="p">,</span> <span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="n">size</span><span class="p">,</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="p">(</span><span class="mi">50</span> <span class="o">-</span> <span class="n">size</span><span class="p">)))</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+    <span class="c1"># New line if bar is complete</span>
+    <span class="k">if</span> <span class="n">fraction</span> <span class="o">==</span> <span class="mf">1.</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="md5"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.download.html#geocoder.geocoding.download.md5">[docs]</a><span class="k">def</span> <span class="nf">md5</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates md5 hash of file</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fname: file path</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">md5_hash</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>  <span class="c1"># nosec</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4096</span><span class="p">),</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="n">md5_hash</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">md5_hash</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="update_ban_file"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.download.html#geocoder.geocoding.download.update_ban_file">[docs]</a><span class="k">def</span> <span class="nf">update_ban_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check which files are present</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        url (str): URL of BAN database</span>
+<span class="sd">        file_name (os.Path): name of the file to write</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Unable to join BAN address website (</span><span class="si">{}</span><span class="s1">).&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="n">SSL_VERIFICATION</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39; Status error code: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">status_code</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="k">raise</span> <span class="ne">ConnectionError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ConnectionError</span><span class="p">,</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">SSLError</span><span class="p">,</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">HTTPError</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ConnectionError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>  <span class="c1"># pragma: no cover</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">update_local_content_file</span><span class="p">():</span>
+    <span class="n">update_ban_file</span><span class="p">(</span><span class="n">ban_url</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="n">local_content_file_name</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">update_server_content_file</span><span class="p">():</span>
+    <span class="n">update_ban_file</span><span class="p">(</span><span class="n">ban_url</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="n">server_content_file_name</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="need_to_download"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.download.html#geocoder.geocoding.download.need_to_download">[docs]</a><span class="k">def</span> <span class="nf">need_to_download</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Defines whether new data needs to be downloaded</span>
+
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">local_content_file_name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">update_server_content_file</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">md5</span><span class="p">(</span><span class="n">server_content_file_name</span><span class="p">)</span> <span class="o">==</span> <span class="n">md5</span><span class="p">(</span><span class="n">local_content_file_name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">database</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;BAN database is already up to date. No need to download it again.&#39;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">server_content_file_name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="download_ban_dpt_file"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.download.html#geocoder.geocoding.download.download_ban_dpt_file">[docs]</a><span class="k">def</span> <span class="nf">download_ban_dpt_file</span><span class="p">(</span><span class="n">ban_dpt_file_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Downloads a single file from BAN</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ban_dpt_file_name (str): name of file to download</span>
+
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_data_folder_path</span><span class="p">,</span> <span class="n">ban_dpt_file_name</span><span class="p">),</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ban_dpt_file</span><span class="p">:</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ban_url</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ban_dpt_file_name</span><span class="p">),</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                <span class="n">verify</span><span class="o">=</span><span class="n">SSL_VERIFICATION</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">response</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Download </span><span class="si">{}</span><span class="s1"> unsuccessful: bad response&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ban_dpt_file_name</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">done</span><span class="p">,</span> <span class="n">total_size</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;content-length&#39;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">iter_content</span><span class="p">(</span><span class="mi">4096</span><span class="p">):</span>
+            <span class="n">ban_dpt_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+            <span class="n">done</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">done</span> <span class="o">!=</span> <span class="n">total_size</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Download </span><span class="si">{}</span><span class="s1"> unsuccessful: incomplete&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ban_dpt_file_name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="get_ban_file"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.download.html#geocoder.geocoding.download.get_ban_file">[docs]</a><span class="k">def</span> <span class="nf">get_ban_file</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Downloads everything if necessary</span>
+
+<span class="sd">    Returns: whether a download has been preformed</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">content_folder_path</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">content_folder_path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">need_to_download</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;A new version of BAN base is available.&#39;</span><span class="p">)</span>
+
+    <span class="n">update_local_content_file</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">raw_data_folder_path</span><span class="p">):</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">raw_data_folder_path</span><span class="p">)</span>
+
+    <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">raw_data_folder_path</span><span class="p">)</span>
+
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">dpt</span> <span class="ow">in</span> <span class="n">dpt_list</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">ban_dpt_gz_file_name_type</span> <span class="ow">in</span> <span class="n">ban_dpt_gz_file_name</span><span class="p">:</span>
+            <span class="n">downloading_ban_dpt_gz_file_name</span> <span class="o">=</span> <span class="n">ban_dpt_gz_file_name_type</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dpt</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">download_ban_dpt_file</span><span class="p">(</span><span class="n">downloading_ban_dpt_gz_file_name</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Impossible to download </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">downloading_ban_dpt_gz_file_name</span><span class="p">))</span>
+        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">completion_bar</span><span class="p">(</span><span class="s1">&#39;Downloading BAN files&#39;</span><span class="p">,</span> <span class="n">count</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">dpt_list</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="decompress"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.download.html#geocoder.geocoding.download.decompress">[docs]</a><span class="k">def</span> <span class="nf">decompress</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decompress every downloaded archive</span>
+
+<span class="sd">    Returns: whether decompression was successful</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">dpt</span> <span class="ow">in</span> <span class="n">dpt_list</span><span class="p">:</span>
+        <span class="c1"># Certifies the existence of the subdirectory.</span>
+        <span class="k">for</span> <span class="n">ban_dpt_gz_file_name_type</span> <span class="ow">in</span> <span class="n">ban_dpt_gz_file_name</span><span class="p">:</span>
+            <span class="n">dpt_gz_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_data_folder_path</span><span class="p">,</span> <span class="n">ban_dpt_gz_file_name_type</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dpt</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">dpt_gz_file_path</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Decompression unsuccessful: nonexistent file </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dpt_gz_file_path</span><span class="p">))</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># Decompress each file within gzip</span>
+                <span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">dpt_gz_file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_in</span><span class="p">:</span>
+                    <span class="n">dpt_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_data_folder_path</span><span class="p">,</span> <span class="n">ban_dpt_gz_file_name_type</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dpt</span><span class="p">)[:</span><span class="o">-</span><span class="mi">3</span><span class="p">])</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Extracting file </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ban_dpt_gz_file_name_type</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dpt</span><span class="p">)[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]))</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">dpt_file_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f_out</span><span class="p">:</span>
+                        <span class="n">shutil</span><span class="o">.</span><span class="n">copyfileobj</span><span class="p">(</span><span class="n">f_in</span><span class="p">,</span> <span class="n">f_out</span><span class="p">)</span>
+
+                <span class="n">remove_file</span><span class="p">(</span><span class="n">dpt_gz_file_path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">count</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="remove_file"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.download.html#geocoder.geocoding.download.remove_file">[docs]</a><span class="k">def</span> <span class="nf">remove_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Delete file</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file_path (os.Path): path to file to be deleted</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Deleting file </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_path</span><span class="p">))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># nosec</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="remove_downloaded_raw_ban_files"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.download.html#geocoder.geocoding.download.remove_downloaded_raw_ban_files">[docs]</a><span class="k">def</span> <span class="nf">remove_downloaded_raw_ban_files</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Removes all raw files (compressed and uncompressed)</span>
+
+<span class="sd">    Returns: whether removing was successful</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">dpt</span> <span class="ow">in</span> <span class="n">dpt_list</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">ban_dpt_gz_file_name_type</span> <span class="ow">in</span> <span class="n">ban_dpt_gz_file_name</span><span class="p">:</span>
+            <span class="n">remove_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_data_folder_path</span><span class="p">,</span> <span class="n">ban_dpt_gz_file_name_type</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dpt</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">ban_dpt_gz_file_name_type</span> <span class="ow">in</span> <span class="n">ban_dpt_file_name</span><span class="p">:</span>
+            <span class="n">remove_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">raw_data_folder_path</span><span class="p">,</span> <span class="n">ban_dpt_gz_file_name_type</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dpt</span><span class="p">)))</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">raw_data_folder_path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, GRO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

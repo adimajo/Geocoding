@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geocoder.geocoding.query &mdash; Geocoder 2.0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="geocoder.geocoding.result" href="geocoder.geocoding.result.html" />
+    <link rel="prev" title="geocoder.geocoding.normalize" href="geocoder.geocoding.normalize.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Geocoder
+          </a>
+              <div class="version">
+                2.0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="geocoder.html">geocoder</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="geocoder.api.html">geocoder.api</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="geocoder.geocoding.html">geocoder.geocoding</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="geocoder.geocoding.__main__.html">geocoder.geocoding.__main__</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geocoder.geocoding.activate_reverse.html">geocoder.geocoding.activate_reverse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geocoder.geocoding.ban_processing.html">geocoder.geocoding.ban_processing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geocoder.geocoding.datapaths.html">geocoder.geocoding.datapaths</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geocoder.geocoding.datatypes.html">geocoder.geocoding.datatypes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geocoder.geocoding.distance.html">geocoder.geocoding.distance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geocoder.geocoding.download.html">geocoder.geocoding.download</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geocoder.geocoding.index.html">geocoder.geocoding.index</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geocoder.geocoding.normalize.html">geocoder.geocoding.normalize</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">geocoder.geocoding.query</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.query.data"><code class="docutils literal notranslate"><span class="pre">data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.query.limits"><code class="docutils literal notranslate"><span class="pre">limits</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.query.complete_commune_selection"><code class="docutils literal notranslate"><span class="pre">complete_commune_selection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.query.complete_voie_selection"><code class="docutils literal notranslate"><span class="pre">complete_voie_selection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.query.get_properties"><code class="docutils literal notranslate"><span class="pre">get_properties()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.query.heuristics"><code class="docutils literal notranslate"><span class="pre">heuristics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.query.nearest_point_from"><code class="docutils literal notranslate"><span class="pre">nearest_point_from()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.query.select"><code class="docutils literal notranslate"><span class="pre">select()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.query.select_code_postal"><code class="docutils literal notranslate"><span class="pre">select_code_postal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.query.select_commune"><code class="docutils literal notranslate"><span class="pre">select_commune()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.query.select_departement"><code class="docutils literal notranslate"><span class="pre">select_departement()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.query.select_localisation"><code class="docutils literal notranslate"><span class="pre">select_localisation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.query.select_voie"><code class="docutils literal notranslate"><span class="pre">select_voie()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.query.setup"><code class="docutils literal notranslate"><span class="pre">setup()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geocoder.geocoding.result.html">geocoder.geocoding.result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geocoder.geocoding.search.html">geocoder.geocoding.search</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geocoder.geocoding.similarity.html">geocoder.geocoding.similarity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geocoder.geocoding.utils.html">geocoder.geocoding.utils</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="geocoder.wsgi.html">geocoder.wsgi</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Geocoder</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="geocoder.html">geocoder</a></li>
+          <li class="breadcrumb-item"><a href="geocoder.geocoding.html">geocoder.geocoding</a></li>
+      <li class="breadcrumb-item active">geocoder.geocoding.query</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/_autosummary/geocoder.geocoding.query.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-geocoder.geocoding.query">
+<span id="geocoder-geocoding-query"></span><h1>geocoder.geocoding.query<a class="headerlink" href="#module-geocoder.geocoding.query" title="Permalink to this heading"></a></h1>
+<p>Interface to query for data.</p>
+<p>This module defines the query methods for each table in the database.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geocoder.geocoding.query.data">
+<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.query.</span></span><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#geocoder.geocoding.query.data" title="Permalink to this definition"></a></dt>
+<dd><p>The database is formed by numpy
+arrays. Each of them is identified by a name and accessible by this
+dictionary with data[name].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> of <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geocoder.geocoding.query.limits">
+<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.query.</span></span><span class="sig-name descname"><span class="pre">limits</span></span><a class="headerlink" href="#geocoder.geocoding.query.limits" title="Permalink to this definition"></a></dt>
+<dd><p>limits[table] stores the
+limits of the numpy array called table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a> of int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.query.complete_commune_selection" title="geocoder.geocoding.query.complete_commune_selection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">complete_commune_selection</span></code></a>(commune)</p></td>
+<td><p>Select record on commune table with field normalize the most similar to commune.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#geocoder.geocoding.query.complete_voie_selection" title="geocoder.geocoding.query.complete_voie_selection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">complete_voie_selection</span></code></a>(code_postal, ...)</p></td>
+<td><p>Select record on voie table with field normalise most similar to voie.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.query.get_properties" title="geocoder.geocoding.query.get_properties"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_properties</span></code></a>(node_id)</p></td>
+<td><p>Auxiliary method to the nearest_point method from kdquery package.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#geocoder.geocoding.query.heuristics" title="geocoder.geocoding.query.heuristics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">heuristics</span></code></a>(table, column, narrow, wide, element)</p></td>
+<td><p>Search record on table with field column the most similar to element.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.query.nearest_point_from" title="geocoder.geocoding.query.nearest_point_from"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nearest_point_from</span></code></a>(query)</p></td>
+<td><p>Find the nearest node in the internal kd-tree to a given query.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#geocoder.geocoding.query.select" title="geocoder.geocoding.query.select"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select</span></code></a>(table, column, start, end, element)</p></td>
+<td><p>Search for a record on table with field column equals to element.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.query.select_code_postal" title="geocoder.geocoding.query.select_code_postal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select_code_postal</span></code></a>(code_postal)</p></td>
+<td><p>Select record on postal table with field code equals to code_postal.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#geocoder.geocoding.query.select_commune" title="geocoder.geocoding.query.select_commune"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select_commune</span></code></a>(postal_id, commune)</p></td>
+<td><p>Select record on commune table with field normalize equals to commune or sufficiently similar.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.query.select_departement" title="geocoder.geocoding.query.select_departement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select_departement</span></code></a>(dpt_code)</p></td>
+<td><p>Select record on department table with field code equals to dpt_code.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#geocoder.geocoding.query.select_localisation" title="geocoder.geocoding.query.select_localisation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select_localisation</span></code></a>(voie_id, numero)</p></td>
+<td><p>Select record on localisation table with field numero equals to numero.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.query.select_voie" title="geocoder.geocoding.query.select_voie"><code class="xref py py-obj docutils literal notranslate"><span class="pre">select_voie</span></code></a>(commune_id, voie, voie_type)</p></td>
+<td><p>Select record on voie table with field normalize equals to voie or sufficiently similar.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#geocoder.geocoding.query.setup" title="geocoder.geocoding.query.setup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup</span></code></a>()</p></td>
+<td><p>Initialize the module level variables.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Similarity</span></code>(s)</p></td>
+<td><p>Class defining the string similarity methods using uni and bigrams.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="geocoder.geocoding.query.complete_commune_selection">
+<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.query.</span></span><span class="sig-name descname"><span class="pre">complete_commune_selection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">commune</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/query.html#complete_commune_selection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.query.complete_commune_selection" title="Permalink to this definition"></a></dt>
+<dd><p>Select record on commune table with field normalize the most similar to
+commune.</p>
+<p>Search for commune in the entire commune table. This method is the
+option to find the commune once the method select_commune has failed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>commune</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The city name.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The index of the record if the search was succeeded,</dt><dd><p>None otherwise.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>commune_id (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geocoder.geocoding.query.complete_voie_selection">
+<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.query.</span></span><span class="sig-name descname"><span class="pre">complete_voie_selection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code_postal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">commune</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voie</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/query.html#complete_voie_selection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.query.complete_voie_selection" title="Permalink to this definition"></a></dt>
+<dd><p>Select record on voie table with field normalise most similar to voie.</p>
+<p>Search for voie in the entire voie table. This method is the option to find
+the voie once the method select_voie has failed. It first tries to find the
+voie belonging to the commune the most similar to commune and if this step
+fails it will try to find the voie belonging to a postal code similar to
+code_postal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>code_postal</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The postcode.</p></li>
+<li><p><strong>commune</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The city name.</p></li>
+<li><p><strong>voie</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The street name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The index of the record if the search was succeeded,</dt><dd><p>None otherwise.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>commune_id (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geocoder.geocoding.query.get_properties">
+<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.query.</span></span><span class="sig-name descname"><span class="pre">get_properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/query.html#get_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.query.get_properties" title="Permalink to this definition"></a></dt>
+<dd><p>Auxiliary method to the nearest_point method from kdquery package.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>node_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – Index of a node in the internal representation of the
+kd-tree using a numpy array.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a>)
+(point (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a> of float): Longitude and latitude of the node,</p>
+<blockquote>
+<div><blockquote>
+<div><p>region (<a href="#id1"><span class="problematic" id="id2">:ob:`list`</span></a> of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of float): The region of the Earth`s
+surface that the node belongs to,</p>
+</div></blockquote>
+<p>dimension (int): The dimension of the surface divided by this node,
+active (bool): True if the node will be consider in the computation of</p>
+<blockquote>
+<div><p>the nearest point,</p>
+</div></blockquote>
+<p>left (int): Index to left child,
+right (int): Index to right child)</p>
+</div></blockquote>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geocoder.geocoding.query.heuristics">
+<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.query.</span></span><span class="sig-name descname"><span class="pre">heuristics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">narrow</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wide</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/query.html#heuristics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.query.heuristics" title="Permalink to this definition"></a></dt>
+<dd><p>Search record on table with field column the most similar to element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>table</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The name of the numpy array.</p></li>
+<li><p><strong>column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The field to consider.</p></li>
+<li><p><strong>narrow</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a>) – <p>Tuple of length 3 with setting for the narrow
+search.
+first element (int): The bottom limit index to look in the table in</p>
+<blockquote>
+<div><p>the narrow search.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>second element (int): The top limit index to look in the table in</dt><dd><p>the narrow search.</p>
+</dd>
+<dt>third element (float): The threshold for the similarity score in</dt><dd><p>the narrow search.</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>wide</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a>) – <p>Tuple of length 3 with setting for the wide
+search (when the narrow is not successful).
+first element (int): The bottom limit index to look in the table in</p>
+<blockquote>
+<div><p>the wide search.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>second element (int): The top limit index to look in the table in</dt><dd><p>the wide search.</p>
+</dd>
+<dt>third element (float): The threshold for the similarity score in</dt><dd><p>the wide search.</p>
+</dd>
+</dl>
+</p></li>
+<li><p><strong>element</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The element to search for.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a>)
+(element_id (int): the position of the record in the table,</p>
+<blockquote>
+<div><p>found (bool): true if the search was succeeded)</p>
+</div></blockquote>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geocoder.geocoding.query.nearest_point_from">
+<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.query.</span></span><span class="sig-name descname"><span class="pre">nearest_point_from</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/query.html#nearest_point_from"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.query.nearest_point_from" title="Permalink to this definition"></a></dt>
+<dd><p>Find the nearest node in the internal kd-tree to a given query.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>query</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a> of float) – Longitude and latitude of the position
+in this order.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a>)
+(node_id (int): Index of the nearest node in the internal kd-tree,</p>
+<blockquote>
+<div><p>dist (float): The distance between the query and the nearest node)</p>
+</div></blockquote>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geocoder.geocoding.query.select">
+<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.query.</span></span><span class="sig-name descname"><span class="pre">select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/query.html#select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.query.select" title="Permalink to this definition"></a></dt>
+<dd><p>Search for a record on table with field column equals to element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>table</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The name of the numpy array.</p></li>
+<li><p><strong>column</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The field to consider.</p></li>
+<li><p><strong>start</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – The bottom limit index to look in the table.</p></li>
+<li><p><strong>end</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – The top limit index to look in the table.</p></li>
+<li><p><strong>element</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – The element to search for.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a>)
+(pos (int): the position of the record in the table,</p>
+<blockquote>
+<div><p>found (bool): true if the search was succeeded)</p>
+</div></blockquote>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geocoder.geocoding.query.select_code_postal">
+<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.query.</span></span><span class="sig-name descname"><span class="pre">select_code_postal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code_postal</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/query.html#select_code_postal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.query.select_code_postal" title="Permalink to this definition"></a></dt>
+<dd><p>Select record on postal table with field code equals to code_postal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>code_postal</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – The postal code.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The index of the record if the search was succeeded,</dt><dd><p>None otherwise.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>postal_id (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geocoder.geocoding.query.select_commune">
+<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.query.</span></span><span class="sig-name descname"><span class="pre">select_commune</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">postal_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">commune</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/query.html#select_commune"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.query.select_commune" title="Permalink to this definition"></a></dt>
+<dd><p>Select record on commune table with field normalize equals to commune or
+sufficiently similar.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>postal_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – The index of the code postal that commune belongs to.</p></li>
+<li><p><strong>commune</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The city name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The index of the record if the search was succeeded,</dt><dd><p>None otherwise.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>commune_id (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geocoder.geocoding.query.select_departement">
+<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.query.</span></span><span class="sig-name descname"><span class="pre">select_departement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dpt_code</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/query.html#select_departement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.query.select_departement" title="Permalink to this definition"></a></dt>
+<dd><p>Select record on department table with field code equals to dpt_code.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dpt_code</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The code of the department.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The index of the record if the search was succeeded,</dt><dd><p>None otherwise.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dpt_id (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geocoder.geocoding.query.select_localisation">
+<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.query.</span></span><span class="sig-name descname"><span class="pre">select_localisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">voie_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">numero</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/query.html#select_localisation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.query.select_localisation" title="Permalink to this definition"></a></dt>
+<dd><p>Select record on localisation table with field numero equals to numero.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>voie_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – The index of the street that the numero belongs to.</p></li>
+<li><p><strong>numero</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – The street number.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The index of the record if the search was</dt><dd><p>succeeded, None otherwise.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>localisation_id (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geocoder.geocoding.query.select_voie">
+<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.query.</span></span><span class="sig-name descname"><span class="pre">select_voie</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">commune_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voie</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">voie_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/query.html#select_voie"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.query.select_voie" title="Permalink to this definition"></a></dt>
+<dd><p>Select record on voie table with field normalize equals to voie or
+sufficiently similar.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>commune_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – The index of the commune that the street belongs to.</p></li>
+<li><p><strong>voie</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – The street name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The index of the record if the search was succeeded,</dt><dd><p>None otherwise.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>voie_id (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geocoder.geocoding.query.setup">
+<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.query.</span></span><span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/query.html#setup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.query.setup" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize the module level variables.</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="geocoder.geocoding.normalize.html" class="btn btn-neutral float-left" title="geocoder.geocoding.normalize" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="geocoder.geocoding.result.html" class="btn btn-neutral float-right" title="geocoder.geocoding.result" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, GRO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

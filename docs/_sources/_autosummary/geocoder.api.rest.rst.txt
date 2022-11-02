@@ -1,0 +1,47 @@
+geocoder.api.rest
+=================
+
+.. automodule:: geocoder.api.rest
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      geocode_file
+      geocode_one
+      get_jsoned_geocoded_data
+      handle_404
+      home
+      jsonify
+      redirect
+      render_template
+      url_for
+      use
+      version
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Blueprint
+      Geocoder
+      datetime
+   
+   
+
+   
+   
+   
+
+
+

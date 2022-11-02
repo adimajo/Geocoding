@@ -1,0 +1,30 @@
+geocoder.api.Geocoder
+=====================
+
+.. automodule:: geocoder.api.Geocoder
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Geocoder
+      datetime
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,29 @@
+geocoder.geocoding.similarity
+=============================
+
+.. automodule:: geocoder.geocoding.similarity
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Similarity
+   
+   
+
+   
+   
+   
+
+
+

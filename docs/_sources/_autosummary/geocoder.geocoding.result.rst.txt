@@ -1,0 +1,31 @@
+geocoder.geocoding.result
+=========================
+
+.. automodule:: geocoder.geocoding.result
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_output
+      get_table_ids
+      int_to_degree
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

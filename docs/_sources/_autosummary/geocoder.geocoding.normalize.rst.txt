@@ -1,0 +1,37 @@
+geocoder.geocoding.normalize
+============================
+
+.. automodule:: geocoder.geocoding.normalize
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      find_voie_type
+      mine
+      remove_separators
+      translate
+      unidecode
+      uniform
+      uniform_adresse
+      uniform_commune
+      uniform_words
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,31 @@
+geocoder.geocoding.search
+=========================
+
+.. automodule:: geocoder.geocoding.search
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      position
+      preprocessing
+      reverse
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

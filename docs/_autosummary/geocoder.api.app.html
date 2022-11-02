@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>geocoder &mdash; Geocoder 2.0.1 documentation</title>
+  <title>geocoder.api.app &mdash; Geocoder 2.0.1 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -20,8 +20,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="geocoder.api" href="geocoder.api.html" />
-    <link rel="prev" title="Welcome to Geocoder’s documentation!" href="../index.html" /> 
+    <link rel="next" title="geocoder.api.Geocoder" href="geocoder.api.Geocoder.html" />
+    <link rel="prev" title="geocoder.api" href="geocoder.api.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -43,8 +43,16 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">geocoder</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="geocoder.api.html">geocoder.api</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="geocoder.html">geocoder</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="geocoder.api.html">geocoder.api</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">geocoder.api.app</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#geocoder.api.app.create_app"><code class="docutils literal notranslate"><span class="pre">create_app()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="geocoder.api.Geocoder.html">geocoder.api.Geocoder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="geocoder.api.rest.html">geocoder.api.rest</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="geocoder.geocoding.html">geocoder.geocoding</a></li>
 <li class="toctree-l2"><a class="reference internal" href="geocoder.wsgi.html">geocoder.wsgi</a></li>
 </ul>
@@ -65,9 +73,11 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a></li>
-      <li class="breadcrumb-item active">geocoder</li>
+          <li class="breadcrumb-item"><a href="geocoder.html">geocoder</a></li>
+          <li class="breadcrumb-item"><a href="geocoder.api.html">geocoder.api</a></li>
+      <li class="breadcrumb-item active">geocoder.api.app</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/_autosummary/geocoder.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/_autosummary/geocoder.api.app.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -75,26 +85,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-geocoder">
-<span id="geocoder"></span><h1>geocoder<a class="headerlink" href="#module-geocoder" title="Permalink to this heading"></a></h1>
-<p>geocoder modules and API</p>
-<table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="geocoder.api.html#module-geocoder.api" title="geocoder.api"><code class="xref py py-obj docutils literal notranslate"><span class="pre">api</span></code></a></p></td>
-<td><p>geocoding API</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="geocoder.geocoding.html#module-geocoder.geocoding" title="geocoder.geocoding"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geocoding</span></code></a></p></td>
-<td><p>original geocoding module</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="geocoder.wsgi.html#module-geocoder.wsgi" title="geocoder.wsgi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wsgi</span></code></a></p></td>
-<td><p>A simple wsgi server</p></td>
-</tr>
-</tbody>
-</table>
+  <section id="module-geocoder.api.app">
+<span id="geocoder-api-app"></span><h1>geocoder.api.app<a class="headerlink" href="#module-geocoder.api.app" title="Permalink to this heading"></a></h1>
+<p>create app object</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <colgroup>
@@ -102,22 +95,48 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">find</span></code>([code_postal, commune, adresse])</p></td>
-<td><p>Find the position over the surface of the Earth of the given address.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">near</span></code>(position)</p></td>
-<td><p>Finds the nearest address in France to a given position over the Earth.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.api.app.create_app" title="geocoder.api.app.create_app"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_app</span></code></a>()</p></td>
+<td><p>Creates the model serving Flask app</p></td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Api</span></code>([app, version, title, description, ...])</p></td>
+<td><p>The main entry point for the application. You need to initialize it with a Flask Application: ::.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">CSRFProtect</span></code>([app])</p></td>
+<td><p>Enable CSRF protection globally for a Flask app.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Flask</span></code>(import_name[, static_url_path, ...])</p></td>
+<td><p>The flask object implements a WSGI application and acts as the central object.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="geocoder.api.app.create_app">
+<span class="sig-prename descclassname"><span class="pre">geocoder.api.app.</span></span><span class="sig-name descname"><span class="pre">create_app</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/api/app.html#create_app"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.api.app.create_app" title="Permalink to this definition"></a></dt>
+<dd><p>Creates the model serving Flask app</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Flask app</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../index.html" class="btn btn-neutral float-left" title="Welcome to Geocoder’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="geocoder.api.html" class="btn btn-neutral float-right" title="geocoder.api" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="geocoder.api.html" class="btn btn-neutral float-left" title="geocoder.api" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="geocoder.api.Geocoder.html" class="btn btn-neutral float-right" title="geocoder.api.Geocoder" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

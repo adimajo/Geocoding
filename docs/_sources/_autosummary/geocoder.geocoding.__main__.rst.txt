@@ -1,0 +1,35 @@
+geocoder.geocoding.\_\_main\_\_
+===============================
+
+.. automodule:: geocoder.geocoding.__main__
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      create_database
+      create_kdtree
+      decompress
+      get_ban_file
+      main
+      process_files
+      remove_downloaded_raw_ban_files
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

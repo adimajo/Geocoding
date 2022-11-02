@@ -1,0 +1,37 @@
+geocoder.api.app
+================
+
+.. automodule:: geocoder.api.app
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      create_app
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Api
+      CSRFProtect
+      Flask
+   
+   
+
+   
+   
+   
+
+
+

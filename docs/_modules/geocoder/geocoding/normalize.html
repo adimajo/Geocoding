@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geocoder.geocoding.normalize &mdash; Geocoder 2.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Geocoder
+          </a>
+              <div class="version">
+                2.0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/geocoder.html">geocoder</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Geocoder</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">geocoder.geocoding.normalize</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for geocoder.geocoding.normalize</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Normalization methods the database and the input of the search.</span>
+
+<span class="sd">Attributes:</span>
+<span class="sd">    dicitionary (dict of str): Dictionary of common abbreviations in French</span>
+<span class="sd">        search queries.</span>
+<span class="sd">    voie_type_1 (set of str): Set of common types of street with one word in</span>
+<span class="sd">        France.</span>
+<span class="sd">    voie_type_2 (set of str): Set of common types of street with two word in</span>
+<span class="sd">        France.</span>
+<span class="sd">    meanless_words (set of str): Set of words in French that does not contain</span>
+<span class="sd">        information to distinguish one address from another.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">from</span> <span class="nn">unidecode</span> <span class="kn">import</span> <span class="n">unidecode</span>
+
+<span class="n">dictionary</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;ALL&quot;</span><span class="p">:</span> <span class="s2">&quot;ALLEE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;AV&quot;</span><span class="p">:</span> <span class="s2">&quot;AVENUE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;BD&quot;</span><span class="p">:</span> <span class="s2">&quot;BOULEVARD&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CH&quot;</span><span class="p">:</span> <span class="s2">&quot;CHEMIN&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CHE&quot;</span><span class="p">:</span> <span class="s2">&quot;CHEMIN&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CRS&quot;</span><span class="p">:</span> <span class="s2">&quot;COURS&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CTRE&quot;</span><span class="p">:</span> <span class="s2">&quot;CENTRE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;DOM&quot;</span><span class="p">:</span> <span class="s2">&quot;DOMAINE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;HAM&quot;</span><span class="p">:</span> <span class="s2">&quot;HAMEAU&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;IMP&quot;</span><span class="p">:</span> <span class="s2">&quot;IMPASSE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;LD&quot;</span><span class="p">:</span> <span class="s2">&quot;LIEUDIT&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;LOT&quot;</span><span class="p">:</span> <span class="s2">&quot;LOTISSEMENT&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;LT&quot;</span><span class="p">:</span> <span class="s2">&quot;LIEUTENANT&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PAS&quot;</span><span class="p">:</span> <span class="s2">&quot;PASSAGE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PDT&quot;</span><span class="p">:</span> <span class="s2">&quot;PRESIDENT&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PL&quot;</span><span class="p">:</span> <span class="s2">&quot;PLACE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;QU&quot;</span><span class="p">:</span> <span class="s2">&quot;QUAI&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;QUA&quot;</span><span class="p">:</span> <span class="s2">&quot;QUARTIER&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RLE&quot;</span><span class="p">:</span> <span class="s2">&quot;RUELLE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RES&quot;</span><span class="p">:</span> <span class="s2">&quot;RESIDENCE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RPT&quot;</span><span class="p">:</span> <span class="s2">&quot;RONDPOINT&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RTE&quot;</span><span class="p">:</span> <span class="s2">&quot;ROUTE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SQ&quot;</span><span class="p">:</span> <span class="s2">&quot;SQUARE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ST&quot;</span><span class="p">:</span> <span class="s2">&quot;SAINT&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;STE&quot;</span><span class="p">:</span> <span class="s2">&quot;SAINTE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;TRA&quot;</span><span class="p">:</span> <span class="s2">&quot;TRAVERSE&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;VLGE&quot;</span><span class="p">:</span> <span class="s2">&quot;VILLAGE&quot;</span>
+<span class="p">}</span>
+
+<span class="n">voie_type_1</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="s2">&quot;ALLEE&quot;</span><span class="p">,</span> <span class="s2">&quot;AVENUE&quot;</span><span class="p">,</span> <span class="s2">&quot;BOULEVARD&quot;</span><span class="p">,</span> <span class="s2">&quot;CITE&quot;</span><span class="p">,</span> <span class="s2">&quot;CHEMIN&quot;</span><span class="p">,</span> <span class="s2">&quot;CENTRE&quot;</span><span class="p">,</span>
+                   <span class="s2">&quot;CLOS&quot;</span><span class="p">,</span> <span class="s2">&quot;COURS&quot;</span><span class="p">,</span> <span class="s2">&quot;DOMAINE&quot;</span><span class="p">,</span> <span class="s2">&quot;GALERIE&quot;</span><span class="p">,</span> <span class="s2">&quot;HAMEAU&quot;</span><span class="p">,</span> <span class="s2">&quot;HLM&quot;</span><span class="p">,</span>
+                   <span class="s2">&quot;IMPASSE&quot;</span><span class="p">,</span> <span class="s2">&quot;LIEUDIT&quot;</span><span class="p">,</span> <span class="s2">&quot;LOTISSEMENT&quot;</span><span class="p">,</span> <span class="s2">&quot;MAIL&quot;</span><span class="p">,</span> <span class="s2">&quot;QUAI&quot;</span><span class="p">,</span>
+                   <span class="s2">&quot;QUARTIER&quot;</span><span class="p">,</span> <span class="s2">&quot;PASSAGE&quot;</span><span class="p">,</span> <span class="s2">&quot;PLACE&quot;</span><span class="p">,</span> <span class="s2">&quot;RONDPOINT&quot;</span><span class="p">,</span>
+                   <span class="s2">&quot;ROUTE&quot;</span><span class="p">,</span> <span class="s2">&quot;RUE&quot;</span><span class="p">,</span> <span class="s2">&quot;RUELLE&quot;</span><span class="p">,</span> <span class="s2">&quot;SQUARE&quot;</span><span class="p">,</span> <span class="s2">&quot;TRAVERSE&quot;</span><span class="p">,</span> <span class="s2">&quot;VOIE&quot;</span><span class="p">,</span>
+                   <span class="s2">&quot;VILLAGE&quot;</span><span class="p">,</span> <span class="s2">&quot;ZONE&quot;</span><span class="p">])</span>
+
+<span class="n">voie_type_2</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([(</span><span class="s2">&quot;CHEF&quot;</span><span class="p">,</span> <span class="s2">&quot;LIEU&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;LIEU&quot;</span><span class="p">,</span> <span class="s2">&quot;DIT&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;GRANDE&quot;</span><span class="p">,</span> <span class="s2">&quot;RUE&quot;</span><span class="p">),</span>
+                   <span class="p">(</span><span class="s2">&quot;GRAND&quot;</span><span class="p">,</span> <span class="s2">&quot;RUE&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;GRANDE&quot;</span><span class="p">,</span> <span class="s2">&quot;PLACE&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;ROND&quot;</span><span class="p">,</span> <span class="s2">&quot;POINT&quot;</span><span class="p">)])</span>
+
+<span class="n">meanless_words</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="s2">&quot;DE&quot;</span><span class="p">,</span> <span class="s2">&quot;DES&quot;</span><span class="p">,</span> <span class="s2">&quot;DU&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;LE&quot;</span><span class="p">,</span> <span class="s2">&quot;LES&quot;</span><span class="p">,</span> <span class="s2">&quot;LA&quot;</span><span class="p">,</span> <span class="s2">&quot;L&quot;</span><span class="p">,</span>
+                      <span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;AU&quot;</span><span class="p">,</span> <span class="s2">&quot;AUX&quot;</span><span class="p">,</span> <span class="s2">&quot;ET&quot;</span><span class="p">,</span> <span class="s2">&quot;EN&quot;</span><span class="p">,</span> <span class="s2">&quot;SUR&quot;</span><span class="p">,</span> <span class="s2">&quot;SOUS&quot;</span><span class="p">,</span> <span class="s2">&quot;CEDEX&quot;</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="uniform"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.normalize.html#geocoder.geocoding.normalize.uniform">[docs]</a><span class="k">def</span> <span class="nf">uniform</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the upper-case text converted to ascii.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">unidecode</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="remove_separators"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.normalize.html#geocoder.geocoding.normalize.remove_separators">[docs]</a><span class="k">def</span> <span class="nf">remove_separators</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Remove some separator symbols that doesn&#39;t make sense in an address.</span>
+
+<span class="sd">    Remove the parenthesis and everything inside if there is, otherwise search</span>
+<span class="sd">    for a slash or a vertical slash and return the everything at the its left.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Remove parenthesis</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[(].*[)]&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="c1"># The slash</span>
+    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># The vertical slash</span>
+    <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[|]&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">text</span></div>
+
+
+<div class="viewcode-block" id="uniform_words"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.normalize.html#geocoder.geocoding.normalize.uniform_words">[docs]</a><span class="k">def</span> <span class="nf">uniform_words</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return a normalized list of words from text.</span>
+
+<span class="sd">    Split the normalized text in words and select those that aren&#39;t in the</span>
+<span class="sd">    module level variable meanless_words set.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">uniform</span><span class="p">(</span><span class="n">remove_separators</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+
+    <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">word</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">translate</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="k">if</span> <span class="n">word</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">meanless_words</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="translate"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.normalize.html#geocoder.geocoding.normalize.translate">[docs]</a><span class="k">def</span> <span class="nf">translate</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Translate the abbreviations to their long form using the module level</span>
+<span class="sd">    variable dictionary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">words</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">words</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="p">:</span>
+            <span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dictionary</span><span class="p">[</span><span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+    <span class="k">return</span> <span class="n">words</span></div>
+
+
+<div class="viewcode-block" id="uniform_adresse"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.normalize.html#geocoder.geocoding.normalize.uniform_adresse">[docs]</a><span class="k">def</span> <span class="nf">uniform_adresse</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Normalization of the address.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">uniform_words</span><span class="p">(</span><span class="n">text</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="uniform_commune"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.normalize.html#geocoder.geocoding.normalize.uniform_commune">[docs]</a><span class="k">def</span> <span class="nf">uniform_commune</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Normalization of the city name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[0-9]&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">uniform_words</span><span class="p">(</span><span class="n">text</span><span class="p">)))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="find_voie_type"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.normalize.html#geocoder.geocoding.normalize.find_voie_type">[docs]</a><span class="k">def</span> <span class="nf">find_voie_type</span><span class="p">(</span><span class="n">words</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Find the type of the street using the module level variables voie_type_1</span>
+<span class="sd">    and voie_type_2.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">words</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">voie_type_1</span> <span class="ow">or</span> <span class="p">(</span><span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">words</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span> <span class="ow">in</span> <span class="n">voie_type_2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">i</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="mine"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.normalize.html#geocoder.geocoding.normalize.mine">[docs]</a><span class="k">def</span> <span class="nf">mine</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Retrieve the useful information from the address.</span>
+
+<span class="sd">    Extract the street&#39;s name, type and number from an address description.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        text (str): The address.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple:</span>
+<span class="sd">        (numero (int); The number, voie (str): The name,</span>
+<span class="sd">         voie_type (str): The type)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">words</span> <span class="o">=</span> <span class="n">uniform_words</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+    <span class="c1"># If the text has no words, return None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">words</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+    <span class="n">voie_type_index</span> <span class="o">=</span> <span class="n">find_voie_type</span><span class="p">(</span><span class="n">words</span><span class="p">)</span>
+
+    <span class="c1"># The index of the last word to consider in the search for the number</span>
+    <span class="n">numero_limit</span> <span class="o">=</span> <span class="n">voie_type_index</span> <span class="k">if</span> <span class="n">voie_type_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> \
+        <span class="k">else</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">words</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Search for the number</span>
+    <span class="n">numero</span><span class="p">,</span> <span class="n">numero_index</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">word</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">words</span><span class="p">[:</span><span class="n">numero_limit</span><span class="p">]))):</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[0-9]+&#39;</span><span class="p">,</span> <span class="n">word</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">matches</span><span class="p">:</span>
+            <span class="n">numero</span><span class="p">,</span> <span class="n">numero_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">i</span>
+            <span class="k">break</span>
+
+    <span class="c1"># In the case that the word describing the type of the street wasn&#39;t found</span>
+    <span class="k">if</span> <span class="n">voie_type_index</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">numero_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">voie_type_index</span> <span class="o">=</span> <span class="n">numero_index</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">voie_type_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">voie_type_index</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">voie</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">words</span><span class="p">[</span><span class="n">voie_type_index</span><span class="p">:])</span>
+    <span class="n">voie_type</span> <span class="o">=</span> <span class="n">words</span><span class="p">[</span><span class="n">voie_type_index</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">numero</span><span class="p">,</span> <span class="n">voie</span><span class="p">,</span> <span class="n">voie_type</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, GRO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

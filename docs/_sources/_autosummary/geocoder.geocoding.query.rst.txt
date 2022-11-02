@@ -1,0 +1,46 @@
+geocoder.geocoding.query
+========================
+
+.. automodule:: geocoder.geocoding.query
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      complete_commune_selection
+      complete_voie_selection
+      get_properties
+      heuristics
+      nearest_point_from
+      select
+      select_code_postal
+      select_commune
+      select_departement
+      select_localisation
+      select_voie
+      setup
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Similarity
+   
+   
+
+   
+   
+   
+
+
+

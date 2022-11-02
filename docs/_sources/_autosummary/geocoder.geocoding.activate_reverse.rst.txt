@@ -1,0 +1,40 @@
+geocoder.geocoding.activate\_reverse
+====================================
+
+.. automodule:: geocoder.geocoding.activate_reverse
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      completion_bar
+      create_dat_file
+      create_kdtree
+      degree_to_int
+      node_to_tuple
+      pre_order
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Tree
+   
+   
+
+   
+   
+   
+
+
+

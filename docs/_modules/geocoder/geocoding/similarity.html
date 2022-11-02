@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geocoder.geocoding.similarity &mdash; Geocoder 2.0.1 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Geocoder
+          </a>
+              <div class="version">
+                2.0.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/geocoder.html">geocoder</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Geocoder</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">geocoder.geocoding.similarity</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for geocoder.geocoding.similarity</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;String similarity methods.</span>
+
+<span class="sd">This module defines the class used for computing the score of similarity</span>
+<span class="sd">between two strings. Even with the ideas for computing this score are well know</span>
+<span class="sd">(ngrams), the exactly method is not and that`s why an own implementation was</span>
+<span class="sd">needed.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="Similarity"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.similarity.html#geocoder.geocoding.similarity.Similarity">[docs]</a><span class="k">class</span> <span class="nc">Similarity</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Class defining the string similarity methods using uni and bigrams.</span>
+
+<span class="sd">    One object of this class will have a set of uni and bigrams of a string s</span>
+<span class="sd">    as an attribute. The string s is an argument of __init__ and this set is</span>
+<span class="sd">    used in the score method to compute the score of similarity between s and</span>
+<span class="sd">    one second string t, for example.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        slice_set (:obj:`set` of :obj:`str`): The set of uni and bigrams.</span>
+<span class="sd">        slice_set_score (int): The score of the attribute slice_set, that is,</span>
+<span class="sd">            the sum of the length of the strings in that set.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            s (str): The string to compute the 1 and 2 grams set.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slice_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_letters_list</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slice_set_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_score</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slice_set</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Similarity.k_letters_list"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.similarity.html#geocoder.geocoding.similarity.Similarity.k_letters_list">[docs]</a>    <span class="k">def</span> <span class="nf">k_letters_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List of all the strings formed by k consecutive letters of s.</span>
+
+<span class="sd">        Divide a string s into a list of strings, where each string is formed</span>
+<span class="sd">        by k consecutive letters of s.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            s (str): The string to divide.</span>
+<span class="sd">            k (int): The number of consecutive letters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (:obj:`list` of :obj:`str`): The list of strings with k consecutive</span>
+<span class="sd">                letters of s.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">:(</span><span class="n">i</span> <span class="o">+</span> <span class="n">k</span><span class="p">)]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))]</span></div>
+
+<div class="viewcode-block" id="Similarity.set_score"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.similarity.html#geocoder.geocoding.similarity.Similarity.set_score">[docs]</a>    <span class="k">def</span> <span class="nf">set_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">words_set</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sum of the lentgh of all elements from a set of strings.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words_set</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Similarity.score"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.similarity.html#geocoder.geocoding.similarity.Similarity.score">[docs]</a>    <span class="k">def</span> <span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;String similarity score.</span>
+
+<span class="sd">        The score of similarity between two strings s and t is defined as the</span>
+<span class="sd">        score of the intersection over the score of the union of two sets: the</span>
+<span class="sd">        set of unigrams and bigrams of s and t.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            t (str): The string to compare.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (float): The score of similarity between t and the string s passed</span>
+<span class="sd">                as argument in the initialization of the class.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Union of the unigram and bigram of t</span>
+        <span class="n">slice_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">k_letters_list</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">slice_set_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_score</span><span class="p">(</span><span class="n">slice_set</span><span class="p">)</span>
+
+        <span class="c1"># The intersection between the slice_set of s and t.</span>
+        <span class="n">intersection</span> <span class="o">=</span> <span class="n">slice_set</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">slice_set</span>
+        <span class="n">intersection_score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_score</span><span class="p">(</span><span class="n">intersection</span><span class="p">)</span>
+
+        <span class="n">union_score</span> <span class="o">=</span> <span class="n">slice_set_score</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">slice_set_score</span> <span class="o">-</span> \
+            <span class="n">intersection_score</span>
+
+        <span class="c1"># The union_score is zero only if both s and t are empty</span>
+        <span class="k">if</span> <span class="n">union_score</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+        <span class="k">return</span> <span class="n">intersection_score</span> <span class="o">/</span> <span class="n">union_score</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, GRO.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
