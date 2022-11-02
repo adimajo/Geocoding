@@ -62,7 +62,7 @@ def get_jsoned_geocoded_data(geocoder):
         'api_version': __version__,
         'quality': QUALITY,
     }
-    if geocoder.is_geocoded():
+    if geocoder.geocoded:
         output_json['data'] = geocoder.get_geocoded_data().to_dict('records')
     elif geocoder.has_errors():
         output_json['errors'] = geocoder.get_errors()
