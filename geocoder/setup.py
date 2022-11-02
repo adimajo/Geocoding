@@ -44,7 +44,7 @@ if __name__ == "__main__":
     setup(
         setup_requires=["wheel"],
         name='Geocoding',
-        version=find_version(here),
+        version=find_version(os.path.join(here, "geocoder")),
         description='geocoding is an address search engine for France',
         long_description=long_description(),
         url='https://github.com/adimajo/geocoding',
