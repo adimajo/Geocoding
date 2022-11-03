@@ -221,6 +221,9 @@ build geocoder:
       changes:
         - .gitlab-ci.yml
         - geocoder/**/*
+        - Pipfile
+        - setup.py
+        - .pypirc
   <<: *common_tag
   image:
     name: ${DOCKER_REGISTRY_BIS}kaniko-project/executor:debug-v1.0.0
