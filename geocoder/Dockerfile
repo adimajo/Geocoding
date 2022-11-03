@@ -8,11 +8,11 @@ RUN pip install --upgrade pip && pip install pipenv
 RUN PIPENV_PIPFILE=geocoder/Pipfile pipenv install --system --deploy
 RUN touch geocoder/requirements.txt && python3 -m pip install geocoder/.
 RUN chown nobody:nogroup /geocoder
-RUN geocoding download
-RUN geocoding decompress
-RUN geocoding index
-RUN geocoding reverse
-RUN geocoding clean
+RUN geocoder download
+RUN geocoder decompress
+RUN geocoder index
+RUN geocoder reverse
+RUN geocoder clean
 
 EXPOSE 8000
 USER nobody

@@ -43,11 +43,11 @@ with open('requirements.txt') as fp:
 if __name__ == "__main__":
     setup(
         setup_requires=["wheel"],
-        name='Geocoding',
+        name='geocoder',
         version=find_version(here),
-        description='geocoding is an address search engine for France',
+        description='geocoder is a (reverse) address to geolocation mapping tool for France',
         long_description=long_description(),
-        url='https://github.com/adimajo/geocoding',
+        url='https://github.com/adimajo/geocoder',
         authors=['Paulo Emilio de Vilhena', 'Adrien Ehrhardt'],
         author_emails=['pevilhena2@gmail.com', 'adrien.ehrhardt@credit-agricole-sa.fr'],
         license='Apache Software License',
@@ -69,7 +69,7 @@ if __name__ == "__main__":
         tests_require=["pytest", "coverage"],
         entry_points={
             'console_scripts': [
-                'geocoding = geocoding.__main__:main'
+                'geocoder = geocoding.__main__:main'
             ]
         },
     )
