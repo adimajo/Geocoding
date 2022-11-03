@@ -69,7 +69,7 @@ if __name__ == "__main__":
         tests_require=["pytest", "coverage"],
         entry_points={
             'console_scripts': [
-                'geocoder = geocoding.__main__:main'
+                'geocoder = geocoder.geocoding.__main__:main'
             ]
         },
     )
