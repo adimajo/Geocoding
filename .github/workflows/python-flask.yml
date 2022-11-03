@@ -32,8 +32,6 @@ jobs:
           export PYPI_REMOTE=https://pypi.org/simple
           echo "PYPI_REMOTE=$PYPI_REMOTE" >> $GITHUB_ENV
           sed -i 's|${PYPI_REMOTE}|'$PYPI_REMOTE'|g' geocoder/Pipfile
-          export PIPENV_PIPFILE=geocoder/Pipfile
-          echo "PIPENV_PIPFILE=$PIPENV_PIPFILE" >> $GITHUB_ENV
           pipenv install
           pipenv install --dev --skip-lock
           export APPLICATION_TAG_VERSION=`pipenv run python -c 'import geocoder; print(geocoder.__version__)'`
@@ -53,9 +51,8 @@ jobs:
       - name: Build documentation
         run: |
           cd docs
-          PIPENV_PIPFILE=../geocoder/Pipfile pipenv run make html
+          PIPENV_PIPFILE=../Pipfile pipenv run make html
           cd ..
-          cp README.rst geocoder/README.rst
       - name: Upload documentation
         run: |
           export LATEST_COMMITER_EMAIL=`git --no-pager log -1 -s --format="%ae"`
@@ -85,5 +82,4 @@ jobs:
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           push: true
-          file: geocoder/Dockerfile
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.APPLICATION_TAG_VERSION }}

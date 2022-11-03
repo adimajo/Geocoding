@@ -4,9 +4,9 @@ defines entrypoints
 """
 import sys
 
-from geocoding.activate_reverse import create_kdtree
-from geocoding.download import get_ban_file, decompress, remove_downloaded_raw_ban_files
-from geocoding.index import process_files, create_database
+from geocoder.geocoding.activate_reverse import create_kdtree
+from geocoder.geocoding.download import get_ban_file, decompress, remove_downloaded_raw_ban_files
+from geocoder.geocoding.index import process_files, create_database
 
 commands = {
     'download': [get_ban_file],

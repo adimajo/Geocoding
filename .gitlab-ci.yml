@@ -12,7 +12,7 @@ variables:
   WORKON_HOME: "$CI_PROJECT_DIR/.cache/venvs"
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   PIPENV_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pipenv"
-  PIPENV_PIPFILE: "$CI_PROJECT_DIR/geocoder/Pipfile"
+  PIPENV_PIPFILE: "$CI_PROJECT_DIR/Pipfile"
 
 .common_tag: &common_tag
   tags:
@@ -228,7 +228,6 @@ build geocoder:
   script:
     - . ./build.env
     - cp README.rst geocoder/README.rst
-    - cd geocoder
     - mkdir -p /kaniko/.docker
     - |-
        KANIKOPROXYBUILDARGS=""
@@ -255,8 +254,6 @@ build_and_deploy_gitlab_registry:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
     - - . ./build.env
-    - cd geocoder
-    - echo $CI_REGISTRY_USER
     - docker build --pull -t "${CI_REGISTRY}/${DOCKER_CI_REGISTRY_USER}/${CI_PROJECT_NAME}:${APPLICATION_TAG_VERSION}" .
     - docker push "${CI_REGISTRY}/${DOCKER_CI_REGISTRY_USER}/${CI_PROJECT_NAME}:${APPLICATION_TAG_VERSION}"
 
@@ -273,7 +270,6 @@ build_and_deploy_dockerhub:
     - docker login -u "$DOCKER_CI_REGISTRY_USER" -p "$DOCKER_CI_REGISTRY_PASSWORD" $DOCKER_CI_REGISTRY
   script:
     - - . ./build.env
-    - cd geocoder
     - docker build --pull -t "${DOCKER_CI_REGISTRY_USER}/${CI_PROJECT_NAME}:${APPLICATION_TAG_VERSION}" .
     - docker push "${DOCKER_CI_REGISTRY_USER}/${CI_PROJECT_NAME}:${APPLICATION_TAG_VERSION}"
 
