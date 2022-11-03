@@ -153,7 +153,7 @@ quality_check:
     - if [ ! -z $GITLAB_SRV_ACCOUNT ]; then keytool -import -alias mycert -file cacreditagricoleserver.crt -storetype jks -trustcacerts -noprompt -keypass keypass -keystore cacerts -storepass test@123 ; fi
     - if [ ! -z $GITLAB_SRV_ACCOUNT ]; then export SONAR_SCANNER_OPTS="-Djavax.net.ssl.trustStore=cacerts" ; fi
     # - -Dsonar.organization=${DOCKER_CI_REGISTRY_USER} ${DOCKER_CI_REGISTRY_USER}_${CI_PROJECT_NAME}
-    - sonar-scanner -Dsonar.exclusions=tests/**,docs/**,coverage.xml,setup.py -Dsonar.python.coverage.reportPaths=coverage.xml -Dsonar.qualitygate.wait=true -Dsonar.projectKey=$SONAR_KEY -Dsonar.projectVersion=$APPLICATION_TAG_VERSION
+    - sonar-scanner -Dsonar.exclusions=tests/**,docs/**,coverage.xml,setup.py,geocoder/__main__.py -Dsonar.python.coverage.reportPaths=coverage.xml -Dsonar.qualitygate.wait=true -Dsonar.projectKey=$SONAR_KEY -Dsonar.projectVersion=$APPLICATION_TAG_VERSION
   only:
    - master
 
