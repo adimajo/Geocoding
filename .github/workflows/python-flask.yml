@@ -31,7 +31,7 @@ jobs:
           pip install pipenv
           export PYPI_REMOTE=https://pypi.org/simple
           echo "PYPI_REMOTE=$PYPI_REMOTE" >> $GITHUB_ENV
-          sed -i 's|${PYPI_REMOTE}|'$PYPI_REMOTE'|g' geocoder/Pipfile
+          sed -i 's|${PYPI_REMOTE}|'$PYPI_REMOTE'|g' Pipfile
           pipenv install
           pipenv install --dev --skip-lock
           export APPLICATION_TAG_VERSION=`pipenv run python -c 'import geocoder; print(geocoder.__version__)'`

@@ -83,8 +83,8 @@ generate_tag:
   artifacts:
     paths:
       - build.env
-      - geocoder/Pipfile.lock
-      - geocoder/Pipfile
+      - Pipfile.lock
+      - Pipfile
   stage: versionning
   <<: *global_cache
   <<: *common_python
@@ -94,7 +94,7 @@ generate_tag:
   script:
     - apk --update add --no-cache git openblas-dev linux-headers build-base
     - pip install pipenv
-    - sed -i 's|${PYPI_REMOTE}|'${PYPI_REMOTE}'|g' geocoder/Pipfile
+    - sed -i 's|${PYPI_REMOTE}|'${PYPI_REMOTE}'|g' Pipfile
     - pipenv install
     - echo export APPLICATION_TAG_VERSION=`python -c 'import geocoder; print(geocoder.__version__)'` >> build.env
 
@@ -153,7 +153,7 @@ quality_check:
     - if [ ! -z $GITLAB_SRV_ACCOUNT ]; then keytool -import -alias mycert -file cacreditagricoleserver.crt -storetype jks -trustcacerts -noprompt -keypass keypass -keystore cacerts -storepass test@123 ; fi
     - if [ ! -z $GITLAB_SRV_ACCOUNT ]; then export SONAR_SCANNER_OPTS="-Djavax.net.ssl.trustStore=cacerts" ; fi
     # - -Dsonar.organization=${DOCKER_CI_REGISTRY_USER} ${DOCKER_CI_REGISTRY_USER}_${CI_PROJECT_NAME}
-    - sonar-scanner -Dsonar.exclusions=tests/**,docs/**,coverage.xml,geocoder/setup.py -Dsonar.python.coverage.reportPaths=coverage.xml -Dsonar.qualitygate.wait=true -Dsonar.projectKey=$SONAR_KEY -Dsonar.projectVersion=$APPLICATION_TAG_VERSION
+    - sonar-scanner -Dsonar.exclusions=tests/**,docs/**,coverage.xml,setup.py -Dsonar.python.coverage.reportPaths=coverage.xml -Dsonar.qualitygate.wait=true -Dsonar.projectKey=$SONAR_KEY -Dsonar.projectVersion=$APPLICATION_TAG_VERSION
   only:
    - master
 
@@ -227,7 +227,6 @@ build geocoder:
     entrypoint: [""]
   script:
     - . ./build.env
-    - cp README.rst geocoder/README.rst
     - mkdir -p /kaniko/.docker
     - |-
        KANIKOPROXYBUILDARGS=""
