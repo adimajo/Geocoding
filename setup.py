@@ -44,7 +44,7 @@ if __name__ == "__main__":
     setup(
         setup_requires=["wheel"],
         name='geocoder',
-        version=find_version(os.path.join(here), "geocoder"),
+        version=find_version(os.path.join(here, "geocoder")),
         description='geocoder is a (reverse) address to geolocation mapping tool for France',
         long_description=long_description(),
         url='https://github.com/adimajo/geocoder',
