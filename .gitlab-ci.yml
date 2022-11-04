@@ -242,6 +242,7 @@ build geocoder:
        echo "${KANIKOCFG}" >> /kaniko/.docker/config.json
     - wget -qO - ${PKI}/cacreditagricoleserver.crt >> /kaniko/ssl/certs/additional-ca-cert-bundle.crt
     - /kaniko/executor --context . --dockerfile Dockerfile $KANIKOPROXYBUILDARGS --build-arg DOCKER_REGISTRY=$DOCKER_REGISTRY --destination ${ARTI_SCRATCH_REGISTRY}.${ARTI_REGISTRY}/${ARTI_REPO}:${APPLICATION_TAG_VERSION}
+  timeout: 2h
 
 build_and_deploy_gitlab_registry:
   # cache: []
@@ -258,6 +259,7 @@ build_and_deploy_gitlab_registry:
     - - . ./build.env
     - docker build --pull -t "${CI_REGISTRY}/${DOCKER_CI_REGISTRY_USER}/${CI_PROJECT_NAME}:${APPLICATION_TAG_VERSION}" .
     - docker push "${CI_REGISTRY}/${DOCKER_CI_REGISTRY_USER}/${CI_PROJECT_NAME}:${APPLICATION_TAG_VERSION}"
+  timeout: 2h
 
 build_and_deploy_dockerhub:
   # cache: []
@@ -274,6 +276,7 @@ build_and_deploy_dockerhub:
     - - . ./build.env
     - docker build --pull -t "${DOCKER_CI_REGISTRY_USER}/${CI_PROJECT_NAME}:${APPLICATION_TAG_VERSION}" .
     - docker push "${DOCKER_CI_REGISTRY_USER}/${CI_PROJECT_NAME}:${APPLICATION_TAG_VERSION}"
+  timeout: 2h
 
 deploy_dev:
   # cache: []
