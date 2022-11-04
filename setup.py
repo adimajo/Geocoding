@@ -5,7 +5,7 @@ import codecs
 import os
 import re
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -63,7 +63,7 @@ if __name__ == "__main__":
             'Programming Language :: Python :: 3.9',
         ],
         keywords='Geocoder France',
-        packages=['geocoder'],
+        packages=find_packages(where='geocoder'),
         install_requires=install_requires,
         test_suite="pytest-runner",
         tests_require=["pytest", "coverage"],
