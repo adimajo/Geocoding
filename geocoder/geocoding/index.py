@@ -13,11 +13,12 @@ from collections import deque, defaultdict
 
 import numpy as np
 from loguru import logger
+from tqdm import tqdm
 
 from geocoder.geocoding import ban_processing
 from geocoder.geocoding.datapaths import paths, database
 from geocoder.geocoding.datatypes import dtypes
-from geocoder.geocoding.download import completion_bar, raw_data_folder_path
+from geocoder.geocoding.download import raw_data_folder_path
 
 file_names = ['departement', 'postal', 'commune', 'voie', 'localisation']
 processed_files = {}
@@ -55,12 +56,11 @@ def process_files():
     departements = list(ban_files.keys())
     departements.sort()
 
-    for i, departement in enumerate(departements):
+    for departement in tqdm(departements):
         for file in ban_files[departement]:
             logger.debug(f"Département : {departement}")
             logger.debug(f"Fichier : {file}")
             ban_processing.update(departement, file, processed_files)
-        completion_bar('Processing BAN', (i + 1) / len(departements))
 
     return True
 
@@ -79,12 +79,8 @@ def create_database():
 
     add_index_tables()
 
-    count = 0
-    for table, processed_file in processed_files.items():
-        logger.debug(list(processed_file))
+    for table, processed_file in tqdm(processed_files.items()):
         create_dat_file(list(processed_file), paths[table], dtypes[table])
-        count += 1
-        completion_bar('Storing data', count / len(processed_files))
 
     return True
 
@@ -93,14 +89,12 @@ def add_index_tables():
     index_tables = ['postal', 'commune', 'voie']
 
     # Index tables creation
-    for i, current_table in enumerate(index_tables):
+    for current_table in tqdm(index_tables):
         sort_method = (lambda j, table=current_table: processed_files[table][j])
 
         # Sort table and add it to the module level dict processed_files
         processed_files[current_table + '_index'] = \
             sorted(range(len(processed_files[current_table])), key=sort_method)
-
-        completion_bar('Indexing tables', (i + 1) / len(index_tables))
 
 
 def create_dat_file(lst, out_filename, dtype):

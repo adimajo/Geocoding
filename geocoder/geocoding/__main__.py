@@ -19,12 +19,12 @@ commands = {
 }
 
 
-def main(args=None):
+def main():
     command = sys.argv[1:]
 
     if not command or command[0] not in commands:
         print('usage: geocoding '
-              '{update, download, decompress, index, remove_non_necessary_files, reverse}')
+              '{update, download, decompress, index, clean, reverse}')
         return
 
     for function in commands[command[0]]:

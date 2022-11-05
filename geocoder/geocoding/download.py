@@ -6,15 +6,15 @@ import gzip
 import hashlib
 import os
 import shutil
-import sys
 
 import requests
 from loguru import logger
+from tqdm import tqdm
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
 
-from geocoder.geocoding.datapaths import here, database
 from geocoder.geocoding import DEBUG
+from geocoder.geocoding.datapaths import here, database
 
 SSL_VERIFICATION = os.environ.get("SSL_VERIFICATION", False)
 
@@ -42,25 +42,6 @@ else:  # pragma: no cover
                 "80", "81", "82", "83", "84", "85", "86", "87", "88", "89",
                 "90", "91", "92", "93", "94", "95",
                 "971", "972", "973", "974", "975", "976", "977", "978", "984", "986", "987", "988", "989"]
-
-
-def completion_bar(msg: str, fraction: float):
-    """
-    Writes a completion bar to std out
-
-    Args:
-        msg (str): message to write
-        fraction (float): fraction of job done
-    """
-    percent = int(100 * fraction)
-    size = int(50 * fraction)
-    sys.stdout.write("\r%-16s: %3d%%[%s%s]\n" %
-                     (msg, percent, '=' * size, ' ' * (50 - size)))
-    sys.stdout.flush()
-
-    # New line if bar is complete
-    if fraction == 1.:
-        print('')
 
 
 def md5(fname):
@@ -176,14 +157,11 @@ def get_ban_file():
 
     os.mkdir(raw_data_folder_path)
 
-    count = 0
-    for dpt in dpt_list:
+    for dpt in tqdm(dpt_list):
         for ban_dpt_gz_file_name_type in ban_dpt_gz_file_name:
             downloading_ban_dpt_gz_file_name = ban_dpt_gz_file_name_type.format(dpt)
             if not download_ban_dpt_file(downloading_ban_dpt_gz_file_name):
                 logger.error('Impossible to download {}'.format(downloading_ban_dpt_gz_file_name))
-        count += 1
-        completion_bar('Downloading BAN files', count / len(dpt_list))
 
     return True
 
