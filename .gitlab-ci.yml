@@ -9,6 +9,7 @@
 variables:
   CURRENT_TAG: $CURRENT_TAG
   DEBUG: "true"
+  LOGURU_LEVEL: "INFO"
   WORKON_HOME: "$CI_PROJECT_DIR/.cache/venvs"
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   PIPENV_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pipenv"
@@ -96,7 +97,8 @@ generate_tag:
     - pip install pipenv
     - sed -i 's|${PYPI_REMOTE}|'${PYPI_REMOTE}'|g' Pipfile
     - pipenv install
-    - echo export APPLICATION_TAG_VERSION=`python -c 'import geocoder; print(geocoder.__version__)'` >> build.env
+    - python -c 'import geocoder; print(geocoder.__version__)'  # otherwise next line doesn't error
+    - echo export APPLICATION_TAG_VERSION=`pipenv run python -c 'import geocoder; print(geocoder.__version__)'` >> build.env
 
 test:
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
@@ -233,7 +235,7 @@ build geocoder:
     - mkdir -p /kaniko/.docker
     - |-
        KANIKOPROXYBUILDARGS=""
-       KANIKOCFG="{\"auths\":{\"https://$ARTI_SCRATCH_REGISTRY.$ARTI_REGISTRY\":{\"auth\":\"$(echo -n $ARTI_USER:$ARTI_PASSWORD | base64 | tr -d '\n')\"}}}"
+       KANIKOCFG="{\"auths\":{\"https://${ARTI_SCRATCH_REGISTRY}.${ARTI_REGISTRY}\":{\"auth\":\"$(echo -n ${ARTI_USER}:${ARTI_PASSWORD} | base64 | tr -d '\n')\"}}}"
        if [ "x${http_proxy}" != "x" -o "x${https_proxy}" != "x" ]; then
          KANIKOCFG="${KANIKOCFG}, \"proxies\": { \"default\": { \"httpProxy\": \"${http_proxy}\", \"httpsProxy\": \"${https_proxy}\", \"noProxy\": \"${no_proxy}\"}}"
          KANIKOPROXYBUILDARGS="--build-arg http_proxy=${http_proxy} --build-arg https_proxy=${https_proxy} --build-arg no_proxy=${no_proxy}"
@@ -241,7 +243,7 @@ build geocoder:
        KANIKOCFG="${KANIKOCFG} }"
        echo "${KANIKOCFG}" >> /kaniko/.docker/config.json
     - wget -qO - ${PKI}/cacreditagricoleserver.crt >> /kaniko/ssl/certs/additional-ca-cert-bundle.crt
-    - /kaniko/executor --context . --dockerfile Dockerfile $KANIKOPROXYBUILDARGS --build-arg DOCKER_REGISTRY=$DOCKER_REGISTRY --destination ${ARTI_SCRATCH_REGISTRY}.${ARTI_REGISTRY}/${ARTI_REPO}:${APPLICATION_TAG_VERSION}
+    - /kaniko/executor --context . --dockerfile Dockerfile ${KANIKOPROXYBUILDARGS} --build-arg DOCKER_REGISTRY=${DOCKER_REGISTRY} --destination ${ARTI_SCRATCH_REGISTRY}.${ARTI_REGISTRY}/${ARTI_REPO}:${APPLICATION_TAG_VERSION}
   timeout: 2h
 
 build_and_deploy_gitlab_registry:
@@ -278,7 +280,7 @@ build_and_deploy_dockerhub:
     - docker push "${DOCKER_CI_REGISTRY_USER}/${CI_PROJECT_NAME}:${APPLICATION_TAG_VERSION}"
   timeout: 2h
 
-deploy_dev:
+deploy_dev_api:
   # cache: []
   stage: deploy_dev
   rules:
@@ -301,8 +303,6 @@ deploy_dev:
         fi
 
 deploy_dev_package:
-  image:
-    name: ${DOCKER_REGISTRY}python:3.8-slim
   artifacts:
     paths:
       - dist/
@@ -326,6 +326,7 @@ deploy_dev_package:
 
 promote_staging_api:
   # cache: []
+  needs: ["deploy_dev_api"]
   stage: promote_staging
   rules:
     - if: $CI_COMMIT_REF_NAME == "master" && $GITLAB_SRV_ACCOUNT
@@ -342,6 +343,7 @@ promote_staging_api:
     - 'curl -S -k -u ${CREDS} -XPOST https://$ARTI_REGISTRY/api/docker/$SOURCE_REPO/v2/promote -H "Content-Type: application/json" -d"{\"targetRepo\":\"${TARGET_REPO}\",\"dockerRepository\":\"${ARTI_REPO}\",\"tag\":\"${APPLICATION_TAG_VERSION}\",\"copy\":true}"'
 
 promote_staging_package:
+  needs: ["deploy_dev_package"]
   stage: promote_staging
   when: manual
   <<: *ci_tools
@@ -362,6 +364,7 @@ promote_staging_package:
 
 promote_stable_package:
   stage: promote_stable
+  needs: ["promote_staging_package"]
   when: manual
   <<: *ci_tools
   <<: *common_tag
@@ -426,8 +429,9 @@ promote_stable_package:
 #  only:
 #   - master
 
-promote_stable:
+promote_stable_api:
   # cache: []
+  needs: ["promote_staging_api"]
   stage: promote_stable
   rules:
     - if: $CI_COMMIT_REF_NAME == "master" && $GITLAB_SRV_ACCOUNT
