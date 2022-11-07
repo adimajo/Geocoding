@@ -97,7 +97,7 @@ generate_tag:
     - pip install pipenv
     - sed -i 's|${PYPI_REMOTE}|'${PYPI_REMOTE}'|g' Pipfile
     - pipenv install
-    - python -c 'import geocoder; print(geocoder.__version__)'  # otherwise next line doesn't error
+    - pipenv run python -c 'import geocoder; print(geocoder.__version__)'  # otherwise next line doesn't error
     - echo export APPLICATION_TAG_VERSION=`pipenv run python -c 'import geocoder; print(geocoder.__version__)'` >> build.env
 
 test:
