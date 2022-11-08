@@ -64,6 +64,9 @@ if __name__ == "__main__":
         ],
         keywords='Geocoder France',
         packages=find_packages(),
+        package_data={
+            'geocoder': ['**/*.css', '**/*.ico', '**/*.html']
+        },
         install_requires=install_requires,
         test_suite="pytest-runner",
         tests_require=["pytest", "coverage"],

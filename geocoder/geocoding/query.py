@@ -15,6 +15,7 @@ import os
 
 import kdquery
 import numpy as np
+from loguru import logger
 
 from geocoder.geocoding import distance, utils
 from geocoder.geocoding.datapaths import paths
@@ -33,6 +34,8 @@ def setup():
             if os.path.isfile(paths[table]):
                 data[table] = np.memmap(paths[table], dtypes[table])
                 limits[table] = (0, len(data[table]))
+            else:
+                logger.info(f"Missing database {table}; geocoder will likely error")
 
 
 def select(table, column, start, end, element):
@@ -140,7 +143,8 @@ def select_code_postal(code_postal):
 
     # Binary search with index list, because the postal table is not
     # entirely sorted.
-    i, postal_id = utils.search(code_postal, data['postal_index'],
+    i, postal_id = utils.search(code_postal,
+                                data['postal_index'],
                                 data['postal']['code'], sorted=False)
     start, end = limits['postal_index']
     found = (i < end and data['postal']['code'][postal_id] == code_postal)
