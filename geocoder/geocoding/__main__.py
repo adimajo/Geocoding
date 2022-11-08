@@ -23,7 +23,7 @@ commands = {
 }
 
 parser = ArgumentParser(description='Runserver parser')
-parser.add_argument('--host', type=str, default='0.0.0.0',
+parser.add_argument('--host', type=str, default='0.0.0.0',  # nosec
                     help='IP to bind')
 parser.add_argument('--port', type=str, default='8000',
                     help='port to bind')
