@@ -10,7 +10,6 @@ from geocoder.api.app import app
 if platform.uname().system.lower() == 'linux':
     import gunicorn.app.base
 
-
     class StandaloneApplication(gunicorn.app.base.BaseApplication, ABC):
 
         def __init__(self, app, options=None):
