@@ -11,7 +11,6 @@ sphinx-rtd-theme = "*"
 flake8 = "*"
 numpydoc = "*"
 bandit = "*"
-pipenv_to_requirements = "*"
 
 [packages]
 werkzeug = "==2.1.2"

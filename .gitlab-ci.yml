@@ -313,7 +313,7 @@ deploy_dev_package:
   script:
     - apk --update add --no-cache wget
     - pip install pipenv
-    - pipenv run pipenv_to_requirements
+    - pipenv requirements
     - pipenv run python3 setup.py sdist bdist_wheel
     - python3 setup.py sdist bdist_wheel
     - wget -qO - ${PKI}cacreditagricoleserver.crt >> cacreditagricoleserver.crt
@@ -327,7 +327,7 @@ deploy_dev_package:
 
 promote_staging_api:
   # cache: []
-  needs: ["deploy_dev_api"]
+  needs: ["deploy_dev_api", "generate_tag"]
   stage: promote_staging
   rules:
     - if: $CI_COMMIT_REF_NAME == "master" && $GITLAB_SRV_ACCOUNT
@@ -344,7 +344,7 @@ promote_staging_api:
     - 'curl -S -k -u ${CREDS} -XPOST https://$ARTI_REGISTRY/api/docker/$SOURCE_REPO/v2/promote -H "Content-Type: application/json" -d"{\"targetRepo\":\"${TARGET_REPO}\",\"dockerRepository\":\"${ARTI_REPO}\",\"tag\":\"${APPLICATION_TAG_VERSION}\",\"copy\":true}"'
 
 promote_staging_package:
-  needs: ["deploy_dev_package"]
+  needs: ["deploy_dev_package", "generate_tag"]
   stage: promote_staging
   when: manual
   <<: *ci_tools
@@ -353,7 +353,7 @@ promote_staging_package:
     CREDS: "${ARTI_USER}:${ARTI_PASSWORD}"
     SOURCE_REPO: "${ARTI_PYPI_SCRATCH_REGISTRY}"
     TARGET_REPO: "${ARTI_PYPI_STAGING_REGISTRY}"
-    IMAGE: casa-rse-nard-api
+    IMAGE: geocoder
   script:
     - . ./build.env
     - 'echo SOURCE REPOSITORY : ${SOURCE_REPO}'
@@ -365,14 +365,14 @@ promote_staging_package:
 
 promote_stable_package:
   stage: promote_stable
-  needs: ["promote_staging_package"]
+  needs: ["promote_staging_package", "generate_tag"]
   when: manual
   <<: *ci_tools
   <<: *common_tag
   variables:
     SOURCE_REPO: "${ARTI_PYPI_STAGING_REGISTRY}"
     TARGET_REPO: "${ARTI_PYPI_STABLE_REGISTRY}"
-    IMAGE: casa-rse-nard-api
+    IMAGE: geocoder
   script:
     - . ./build.env
     - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
@@ -432,7 +432,7 @@ promote_stable_package:
 
 promote_stable_api:
   # cache: []
-  needs: ["promote_staging_api"]
+  needs: ["promote_staging_api", "generate_tag"]
   stage: promote_stable
   rules:
     - if: $CI_COMMIT_REF_NAME == "master" && $GITLAB_SRV_ACCOUNT
