@@ -13,17 +13,10 @@ geocoder.api.rest
 
    .. autosummary::
    
-      geocode_file
-      geocode_one
       get_jsoned_geocoded_data
-      handle_404
-      home
       jsonify
-      redirect
+      make_response
       render_template
-      url_for
-      use
-      version
    
    
 
@@ -33,8 +26,14 @@ geocoder.api.rest
 
    .. autosummary::
    
-      Blueprint
+      GeocodeFile
+      GeocodeOne
       Geocoder
+      Home
+      Namespace
+      Resource
+      Use
+      Version
       datetime
    
    
