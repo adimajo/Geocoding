@@ -13,7 +13,6 @@ geocoder.geocoding.activate\_reverse
 
    .. autosummary::
    
-      completion_bar
       create_dat_file
       create_kdtree
       degree_to_int
@@ -29,6 +28,7 @@ geocoder.geocoding.activate\_reverse
    .. autosummary::
    
       Tree
+      tqdm
    
    
 

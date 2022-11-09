@@ -79,10 +79,10 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">kdquery</span> <span class="kn">import</span> <span class="n">Tree</span>
 <span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="kn">from</span> <span class="nn">geocoder.geocoding.datapaths</span> <span class="kn">import</span> <span class="n">paths</span>
 <span class="kn">from</span> <span class="nn">geocoder.geocoding.datatypes</span> <span class="kn">import</span> <span class="n">dtypes</span>
-<span class="kn">from</span> <span class="nn">geocoder.geocoding.download</span> <span class="kn">import</span> <span class="n">completion_bar</span>
 <span class="kn">from</span> <span class="nn">geocoder.geocoding.index</span> <span class="kn">import</span> <span class="n">create_dat_file</span>
 <span class="kn">from</span> <span class="nn">geocoder.geocoding.utils</span> <span class="kn">import</span> <span class="n">pre_order</span><span class="p">,</span> <span class="n">degree_to_int</span>
 
@@ -111,13 +111,10 @@
     <span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">table</span><span class="p">),</span> <span class="n">limits</span><span class="p">)</span>
 
     <span class="c1"># Load tree with all the addresses on France</span>
-    <span class="k">for</span> <span class="n">count</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pre_order</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">table</span><span class="p">))):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">pre_order</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">table</span><span class="p">))):</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
         <span class="n">tree</span><span class="o">.</span><span class="n">insert</span><span class="p">((</span><span class="n">table</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="s1">&#39;longitude&#39;</span><span class="p">],</span> <span class="n">table</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="s1">&#39;latitude&#39;</span><span class="p">]),</span>
                     <span class="n">data</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">count</span> <span class="o">%</span> <span class="mi">300000</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">count</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">table</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">completion_bar</span><span class="p">(</span><span class="s1">&#39;Loading kd-tree&#39;</span><span class="p">,</span> <span class="p">((</span><span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">table</span><span class="p">)))</span>
 
     <span class="n">tuple_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">node_to_tuple</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">tree</span><span class="p">]</span>
 

@@ -45,7 +45,14 @@
 <li class="toctree-l1 current"><a class="reference internal" href="geocoder.html">geocoder</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="geocoder.api.html">geocoder.api</a></li>
 <li class="toctree-l2"><a class="reference internal" href="geocoder.geocoding.html">geocoder.geocoding</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">geocoder.wsgi</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">geocoder.wsgi</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#geocoder.wsgi.StandaloneApplication"><code class="docutils literal notranslate"><span class="pre">StandaloneApplication</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#geocoder.wsgi.StandaloneApplication.do_load_config"><code class="docutils literal notranslate"><span class="pre">StandaloneApplication.do_load_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geocoder.wsgi.StandaloneApplication.load_config"><code class="docutils literal notranslate"><span class="pre">StandaloneApplication.load_config()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -78,6 +85,95 @@
   <section id="module-geocoder.wsgi">
 <span id="geocoder-wsgi"></span><h1>geocoder.wsgi<a class="headerlink" href="#module-geocoder.wsgi" title="Permalink to this heading"></a></h1>
 <p>A simple wsgi server</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">runserver</span></code>(options)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ABC</span></code>()</p></td>
+<td><p>Helper class that provides a standard way to create an ABC using inheritance.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#geocoder.wsgi.StandaloneApplication" title="geocoder.wsgi.StandaloneApplication"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StandaloneApplication</span></code></a>(app[, options])</p></td>
+<td><p><p class="rubric">Methods</p>
+</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="geocoder.wsgi.StandaloneApplication">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geocoder.wsgi.</span></span><span class="sig-name descname"><span class="pre">StandaloneApplication</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/wsgi.html#StandaloneApplication"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.wsgi.StandaloneApplication" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseApplication</span></code>, <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.wsgi.StandaloneApplication.do_load_config" title="geocoder.wsgi.StandaloneApplication.do_load_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">do_load_config</span></code></a>()</p></td>
+<td><p>Loads the configuration</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#geocoder.wsgi.StandaloneApplication.load_config" title="geocoder.wsgi.StandaloneApplication.load_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_config</span></code></a>()</p></td>
+<td><p>This method is used to load the configuration from one or several input(s).</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 70%" />
+<col style="width: 30%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>init</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>load</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>load_default_config</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>reload</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>run</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>wsgi</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="geocoder.wsgi.StandaloneApplication.do_load_config">
+<span class="sig-name descname"><span class="pre">do_load_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geocoder.wsgi.StandaloneApplication.do_load_config" title="Permalink to this definition"></a></dt>
+<dd><p>Loads the configuration</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geocoder.wsgi.StandaloneApplication.load_config">
+<span class="sig-name descname"><span class="pre">load_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/wsgi.html#StandaloneApplication.load_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.wsgi.StandaloneApplication.load_config" title="Permalink to this definition"></a></dt>
+<dd><p>This method is used to load the configuration from one or several input(s).
+Custom Command line, configuration file.
+You have to override this method in your class.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 

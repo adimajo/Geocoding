@@ -53,7 +53,6 @@
 <li class="toctree-l3"><a class="reference internal" href="geocoder.geocoding.datatypes.html">geocoder.geocoding.datatypes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="geocoder.geocoding.distance.html">geocoder.geocoding.distance</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">geocoder.geocoding.download</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.download.completion_bar"><code class="docutils literal notranslate"><span class="pre">completion_bar()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.download.decompress"><code class="docutils literal notranslate"><span class="pre">decompress()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.download.download_ban_dpt_file"><code class="docutils literal notranslate"><span class="pre">download_ban_dpt_file()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.download.get_ban_file"><code class="docutils literal notranslate"><span class="pre">get_ban_file()</span></code></a></li>
@@ -114,41 +113,50 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.download.completion_bar" title="geocoder.geocoding.download.completion_bar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">completion_bar</span></code></a>(msg, fraction)</p></td>
-<td><p>Writes a completion bar to std out</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#geocoder.geocoding.download.decompress" title="geocoder.geocoding.download.decompress"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decompress</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.download.decompress" title="geocoder.geocoding.download.decompress"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decompress</span></code></a>()</p></td>
 <td><p>Decompress every downloaded archive</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">disable_warnings</span></code>([category])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">disable_warnings</span></code>([category])</p></td>
 <td><p>Helper for quickly disabling all urllib3 warnings.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#geocoder.geocoding.download.download_ban_dpt_file" title="geocoder.geocoding.download.download_ban_dpt_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_ban_dpt_file</span></code></a>(ban_dpt_file_name)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.download.download_ban_dpt_file" title="geocoder.geocoding.download.download_ban_dpt_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_ban_dpt_file</span></code></a>(ban_dpt_file_name)</p></td>
 <td><p>Downloads a single file from BAN</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.download.get_ban_file" title="geocoder.geocoding.download.get_ban_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_ban_file</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#geocoder.geocoding.download.get_ban_file" title="geocoder.geocoding.download.get_ban_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_ban_file</span></code></a>()</p></td>
 <td><p>Downloads everything if necessary</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#geocoder.geocoding.download.md5" title="geocoder.geocoding.download.md5"><code class="xref py py-obj docutils literal notranslate"><span class="pre">md5</span></code></a>(fname)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.download.md5" title="geocoder.geocoding.download.md5"><code class="xref py py-obj docutils literal notranslate"><span class="pre">md5</span></code></a>(fname)</p></td>
 <td><p>Calculates md5 hash of file</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.download.need_to_download" title="geocoder.geocoding.download.need_to_download"><code class="xref py py-obj docutils literal notranslate"><span class="pre">need_to_download</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#geocoder.geocoding.download.need_to_download" title="geocoder.geocoding.download.need_to_download"><code class="xref py py-obj docutils literal notranslate"><span class="pre">need_to_download</span></code></a>()</p></td>
 <td><p>Defines whether new data needs to be downloaded</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#geocoder.geocoding.download.remove_downloaded_raw_ban_files" title="geocoder.geocoding.download.remove_downloaded_raw_ban_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_downloaded_raw_ban_files</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.download.remove_downloaded_raw_ban_files" title="geocoder.geocoding.download.remove_downloaded_raw_ban_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_downloaded_raw_ban_files</span></code></a>()</p></td>
 <td><p>Removes all raw files (compressed and uncompressed)</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.download.remove_file" title="geocoder.geocoding.download.remove_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_file</span></code></a>(file_path)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#geocoder.geocoding.download.remove_file" title="geocoder.geocoding.download.remove_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_file</span></code></a>(file_path)</p></td>
 <td><p>Delete file</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#geocoder.geocoding.download.update_ban_file" title="geocoder.geocoding.download.update_ban_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_ban_file</span></code></a>(url, file_name)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.download.update_ban_file" title="geocoder.geocoding.download.update_ban_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_ban_file</span></code></a>(url, file_name)</p></td>
 <td><p>Check which files are present</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_local_content_file</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_local_content_file</span></code>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_server_content_file</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_server_content_file</span></code>()</p></td>
 <td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table class="autosummary longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tqdm</span></code>(*_, **__)</p></td>
+<td><p>Decorate an iterable object, returning an iterator which acts exactly like the original iterable, but prints a dynamically updating progressbar every time a value is requested.</p></td>
 </tr>
 </tbody>
 </table>
@@ -164,20 +172,6 @@
 </tr>
 </tbody>
 </table>
-<dl class="py function">
-<dt class="sig sig-object py" id="geocoder.geocoding.download.completion_bar">
-<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.download.</span></span><span class="sig-name descname"><span class="pre">completion_bar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/download.html#completion_bar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.download.completion_bar" title="Permalink to this definition"></a></dt>
-<dd><p>Writes a completion bar to std out</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>msg</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – message to write</p></li>
-<li><p><strong>fraction</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a>) – fraction of job done</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="geocoder.geocoding.download.decompress">
 <span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.download.</span></span><span class="sig-name descname"><span class="pre">decompress</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/download.html#decompress"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.download.decompress" title="Permalink to this definition"></a></dt>

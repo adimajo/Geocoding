@@ -85,6 +85,7 @@
 
 <span class="kn">import</span> <span class="nn">kdquery</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
 
 <span class="kn">from</span> <span class="nn">geocoder.geocoding</span> <span class="kn">import</span> <span class="n">distance</span><span class="p">,</span> <span class="n">utils</span>
 <span class="kn">from</span> <span class="nn">geocoder.geocoding.datapaths</span> <span class="kn">import</span> <span class="n">paths</span>
@@ -102,7 +103,9 @@
         <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">paths</span><span class="p">[</span><span class="n">table</span><span class="p">]):</span>
                 <span class="n">data</span><span class="p">[</span><span class="n">table</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">memmap</span><span class="p">(</span><span class="n">paths</span><span class="p">[</span><span class="n">table</span><span class="p">],</span> <span class="n">dtypes</span><span class="p">[</span><span class="n">table</span><span class="p">])</span>
-                <span class="n">limits</span><span class="p">[</span><span class="n">table</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">table</span><span class="p">]))</span></div>
+                <span class="n">limits</span><span class="p">[</span><span class="n">table</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">table</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing database </span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s2">; geocoder will likely error&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="select"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.query.html#geocoder.geocoding.query.select">[docs]</a><span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
@@ -210,7 +213,8 @@
 
     <span class="c1"># Binary search with index list, because the postal table is not</span>
     <span class="c1"># entirely sorted.</span>
-    <span class="n">i</span><span class="p">,</span> <span class="n">postal_id</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">code_postal</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;postal_index&#39;</span><span class="p">],</span>
+    <span class="n">i</span><span class="p">,</span> <span class="n">postal_id</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">code_postal</span><span class="p">,</span>
+                                <span class="n">data</span><span class="p">[</span><span class="s1">&#39;postal_index&#39;</span><span class="p">],</span>
                                 <span class="n">data</span><span class="p">[</span><span class="s1">&#39;postal&#39;</span><span class="p">][</span><span class="s1">&#39;code&#39;</span><span class="p">],</span> <span class="nb">sorted</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">limits</span><span class="p">[</span><span class="s1">&#39;postal_index&#39;</span><span class="p">]</span>
     <span class="n">found</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">end</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;postal&#39;</span><span class="p">][</span><span class="s1">&#39;code&#39;</span><span class="p">][</span><span class="n">postal_id</span><span class="p">]</span> <span class="o">==</span> <span class="n">code_postal</span><span class="p">)</span>

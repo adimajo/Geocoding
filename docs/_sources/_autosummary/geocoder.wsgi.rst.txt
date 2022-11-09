@@ -9,9 +9,22 @@ geocoder.wsgi
 
    
    
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      runserver
+   
    
 
    
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      ABC
+      StandaloneApplication
    
    
 

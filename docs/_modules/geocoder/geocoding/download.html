@@ -76,15 +76,15 @@
 <span class="kn">import</span> <span class="nn">hashlib</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
-<span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">from</span> <span class="nn">loguru</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 <span class="kn">from</span> <span class="nn">urllib3</span> <span class="kn">import</span> <span class="n">disable_warnings</span>
 <span class="kn">from</span> <span class="nn">urllib3.exceptions</span> <span class="kn">import</span> <span class="n">InsecureRequestWarning</span>
 
-<span class="kn">from</span> <span class="nn">geocoder.geocoding.datapaths</span> <span class="kn">import</span> <span class="n">here</span><span class="p">,</span> <span class="n">database</span>
 <span class="kn">from</span> <span class="nn">geocoder.geocoding</span> <span class="kn">import</span> <span class="n">DEBUG</span>
+<span class="kn">from</span> <span class="nn">geocoder.geocoding.datapaths</span> <span class="kn">import</span> <span class="n">here</span><span class="p">,</span> <span class="n">database</span>
 
 <span class="n">SSL_VERIFICATION</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;SSL_VERIFICATION&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
@@ -112,25 +112,6 @@
                 <span class="s2">&quot;80&quot;</span><span class="p">,</span> <span class="s2">&quot;81&quot;</span><span class="p">,</span> <span class="s2">&quot;82&quot;</span><span class="p">,</span> <span class="s2">&quot;83&quot;</span><span class="p">,</span> <span class="s2">&quot;84&quot;</span><span class="p">,</span> <span class="s2">&quot;85&quot;</span><span class="p">,</span> <span class="s2">&quot;86&quot;</span><span class="p">,</span> <span class="s2">&quot;87&quot;</span><span class="p">,</span> <span class="s2">&quot;88&quot;</span><span class="p">,</span> <span class="s2">&quot;89&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;90&quot;</span><span class="p">,</span> <span class="s2">&quot;91&quot;</span><span class="p">,</span> <span class="s2">&quot;92&quot;</span><span class="p">,</span> <span class="s2">&quot;93&quot;</span><span class="p">,</span> <span class="s2">&quot;94&quot;</span><span class="p">,</span> <span class="s2">&quot;95&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;971&quot;</span><span class="p">,</span> <span class="s2">&quot;972&quot;</span><span class="p">,</span> <span class="s2">&quot;973&quot;</span><span class="p">,</span> <span class="s2">&quot;974&quot;</span><span class="p">,</span> <span class="s2">&quot;975&quot;</span><span class="p">,</span> <span class="s2">&quot;976&quot;</span><span class="p">,</span> <span class="s2">&quot;977&quot;</span><span class="p">,</span> <span class="s2">&quot;978&quot;</span><span class="p">,</span> <span class="s2">&quot;984&quot;</span><span class="p">,</span> <span class="s2">&quot;986&quot;</span><span class="p">,</span> <span class="s2">&quot;987&quot;</span><span class="p">,</span> <span class="s2">&quot;988&quot;</span><span class="p">,</span> <span class="s2">&quot;989&quot;</span><span class="p">]</span>
-
-
-<div class="viewcode-block" id="completion_bar"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.download.html#geocoder.geocoding.download.completion_bar">[docs]</a><span class="k">def</span> <span class="nf">completion_bar</span><span class="p">(</span><span class="n">msg</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fraction</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Writes a completion bar to std out</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        msg (str): message to write</span>
-<span class="sd">        fraction (float): fraction of job done</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">percent</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">fraction</span><span class="p">)</span>
-    <span class="n">size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">50</span> <span class="o">*</span> <span class="n">fraction</span><span class="p">)</span>
-    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r</span><span class="si">%-16s</span><span class="s2">: </span><span class="si">%3d%%</span><span class="s2">[</span><span class="si">%s%s</span><span class="s2">]</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span>
-                     <span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">percent</span><span class="p">,</span> <span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="n">size</span><span class="p">,</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="p">(</span><span class="mi">50</span> <span class="o">-</span> <span class="n">size</span><span class="p">)))</span>
-    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
-
-    <span class="c1"># New line if bar is complete</span>
-    <span class="k">if</span> <span class="n">fraction</span> <span class="o">==</span> <span class="mf">1.</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="md5"><a class="viewcode-back" href="../../../_autosummary/geocoder.geocoding.download.html#geocoder.geocoding.download.md5">[docs]</a><span class="k">def</span> <span class="nf">md5</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
@@ -246,14 +227,11 @@
 
     <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">raw_data_folder_path</span><span class="p">)</span>
 
-    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">dpt</span> <span class="ow">in</span> <span class="n">dpt_list</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">dpt</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">dpt_list</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">ban_dpt_gz_file_name_type</span> <span class="ow">in</span> <span class="n">ban_dpt_gz_file_name</span><span class="p">:</span>
             <span class="n">downloading_ban_dpt_gz_file_name</span> <span class="o">=</span> <span class="n">ban_dpt_gz_file_name_type</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dpt</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">download_ban_dpt_file</span><span class="p">(</span><span class="n">downloading_ban_dpt_gz_file_name</span><span class="p">):</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Impossible to download </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">downloading_ban_dpt_gz_file_name</span><span class="p">))</span>
-        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="n">completion_bar</span><span class="p">(</span><span class="s1">&#39;Downloading BAN files&#39;</span><span class="p">,</span> <span class="n">count</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">dpt_list</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="kc">True</span></div>
 

@@ -13,7 +13,6 @@ geocoder.geocoding.download
 
    .. autosummary::
    
-      completion_bar
       decompress
       disable_warnings
       download_ban_dpt_file
@@ -29,6 +28,12 @@ geocoder.geocoding.download
    
 
    
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      tqdm
    
    
 
