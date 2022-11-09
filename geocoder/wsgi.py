@@ -5,7 +5,7 @@ import os
 import platform
 from abc import ABC
 
-from geocoder.api.app import app
+from geocoder.api.provider import app
 
 if platform.uname().system.lower() == 'linux':
     import gunicorn.app.base

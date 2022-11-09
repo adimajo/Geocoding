@@ -11,16 +11,13 @@ from datetime import datetime
 
 import pandas as pd
 from Geocoding_utils import ADDRESS, POSTAL_CODE, CITY
-from flask import Blueprint
 from flask import jsonify
-from flask import redirect
-from flask import render_template
+from flask import render_template, make_response
 from flask import request
-from flask import url_for
+from flask_restx import Namespace, Resource
 
-from geocoder.api.Geocoder import Geocoder
 from geocoder import __version__
-
+from geocoder.api.Geocoder import Geocoder
 
 QUALITY = {'1': 'Successful',
            '2': 'Precise number was not found',
@@ -29,30 +26,58 @@ QUALITY = {'1': 'Successful',
            '5': 'City was not found',
            '6': 'Nothing was found'}
 
-api_rest = Blueprint(
-    "rest",
-    __name__,
-)
+api_rest = Namespace('')
 
 
-@api_rest.route("/")
-def home():
-    return render_template("index.html", version=__version__)
+@api_rest.route("/home")
+class Home(Resource):
+    """
+    Render homepage
+
+    Methods
+    -------
+    get:
+        get method for Home resource: outputs the homepage
+
+    """
+    def get(self):
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template("index.html"), 200, headers)
 
 
 @api_rest.route("/version")
-def version():
-    return jsonify(version=__version__)
+class Version(Resource):
+    """
+    Flask resource to spit current version
+
+    Methods
+    -------
+    get:
+        get method for Version resource: outputs the current version of the stresspent
+
+    """
+    @api_rest.doc(responses={200: 'Version of the stresspent API'})
+    @api_rest.doc(responses={500: 'All other server errors'})
+    def get(self):
+        response = jsonify(version=__version__)
+        response.status_code = 200
+        return response
 
 
 @api_rest.route("/use")
-def use():
-    return render_template("use_rest.html")
+class Use(Resource):
+    """
+    Render Use
 
+    Methods
+    -------
+    get:
+        get method for Use resource: shows how to use the API
 
-@api_rest.app_errorhandler(404)
-def handle_404(error):
-    return redirect(url_for('rest.use'))
+    """
+    def get(self):
+        headers = {'Content-Type': 'text/html'}
+        return make_response(render_template("use_rest.html"), 200, headers)
 
 
 def get_jsoned_geocoded_data(geocoder):
@@ -72,23 +97,25 @@ def get_jsoned_geocoded_data(geocoder):
 
 
 @api_rest.route("/geocode/<address>/<postal_code>/<city>", methods=["GET"])
-def geocode_one(address, postal_code, city):
-    print(address)
-    print(postal_code)
-    print(city)
-    geocoder = Geocoder(pd.DataFrame(data={ADDRESS: address, POSTAL_CODE: postal_code, CITY: city}, index=[0]))
-    geocoder.geocode()
-    return jsonify(get_jsoned_geocoded_data(geocoder))
+class GeocodeOne(Resource):
+    def get(self, address, postal_code, city):
+        print(address)
+        print(postal_code)
+        print(city)
+        geocoder = Geocoder(pd.DataFrame(data={ADDRESS: address, POSTAL_CODE: postal_code, CITY: city}, index=[0]))
+        geocoder.geocode()
+        return jsonify(get_jsoned_geocoded_data(geocoder))
 
 
 @api_rest.route("/geocode_file", methods=["POST"])
-def geocode_file():
-    json_as_str = request.get_json(force=True)
-    try:
-        data = json.loads(json_as_str)
-    except (json.JSONDecodeError, TypeError):
-        data = json.loads(json.dumps(json_as_str))
-    data_to_geocode = pd.json_normalize(data)
-    geocoder = Geocoder(data_to_geocode)
-    geocoder.geocode()
-    return jsonify(get_jsoned_geocoded_data(geocoder))
+class GeocodeFile(Resource):
+    def post(self):
+        json_as_str = request.get_json(force=True)
+        try:
+            data = json.loads(json_as_str)
+        except (json.JSONDecodeError, TypeError):
+            data = json.loads(json.dumps(json_as_str))
+        data_to_geocode = pd.json_normalize(data)
+        geocoder = Geocoder(data_to_geocode)
+        geocoder.geocode()
+        return jsonify(get_jsoned_geocoded_data(geocoder))
