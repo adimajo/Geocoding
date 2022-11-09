@@ -309,6 +309,7 @@ deploy_dev_package:
   stage: deploy_dev
   <<: *pull_cache
   <<: *common_tag
+  <<: *common_python
   script:
     - apk --update add --no-cache wget
     - pip install pipenv

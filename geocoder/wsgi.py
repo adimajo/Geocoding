@@ -29,9 +29,8 @@ if platform.uname().system.lower() == 'linux':
 
 def runserver(options):
     if platform.uname().system.lower() == 'linux':
-        # host = options.pop('host')
-        # port = options.pop('port')
-        # StandaloneApplication(app, options).run(host=host, port=port)
+        bind = f"{options.pop('host')}:{options.pop('port')}"
+        options.update({"bind": bind})
         StandaloneApplication(app, options).run()
     else:
         app.run(host=options["host"],  # nosec
