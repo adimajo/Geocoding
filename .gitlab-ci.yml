@@ -313,7 +313,7 @@ deploy_dev_package:
   script:
     - apk --update add --no-cache wget
     - pip install pipenv
-    - pipenv requirements
+    - pipenv requirements > requirements.txt
     - pipenv run python3 setup.py sdist bdist_wheel
     - python3 setup.py sdist bdist_wheel
     - wget -qO - ${PKI}cacreditagricoleserver.crt >> cacreditagricoleserver.crt
@@ -341,7 +341,7 @@ promote_staging_api:
   script:
     - . ./build.env
     - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
-    - 'curl -S -k -u ${CREDS} -XPOST https://$ARTI_REGISTRY/api/docker/$SOURCE_REPO/v2/promote -H "Content-Type: application/json" -d"{\"targetRepo\":\"${TARGET_REPO}\",\"dockerRepository\":\"${ARTI_REPO}\",\"tag\":\"${APPLICATION_TAG_VERSION}\",\"copy\":true}"'
+    - 'curl -S -k -u ${CREDS} -XPOST https://$ARTI_REGISTRY/artifactory/api/docker/$SOURCE_REPO/v2/promote -H "Content-Type: application/json" -d"{\"targetRepo\":\"${TARGET_REPO}\",\"dockerRepository\":\"${ARTI_REPO}\",\"tag\":\"${APPLICATION_TAG_VERSION}\",\"copy\":true}"'
 
 promote_staging_package:
   needs: ["deploy_dev_package", "generate_tag"]
@@ -359,7 +359,7 @@ promote_staging_package:
     - 'echo SOURCE REPOSITORY : ${SOURCE_REPO}'
     - 'echo TARGET REPOSITORY : ${TARGET_REPO}'
     - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
-    - if [[ $(curl -S -k -u ${CREDS} -XPOST https://${ARTI_REGISTRY}/api/copy/${SOURCE_REPO}/${IMAGE}?to=/${TARGET_REPO} | jq --raw-output '.messages[0].level') = "INFO" ]]; then { echo "Success"; exit 0; }; else { echo >&2 "Error in promote"; exit 1; }; fi
+    - if [[ $(curl -S -k -u ${CREDS} -XPOST https://${ARTI_REGISTRY}/artifactory/api/copy/${SOURCE_REPO}/${IMAGE}?to=/${TARGET_REPO} | jq --raw-output '.messages[0].level') = "INFO" ]]; then { echo "Success"; exit 0; }; else { echo >&2 "Error in promote"; exit 1; }; fi
   only:
    - master
 
