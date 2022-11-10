@@ -87,7 +87,7 @@ if __name__ == "__main__":
         package_data={
             'geocoder': ['**/*.css', '**/*.ico', '**/*.html']
         },
-        install_requires=install_requires,
+        install_requires=get_requirements(),
         test_suite="pytest-runner",
         tests_require=["pytest", "coverage"],
         entry_points={
