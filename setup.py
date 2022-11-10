@@ -37,8 +37,28 @@ def find_version(file_path, file_name: str = "__init__.py"):
     raise RuntimeError("Unable to find version string.")
 
 
-with open('requirements.txt') as fp:
-    install_requires = [x.split("/")[-1] for x in fp.read().splitlines()[1:]]
+def get_requirements():
+    """
+    Return requirements as list.
+
+    package1==1.0.3
+    package2==0.0.5
+    """
+    with open('requirements.txt') as f:
+        next(f)
+        packages = []
+        for line in f:
+            line = line.strip()
+            # let's also ignore empty lines and comments
+            if not line or line.startswith('#'):
+                continue
+            if 'https://' in line:
+                tail = line.rsplit('/', 1)[1]
+                tail = tail.split('#')[0]
+                line = tail.replace('@', '==').replace('.git', '')
+            packages.append(line)
+    return packages
+
 
 if __name__ == "__main__":
     setup(

@@ -1,5 +1,6 @@
 ARG DOCKER_REGISTRY
-FROM ${DOCKER_REGISTRY}python:3.8.13-alpine3.16 as build
+ARG BASE_IMAGE
+FROM ${DOCKER_REGISTRY}${BASE_IMAGE} as build
 COPY geocoder geocoder/
 COPY README.rst README.rst
 COPY setup.py setup.py
@@ -19,7 +20,7 @@ RUN chown nobody:nogroup /geocoder &&\
     geocoder reverse &&\
     geocoder clean
 
-FROM ${DOCKER_REGISTRY}python:3.8.13-alpine3.16 as run
+FROM ${DOCKER_REGISTRY}${BASE_IMAGE} as run
 
 COPY --from=build /usr /usr
 
