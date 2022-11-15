@@ -45,18 +45,22 @@ def get_requirements():
     package2==0.0.5
     """
     with open('requirements.txt') as f:
-        next(f)
         packages = []
-        for line in f:
-            line = line.strip()
-            # let's also ignore empty lines and comments
-            if not line or line.startswith('#'):
-                continue
-            if 'https://' in line:
-                tail = line.rsplit('/', 1)[1]
-                tail = tail.split('#')[0]
-                line = tail.replace('@', '==').replace('.git', '')
-            packages.append(line)
+        try:
+            next(f)
+            for line in f:
+                line = line.strip()
+                # let's also ignore empty lines and comments
+                if not line or line.startswith('#'):
+                    continue
+                if 'https://' in line:
+                    continue
+                    # tail = line.rsplit('/', 1)[1]
+                    # tail = tail.split('#')[0]
+                    # line = tail.replace('@', '==').replace('.git', '')
+                packages.append(line)
+        except StopIteration:
+            pass
     return packages
 
 
