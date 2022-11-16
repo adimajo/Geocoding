@@ -1,6 +1,6 @@
 ARG DOCKER_REGISTRY
 ARG BASE_IMAGE
-FROM ${DOCKER_REGISTRY}${BASE_IMAGE} as build
+FROM ${DOCKER_REGISTRY}${BASE_IMAGE}
 COPY geocoder geocoder/
 COPY README.rst README.rst
 COPY setup.py setup.py
@@ -20,10 +20,11 @@ RUN chown nobody:nogroup /geocoder &&\
     geocoder reverse &&\
     geocoder clean
 
-FROM ${DOCKER_REGISTRY}${BASE_IMAGE} as run
-
-COPY --from=build /usr /usr
-
-EXPOSE 8000
-USER nobody
+# FROM ${DOCKER_REGISTRY}${BASE_IMAGE} as run
+#
+# COPY --from=build /usr /usr
+#
+# EXPOSE 8000
+# USER nobody
+RUN rm -rf geocoder && rm -f README.rst Pipfile Pipfile.lock setup.py
 ENTRYPOINT geocoder runserver
