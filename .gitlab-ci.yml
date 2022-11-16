@@ -226,7 +226,7 @@ build geocoder:
         - geocoder/**/*
         - Pipfile
         - setup.py
-        - .pypirc
+        - Dockerfile
   <<: *common_tag
   image:
     name: ${DOCKER_REGISTRY_BIS}kaniko-project/executor:debug-v1.0.0
