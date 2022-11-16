@@ -94,7 +94,7 @@ generate_tag:
   only:
    - master
   script:
-    - apk --update add --no-cache git openblas-dev linux-headers build-base
+    - apk --update add --no-cache git openblas-dev linux-headers build-base libffi-dev
     - pip install pipenv
     - sed -i 's|${PYPI_REMOTE}|'${PYPI_REMOTE}'|g' Pipfile
     - pipenv install
@@ -111,7 +111,7 @@ test:
   <<: *common_python
   <<: *common_tag
   script:
-    - apk --update add --no-cache git openblas-dev linux-headers build-base
+    - apk --update add --no-cache git openblas-dev linux-headers build-base libffi-dev
     - pip install pipenv
     - pipenv install -d --skip-lock
     - pipenv run coverage run --source geocoder/ -m pytest
@@ -131,8 +131,9 @@ security:
   <<: *common_python
   <<: *common_tag
   script:
-  - pip install pipenv
-  - pipenv run bandit -r geocoder
+    - apk --update add --no-cache git openblas-dev linux-headers build-base libffi-dev
+    - pip install pipenv
+    - pipenv run bandit -r geocoder
   only:
     refs:
       - branches
@@ -312,7 +313,7 @@ deploy_dev_package:
   <<: *common_tag
   <<: *common_python
   script:
-    - apk --update add --no-cache wget
+    - apk --update add --no-cache git openblas-dev linux-headers build-base libffi-dev
     - pip install pipenv
     - pipenv requirements > requirements.txt
     - pipenv run python3 setup.py sdist bdist_wheel
