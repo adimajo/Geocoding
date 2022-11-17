@@ -42,7 +42,7 @@ class Home(Resource):
     """
     def get(self):
         headers = {'Content-Type': 'text/html'}
-        return make_response(render_template("index.html"), 200, headers)
+        return make_response(render_template("index.html", version=__version__), 200, headers)
 
 
 @api_rest.route("/version")

@@ -123,6 +123,7 @@ test:
     changes:
       - .gitlab-ci.yml
       - geocoder/**/*
+      - Pipfile
       - tests/**/*
 
 security:
