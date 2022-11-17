@@ -112,7 +112,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Content-Type&#39;</span><span class="p">:</span> <span class="s1">&#39;text/html&#39;</span><span class="p">}</span>
-        <span class="k">return</span> <span class="n">make_response</span><span class="p">(</span><span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;index.html&quot;</span><span class="p">),</span> <span class="mi">200</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">make_response</span><span class="p">(</span><span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;index.html&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">__version__</span><span class="p">),</span> <span class="mi">200</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Version"><a class="viewcode-back" href="../../../_autosummary/geocoder.api.rest.html#geocoder.api.rest.Version">[docs]</a><span class="nd">@api_rest</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/version&quot;</span><span class="p">)</span>
