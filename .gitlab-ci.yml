@@ -321,9 +321,7 @@ deploy_dev_package:
     - python3 setup.py sdist bdist_wheel
     - wget -qO - ${PKI}cacreditagricoleserver.crt >> cacreditagricoleserver.crt
     - export CURL_CA_BUNDLE=""
-    - echo "${ARTI_REGISTRY}" >> .pypirc
-    - echo "/artifactory/api/pypi/" >> .pypirc
-    - echo "${ARTI_PYPI_SCRATCH_REGISTRY}" >> .pypirc
+    - echo "${ARTI_REGISTRY}/artifactory/api/pypi/${ARTI_PYPI_SCRATCH_REGISTRY}" >> .pypirc
     - pipenv run twine upload --cert cacreditagricoleserver.crt --config-file .pypirc --repository arti dist/*
   only:
    - master
