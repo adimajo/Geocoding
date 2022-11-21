@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>geocoder.geocoding.index &mdash; Geocoder 2.0.1 documentation</title>
+  <title>geocoder.geocoding.index &mdash; Geocoder 2.0.2 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -29,7 +29,7 @@
             <a href="../../../index.html" class="icon icon-home"> Geocoder
           </a>
               <div class="version">
-                2.0.1
+                2.0.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -102,7 +102,7 @@
 
     <span class="c1"># Check if the folder with the data to process exists</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">raw_data_folder_path</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Data not found - execute: geocoding download&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Data not found - execute: geocoder download&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="c1"># Open each csv file</span>
@@ -120,7 +120,7 @@
 
     <span class="c1"># Check if the folder was not empty</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">ban_files</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No CSV file - execute: geocoding decompress&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No CSV file - execute: geocoder decompress&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="n">departements</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ban_files</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
