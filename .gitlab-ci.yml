@@ -382,7 +382,7 @@ promote_stable_package:
   script:
     - . ./build.env
     - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
-    - jfrog config add rt-server --artifactory-url=https://${ARTI_REGISTRY} --user=${ARTI_USER} --password=${ARTI_PASSWORD} --interactive=false
+    - jfrog config add rt-server --artifactory-url=https://${ARTI_REGISTRY}/artifactory --user=${ARTI_USER} --password=${ARTI_PASSWORD} --interactive=false
     - jfrog config use rt-server
     - jfrog rt ping
     - jfrog rt pip-config --server-id-resolve rt-server --repo-resolve ${TARGET_REPO}
@@ -489,7 +489,28 @@ promote_stable_api:
 #        fi
 #  only:
 #   - master
-#
+
+promote_stable_forced:
+  stage: promote_stable_forced
+  image: layer-kraft.registry.saas.cagip.group.gca/ci-tools/promote:latest
+  <<: *common_tag
+  variables:
+    SOURCE_REPO: "${ARTI_STAGING_REGISTRY}"
+    TARGET_REPO: "${ARTI_STABLE_REGISTRY}"
+    IMAGE: "${ARTI_REPO}"
+  script:
+    - . ./build.env
+    - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
+    - docker-promote --tag=$APPLICATION_TAG_VERSION --force
+  only:
+    - master
+  needs:
+    - job: generate_tag
+      artifacts: true
+    - job: promote_stable
+  when: on_failure
+  allow_failure: false
+
 #deploy_prod:
 #  cache: []
 #  stage: deploy_prd
