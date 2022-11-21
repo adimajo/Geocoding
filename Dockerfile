@@ -2,7 +2,7 @@ ARG DOCKER_REGISTRY
 ARG BASE_IMAGE
 FROM ${DOCKER_REGISTRY}${BASE_IMAGE}
 COPY geocoder geocoder/
-COPY README.rst README.rst
+COPY README.md README.md
 COPY setup.py setup.py
 COPY Pipfile Pipfile
 COPY Pipfile.lock Pipfile.lock
@@ -20,5 +20,5 @@ RUN chown nobody:nogroup /geocoder &&\
     geocoder reverse &&\
     geocoder clean
 
-RUN rm -rf geocoder && rm -f README.rst Pipfile Pipfile.lock setup.py
+RUN rm -rf geocoder && rm -f README.md Pipfile Pipfile.lock setup.py
 ENTRYPOINT geocoder runserver

@@ -41,6 +41,7 @@ def create_app():
         version=__version__,
         description='Geocoder pour la France',
         contact='adrien.ehrhardt@credit-agricole-sa.fr',
+        decorators=[csrf.exempt],
         doc="/doc",
         default='mapi',
         default_label='Super API'

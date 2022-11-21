@@ -158,7 +158,7 @@ quality_check:
     - if [ ! -z $GITLAB_SRV_ACCOUNT ]; then keytool -import -alias mycert -file cacreditagricoleserver.crt -storetype jks -trustcacerts -noprompt -keypass keypass -keystore cacerts -storepass test@123 ; fi
     - if [ ! -z $GITLAB_SRV_ACCOUNT ]; then export SONAR_SCANNER_OPTS="-Djavax.net.ssl.trustStore=cacerts" ; fi
     # - -Dsonar.organization=${DOCKER_CI_REGISTRY_USER} ${DOCKER_CI_REGISTRY_USER}_${CI_PROJECT_NAME}
-    - sonar-scanner -Dsonar.exclusions=tests/**,docs/**,coverage.xml,setup.py,geocoder/__main__.py -Dsonar.python.coverage.reportPaths=coverage.xml -Dsonar.qualitygate.wait=true -Dsonar.projectKey=$SONAR_KEY -Dsonar.projectVersion=$APPLICATION_TAG_VERSION
+    - sonar-scanner -Dsonar.exclusions=tests/**,docs/**,coverage.xml,setup.py,geocoder/geocoding/__main__.py -Dsonar.python.coverage.reportPaths=coverage.xml -Dsonar.qualitygate.wait=true -Dsonar.projectKey=$SONAR_KEY -Dsonar.projectVersion=$APPLICATION_TAG_VERSION
   only:
    - master
 
@@ -319,13 +319,15 @@ deploy_dev_package:
     - pipenv requirements > requirements.txt
     - pipenv run python3 setup.py sdist bdist_wheel
     - python3 setup.py sdist bdist_wheel
-    - wget -qO - ${PKI}cacreditagricoleserver.crt >> cacreditagricoleserver.crt
-    - export CURL_CA_BUNDLE="cacreditagricoleserver.crt"
-    - export REQUESTS_CA_BUNDLE="cacreditagricoleserver.crt"
-    - export TWINE_CERT="cacreditagricoleserver.crt"
-    - openssl x509 -in cacreditagricoleserver.crt -out cacreditagricoleserver.pem
+    - wget -qO - ${PKI}/cacreditagricoleserver.crt >> cacreditagricoleserver.crt
+    - wget -qO - ${PKI}/rca_credit_agricole_group.crt >> rca_credit_agricole_group.crt
+    - cat cacreditagricoleserver.crt rca_credit_agricole_group.crt > credit_agricole_bundle.crt
+#    - export CURL_CA_BUNDLE="cacreditagricoleserver.crt"
+#    - export REQUESTS_CA_BUNDLE="cacreditagricoleserver.crt"
+#    - export TWINE_CERT="cacreditagricoleserver.crt"
+#    - openssl x509 -in cacreditagricoleserver.crt -out cacreditagricoleserver.pem
     - echo "${ARTI_REGISTRY}/artifactory/api/pypi/${ARTI_PYPI_SCRATCH_REGISTRY}" >> .pypirc
-    - pipenv run twine upload --cert cacreditagricoleserver.crt --config-file .pypirc --repository arti dist/*
+    - pipenv run twine upload --cert credit_agricole_bundle.crt --config-file .pypirc --repository arti dist/*
   only:
    - master
 

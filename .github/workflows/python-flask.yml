@@ -64,7 +64,7 @@ jobs:
           git checkout pages
           rm -rf docs
           mkdir docs_temp
-          git checkout master -- docs README.rst
+          git checkout master -- docs README.md
           cp -rf docs/build/html/* docs_temp/
           rm -rf docs
           mv docs_temp docs

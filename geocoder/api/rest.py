@@ -99,9 +99,6 @@ def get_jsoned_geocoded_data(geocoder):
 @api_rest.route("/geocode/<address>/<postal_code>/<city>", methods=["GET"])
 class GeocodeOne(Resource):
     def get(self, address, postal_code, city):
-        print(address)
-        print(postal_code)
-        print(city)
         geocoder = Geocoder(pd.DataFrame(data={ADDRESS: address, POSTAL_CODE: postal_code, CITY: city}, index=[0]))
         geocoder.geocode()
         return jsonify(get_jsoned_geocoded_data(geocoder))

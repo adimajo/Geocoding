@@ -24,6 +24,7 @@ remove_downloaded_raw_ban_files()
 @pytest.fixture
 def client():
     app.config['TESTING'] = True
+    app.config['SECRET_KEY'] = "TEST"
 
     with app.test_client() as client:
         yield client
@@ -40,6 +41,16 @@ def test_geocode(client, caplog):
     assert round(json.loads(response.data.decode("utf-8"))["data"][0]["lat"], 2) == 45.93
     response = client.get('/')
     response = client.get('/use')
+
+
+def test_geocode_file(client, caplog):
+    json_file = json.dumps([{
+        'address': "Rue du Professeur Christian Cabrol",
+        'postal_code': "01500",
+        'city': "Ambérieux-en-Bugey"}])
+    response = client.post('/geocode_file', json=json_file)
+    assert round(json.loads(response.data.decode("utf-8"))["data"][0]["lon"], 2) == 5.35
+    assert round(json.loads(response.data.decode("utf-8"))["data"][0]["lat"], 2) == 45.98
 
 
 def test_functions():

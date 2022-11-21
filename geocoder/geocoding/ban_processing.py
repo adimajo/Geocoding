@@ -171,7 +171,7 @@ def update(dpt_nom: str, csv_file_path, processed_files: dict):
     with open(csv_file_path, 'r', encoding='UTF-8') as f:
         try:  # some lieux-dits might be empty
             next(f)
-        except StopIteration:
+        except StopIteration:  # pragma: no cover
             return
         for line in f:
             attributes = get_attributes(line.strip().split(';'))

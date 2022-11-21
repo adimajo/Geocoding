@@ -11,7 +11,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 
 def long_description():
-    with open(os.path.join(here, 'README.rst')) as f:
+    with open(os.path.join(here, 'README.md')) as f:
         long_description = f.read()
     return long_description
 
@@ -71,6 +71,7 @@ if __name__ == "__main__":
         version=find_version(os.path.join(here, "geocoder")),
         description='geocoder is a (reverse) address to geolocation mapping tool for France',
         long_description=long_description(),
+        long_description_content_type="text/markdown",
         url='https://github.com/adimajo/geocoder',
         author='Paulo Emilio de Vilhena, Adrien Ehrhardt',
         author_email='pevilhena2@gmail.com, adrien.ehrhardt@credit-agricole-sa.fr',

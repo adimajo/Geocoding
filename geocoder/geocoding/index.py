@@ -32,7 +32,7 @@ def process_files():
 
     # Check if the folder with the data to process exists
     if not os.path.exists(raw_data_folder_path):  # pragma: no cover
-        logger.info('Data not found - execute: geocoding download')
+        logger.info('Data not found - execute: geocoder download')
         return False
 
     # Open each csv file
@@ -50,7 +50,7 @@ def process_files():
 
     # Check if the folder was not empty
     if not ban_files:  # pragma: no cover
-        logger.info('No CSV file - execute: geocoding decompress')
+        logger.info('No CSV file - execute: geocoder decompress')
         return False
 
     departements = list(ban_files.keys())

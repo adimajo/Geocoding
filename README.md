@@ -1,8 +1,20 @@
-=========
-Geocoding
-=========
+[![coverage report](https://gitlab.ca.cib/GIT/RCI/DA/geocoder/geocoder/badges/master/coverage.svg)](https://gitlab.ca.cib/GIT/RCI/DA/geocoder/geocoder/-/commits/master)
+[![pipeline status](https://gitlab.ca.cib/GIT/RCI/DA/geocoder/geocoder/badges/master/pipeline.svg)](https://gitlab.ca.cib/GIT/RCI/DA/geocoder/geocoder/-/commits/master)
+[![Python Flask app](https://github.com/adimajo/geocoder/actions/workflows/python-flask.yml/badge.svg?branch=master)](https://github.com/adimajo/geocoder/actions/workflows/python-flask.yml)
 
-Geocoding is an address search engine for France. Unlike other APIs, it uses a database provided by the french government (Base Adresse Nationale - BAN) as the main source of information and does not impose any limit to the number of queries. The purpose of the project is to supply the needs of french data scientists that rely on geocoded data.
+Geocoder
+========
+
+Geocoder is an address search engine for France.
+Unlike other APIs, it uses a database provided by the 
+rench government
+(Base Adresse Nationale - BAN) as the main source of information and does
+not impose any limit to the number of queries. The purpose of the project
+is to supply the needs of french data scientists that rely on geocoded data.
+
+Fork from [chrlryo/Geocoding](https://github.com/chrlryo/Geocoding) itself
+a fork from [DeVilhena-Paulo/Geocoding](https://github.com/DeVilhena-Paulo/Geocoding).
+
 
 Getting Started
 ===============
@@ -11,7 +23,7 @@ Prerequisites
 -------------
 
 * Python version 3 installed locally
-* Pip installed locally
+* Pipenv installed locally
 * Docker (for geocoding API use)
 
 Using API with Docker
@@ -28,52 +40,52 @@ Docker requirements for building
 
 Use it
 
-  docker run -p 8088:8088 geocoding-api
+  docker run -p 8000:8000 geocoding-api
 
 The API is available through:
 
 * In your browser:
 
-  * http://localhost:8088
-  * http://localhost:8088/use
-  * http://localhost:8088/geocode/<address>/<postal_code>/<city>
+  * http://localhost:8000
+  * http://localhost:8000/use
+  * http://localhost:8000/geocode/<address>/<postal_code>/<city>
 
 * With Curl:
 
   curl --header "Content-Type: application/json" \
   --request POST \
   --data '[{"address": "...", "postal_code": "...", "city": "..."}, {"address": "...", "postal_code": "...", "city": "..."}]' \
-  http://localhost:8088/geocode_file
+  http://localhost:8000/geocode_file
 
 Exemples:
 
-  http://localhost:8088/geocode/12, Bd des Maréchaux/91120/Palaiseau
+  http://localhost:8000/geocode/12, Bd des Maréchaux/91120/Palaiseau
 
   curl --header "Content-Type: application/json" \
   --request POST \
   --data '[{"address": "12, Bd des Maréchaux", "postal_code": "91120", "city": "Palaiseau"}]' \
-  http://localhost:8088/geocode_file
+  http://localhost:8000/geocode_file
 
 
 For using purposes
 ------------------
 
-The package can easily be installed via pip::
+The package can easily be installed via pip (only on Crédit Agricole's internal Artifactory repository)::
 
-  pip install geocoding
+  pip install geocoder
 
 Before the first use, you need to download the BAN database and process its files to unlock the functionalities of the package. All of this can be done with the following command (the whole process should take 30 minutes)::
 
   geocoding update
 
-Alternatively, you can do it step by step with the following commands::
+Alternatively, you can do it step by step with the following commands:
 
   geocoding download
   geocoding decompress
   geocoding index
   geocoding remove_non_necessary_files
 
-To unlock the reverse search, execute the following command::
+To unlock the reverse search, execute the following command:
 
   geocoding reverse
 
@@ -145,7 +157,7 @@ The reverse functionality
     output['voie']['nom']  # BOULEVARD DES MARECHAUX
 
 Benchmarks
----------------
+----------
 
 .. code-block:: python
 
