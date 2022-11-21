@@ -64,6 +64,7 @@ stages:
   - deploy_dev
   - promote_staging
   - promote_stable
+  - promote_stable_forced
 
 lint:
   stage: lint
@@ -507,7 +508,7 @@ promote_stable_forced:
   needs:
     - job: generate_tag
       artifacts: true
-    - job: promote_stable
+    - job: promote_stable_api
   when: on_failure
   allow_failure: false
 
