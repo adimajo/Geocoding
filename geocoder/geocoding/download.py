@@ -157,7 +157,7 @@ def get_ban_file():
 
     os.mkdir(raw_data_folder_path)
 
-    for dpt in tqdm(dpt_list):
+    for dpt in tqdm(dpt_list, desc="Download raw data"):
         for ban_dpt_gz_file_name_type in ban_dpt_gz_file_name:
             downloading_ban_dpt_gz_file_name = ban_dpt_gz_file_name_type.format(dpt)
             if not download_ban_dpt_file(downloading_ban_dpt_gz_file_name):

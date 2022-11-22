@@ -41,7 +41,7 @@ def create_kdtree():
     tree = Tree(2, len(table), limits)
 
     # Load tree with all the addresses on France
-    for i in tqdm(pre_order(len(table))):
+    for i in tqdm(pre_order(len(table)), desc="kd-tree"):
         index = indices[i]
         tree.insert((table[index]['longitude'], table[index]['latitude']),
                     data=index)

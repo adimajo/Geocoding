@@ -46,7 +46,7 @@ def process_files():
                     dpt_name = filename.split('-')[-2].split('.')[0]
                 ban_files[dpt_name].append(file_path)
 
-    logger.debug(f"Fichiers : {ban_files}")
+    logger.debug(f"Files: {ban_files}")
 
     # Check if the folder was not empty
     if not ban_files:  # pragma: no cover
@@ -56,7 +56,7 @@ def process_files():
     departements = list(ban_files.keys())
     departements.sort()
 
-    for departement in tqdm(departements):
+    for departement in tqdm(departements, desc="Process files"):
         for file in ban_files[departement]:
             logger.debug(f"Département : {departement}")
             logger.debug(f"Fichier : {file}")
@@ -79,7 +79,7 @@ def create_database():
 
     add_index_tables()
 
-    for table, processed_file in tqdm(processed_files.items()):
+    for table, processed_file in tqdm(processed_files.items(), desc="Store database"):
         create_dat_file(list(processed_file), paths[table], dtypes[table])
 
     return True
@@ -89,7 +89,7 @@ def add_index_tables():
     index_tables = ['postal', 'commune', 'voie']
 
     # Index tables creation
-    for current_table in tqdm(index_tables):
+    for current_table in tqdm(index_tables, desc="Index tables"):
         sort_method = (lambda j, table=current_table: processed_files[table][j])
 
         # Sort table and add it to the module level dict processed_files

@@ -20,5 +20,10 @@ RUN chown nobody:nogroup /geocoder &&\
     geocoder reverse &&\
     geocoder clean
 
+RUN export APPLICATION_TAG_VERSION=`python -c 'import geocoder; print(geocoder.__version__)'`
+
+LABEL da.da/geocoder.version=$APPLICATION_TAG_VERSION \
+      da.da/geocoder.contact=Groupe-recherche-operationnelle.GRO@credit-agricole-sa.fr
+
 RUN rm -rf geocoder && rm -f README.md Pipfile Pipfile.lock setup.py
 ENTRYPOINT geocoder runserver
