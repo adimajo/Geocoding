@@ -372,7 +372,7 @@ promote_staging_package:
 
 promote_stable_package:
   stage: promote_stable
-  needs: ["promote_staging_package", "generate_tag"]
+  needs: ["deploy_dev_package", "promote_staging_package", "generate_tag"]
   when: manual
   <<: *ci_tools
   <<: *common_tag
