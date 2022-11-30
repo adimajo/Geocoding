@@ -55,7 +55,7 @@ def position(code_postal=None, commune=None, adresse=None):
     Args:
         code_postal (str): The postal code.
         commune (str): The city name.
-        adresse(str): Address with number and street name.
+        adresse (str): Address with number and street name.
 
     Returns:
         :obj:`dict`

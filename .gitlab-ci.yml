@@ -328,6 +328,7 @@ deploy_dev_package:
 #    - export TWINE_CERT="cacreditagricoleserver.crt"
 #    - openssl x509 -in cacreditagricoleserver.crt -out cacreditagricoleserver.pem
     - echo "${ARTI_REGISTRY}/artifactory/api/pypi/${ARTI_PYPI_SCRATCH_REGISTRY}" >> .pypirc
+    - pipenv run pip install twine  # if cache has been wiped
     - pipenv run twine upload --cert credit_agricole_bundle.crt --config-file .pypirc --repository arti dist/*
   only:
    - master
