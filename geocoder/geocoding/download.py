@@ -12,8 +12,9 @@ from loguru import logger
 from tqdm import tqdm
 from urllib3 import disable_warnings
 from urllib3.exceptions import InsecureRequestWarning
+from botocore.errorfactory import ClientError
 
-from geocoder.geocoding import DEBUG
+from geocoder.geocoding import DEBUG, LOCAL_DB, s3
 from geocoder.geocoding.datapaths import here, database
 
 SSL_VERIFICATION = os.environ.get("SSL_VERIFICATION", False)
@@ -25,9 +26,16 @@ raw_data_folder_path = os.path.join(here, 'raw')
 ban_url = 'https://adresse.data.gouv.fr/data/ban/adresses-odbl/latest/csv/{}'
 ban_dpt_gz_file_name = ['adresses-{}.csv.gz', 'lieux-dits-{}-beta.csv.gz']
 ban_dpt_file_name = [filegz[:-3] for filegz in ban_dpt_gz_file_name]
-content_folder_path = os.path.join(here, 'content')
-server_content_file_name = os.path.join(content_folder_path, 'server_content_v2.txt')
-local_content_file_name = os.path.join(content_folder_path, 'local_content_v2.txt')
+
+content_folder_path = 'content'
+server_content_file_name = 'server_content_v2.txt'
+local_content_file_name = 'local_content_v2.txt'
+
+if LOCAL_DB:
+    content_folder_path = os.path.join(here, content_folder_path)
+    server_content_file_name = os.path.join(content_folder_path, server_content_file_name)
+    local_content_file_name = os.path.join(content_folder_path, local_content_file_name)
+
 if DEBUG:
     dpt_list = ["01"]
 else:  # pragma: no cover
@@ -52,7 +60,12 @@ def md5(fname):
         fname: file path
     """
     md5_hash = hashlib.md5()  # nosec
-    with open(fname, "rb") as f:
+    if LOCAL_DB:
+        with open(fname, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                md5_hash.update(chunk)
+    else:
+        f = s3.get_object(Bucket="geocoder", Key=f"content/{fname}")['Body']
         for chunk in iter(lambda: f.read(4096), b""):
             md5_hash.update(chunk)
     return md5_hash.hexdigest()
@@ -67,6 +80,7 @@ def update_ban_file(url, file_name):
         file_name (os.Path): name of the file to write
     """
     try:
+
         msg = 'Unable to join BAN address website ({}).'.format(url)
         r = requests.get(url, verify=SSL_VERIFICATION)
         msg += ' Status error code: {}'.format(r.status_code)
@@ -75,15 +89,20 @@ def update_ban_file(url, file_name):
     except (requests.exceptions.ConnectionError, requests.exceptions.SSLError, requests.exceptions.HTTPError):
         raise ConnectionError(msg)  # pragma: no cover
 
-    with open(file_name, 'w') as file:
-        file.write(r.text)
+    if LOCAL_DB:
+        with open(file_name, 'w') as file:
+            file.write(r.text)
+    else:
+        s3.put_object(Body=r.text, Bucket="geocoder", Key=f"content/{file_name}")
 
 
 def update_local_content_file():
+    logger.debug("Update local content file")
     update_ban_file(ban_url.format(""), local_content_file_name)
 
 
 def update_server_content_file():
+    logger.debug("Update server content file")
     update_ban_file(ban_url.format(""), server_content_file_name)
 
 
@@ -93,16 +112,25 @@ def need_to_download():
 
     :rtype: bool
     """
-    if not os.path.exists(local_content_file_name):
+    if LOCAL_DB and not os.path.exists(local_content_file_name):
         return True
-    else:
-        update_server_content_file()
-
-        if md5(server_content_file_name) == md5(local_content_file_name) and os.path.exists(database):
-            logger.info('BAN database is already up to date. No need to download it again.')
+    elif not LOCAL_DB:
+        try:
+            s3.head_object(Bucket='geocoder', Key=f"content/{local_content_file_name}")
+        except ClientError:
+            return True
+    logger.debug("Local content file exists")
+    update_server_content_file()
+    logger.debug("Comparing local and server content files")
+    if md5(server_content_file_name) == md5(local_content_file_name) and (
+            (LOCAL_DB and os.path.exists(database)) or (not LOCAL_DB)):
+        logger.info('BAN database is already up to date. No need to download it again.')
+        if LOCAL_DB:
             os.remove(server_content_file_name)
-            return False
-
+        else:
+            s3.delete_object(Bucket="geocoder", Key=f"content/{server_content_file_name}")
+        return False
+    else:
         return True
 
 
@@ -132,6 +160,11 @@ def download_ban_dpt_file(ban_dpt_file_name):
         logger.error('Download {} unsuccessful: incomplete'.format(ban_dpt_file_name))
         return False
 
+    if not LOCAL_DB:
+        with open(os.path.join(raw_data_folder_path, ban_dpt_file_name), 'rb') as ban_dpt_file:
+            s3.upload_fileobj(Fileobj=ban_dpt_file,
+                              Bucket='geocoder',
+                              Key=f"raw/{ban_dpt_file_name}")
     return True
 
 
@@ -142,7 +175,7 @@ def get_ban_file():
     Returns: whether a download has been preformed
     :rtype: bool
     """
-    if not os.path.exists(content_folder_path):
+    if LOCAL_DB and not os.path.exists(content_folder_path):
         os.mkdir(content_folder_path)
 
     if not need_to_download():
@@ -152,10 +185,18 @@ def get_ban_file():
 
     update_local_content_file()
 
-    if os.path.exists(raw_data_folder_path):
+    if LOCAL_DB and os.path.exists(raw_data_folder_path):
         shutil.rmtree(raw_data_folder_path)
-
-    os.mkdir(raw_data_folder_path)
+    if LOCAL_DB:
+        os.mkdir(raw_data_folder_path)
+    else:
+        bucket_list_result_set = s3.list_objects_v2(Bucket='geocoder',
+                                                    Prefix="content/",
+                                                    Delimiter='/')['Contents']
+        for obj in bucket_list_result_set:
+            if obj['Key'] == 'content/':
+                continue
+            s3.delete_object(Bucket="geocoder", Key=obj["Key"])
 
     for dpt in tqdm(dpt_list, desc="Download raw data"):
         for ban_dpt_gz_file_name_type in ban_dpt_gz_file_name:
@@ -173,6 +214,18 @@ def decompress():
     Returns: whether decompression was successful
     :rtype: bool
     """
+    if not LOCAL_DB and not os.path.exists(raw_data_folder_path):
+        # retrieve from S3
+        os.mkdir(raw_data_folder_path)
+        bucket_list_result_set = s3.list_objects_v2(Bucket='geocoder',
+                                                    Prefix="raw/",
+                                                    Delimiter='/')['Contents']
+        for obj in bucket_list_result_set:
+            filename = obj['Key'].replace('raw/', "")
+            if filename is None or filename == "" or not filename.endswith(".gz"):
+                continue
+            s3.download_file('geocoder', obj['Key'], os.path.join(raw_data_folder_path, filename))
+
     count = 0
     for dpt in dpt_list:
         # Certifies the existence of the subdirectory.
@@ -220,7 +273,7 @@ def remove_downloaded_raw_ban_files():
     for dpt in dpt_list:
         for ban_dpt_gz_file_name_type in ban_dpt_gz_file_name:
             remove_file(os.path.join(raw_data_folder_path, ban_dpt_gz_file_name_type.format(dpt)))
-        for ban_dpt_gz_file_name_type in ban_dpt_file_name:
-            remove_file(os.path.join(raw_data_folder_path, ban_dpt_gz_file_name_type.format(dpt)))
+        for ban_dpt_file_name_type in ban_dpt_file_name:
+            remove_file(os.path.join(raw_data_folder_path, ban_dpt_file_name_type.format(dpt)))
     shutil.rmtree(raw_data_folder_path)
     return True

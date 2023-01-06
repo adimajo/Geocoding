@@ -15,7 +15,7 @@ import numpy as np
 from loguru import logger
 from tqdm import tqdm
 
-from geocoder.geocoding import ban_processing
+from geocoder.geocoding import ban_processing, LOCAL_DB, s3
 from geocoder.geocoding.datapaths import paths, database
 from geocoder.geocoding.datatypes import dtypes
 from geocoder.geocoding.download import raw_data_folder_path
@@ -109,3 +109,5 @@ def create_dat_file(lst, out_filename, dtype):
     dat_file = np.memmap(out_filename, mode='w+', dtype=dtype, shape=(len(lst), ))
     dat_file[:] = lst[:]
     dat_file.flush()
+    if not LOCAL_DB:
+        s3.upload_file(out_filename, "geocoder", f"database/{os.path.basename(out_filename)}")

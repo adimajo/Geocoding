@@ -13,6 +13,9 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 database = os.path.join(here, 'database')
 
+if not os.path.exists(database):
+    os.mkdir(database)
+
 tables = ['departement', 'postal', 'commune', 'voie', 'localisation',
           'commune_index', 'postal_index', 'voie_index', 'kdtree']
 
