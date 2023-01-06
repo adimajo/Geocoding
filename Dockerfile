@@ -1,5 +1,6 @@
 ARG DOCKER_REGISTRY
 ARG BASE_IMAGE
+
 FROM ${DOCKER_REGISTRY}${BASE_IMAGE}
 COPY geocoder geocoder/
 COPY README.md README.md
@@ -13,12 +14,7 @@ RUN apk --update add --no-cache git openblas-dev linux-headers build-base || tru
     pipenv install --system --deploy &&\
     touch requirements.txt && python3 -m pip install .
 RUN chown nobody:nogroup /geocoder &&\
-    chmod +x geocoder &&\
-    geocoder download &&\
-    geocoder decompress &&\
-    geocoder index &&\
-    geocoder reverse &&\
-    geocoder clean
+    chmod +x geocoder
 
 RUN export APPLICATION_TAG_VERSION=`python -c 'import geocoder; print(geocoder.__version__)'`
 
@@ -26,4 +22,5 @@ LABEL da.da/geocoder.version=$APPLICATION_TAG_VERSION \
       da.da/geocoder.contact=Groupe-recherche-operationnelle.GRO@credit-agricole-sa.fr
 
 RUN rm -rf geocoder && rm -f README.md Pipfile Pipfile.lock setup.py
-ENTRYPOINT geocoder runserver
+ENTRYPOINT geocoder update &&\
+    geocoder runserver

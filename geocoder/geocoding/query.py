@@ -17,7 +17,7 @@ import kdquery
 import numpy as np
 from loguru import logger
 
-from geocoder.geocoding import distance, utils
+from geocoder.geocoding import distance, utils, s3, LOCAL_DB
 from geocoder.geocoding.datapaths import paths
 from geocoder.geocoding.datatypes import dtypes
 from geocoder.geocoding.similarity import Similarity
@@ -31,6 +31,8 @@ def setup():
     """
     if not data or not limits:
         for table in paths:
+            if not LOCAL_DB:
+                s3.download_file('geocoder', f"database/{table}.dat", paths[table])
             if os.path.isfile(paths[table]):
                 data[table] = np.memmap(paths[table], dtypes[table])
                 limits[table] = (0, len(data[table]))
