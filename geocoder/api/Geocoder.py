@@ -61,13 +61,14 @@ class Geocoder:
         if not self.geocoded and not self.errors:
             def find(args):
                 if args[0] == '98000':  # pragma: no cover
-                    return np.nan, np.nan, np.nan
+                    return np.nan, np.nan, np.nan, np.nan
                 else:
                     res = geocoder.find(*args)
-                    return res.get('longitude', np.nan), res.get('latitude', np.nan), res.get('quality', np.nan)
+                    return res.get('longitude', np.nan), res.get('latitude', np.nan), res.get('quality', np.nan),\
+                        res.get('commune', {}).get('code_insee', np.nan)
 
             geocoded_fields = [find(args) for args in self.data[[POSTAL_CODE, CITY, ADDRESS]].fillna('').values]
 
-            self.data['lon'], self.data['lat'], self.data['quality'] = zip(*geocoded_fields)
+            self.data['lon'], self.data['lat'], self.data['quality'], self.data['code_insee'] = zip(*geocoded_fields)
             self.geocoded_date_time = datetime.now()
             self.geocoded = True
