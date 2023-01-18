@@ -220,7 +220,8 @@ def complete_commune_selection(commune):
 
     # Binary search with index list, because the commune table is not
     # entirely sorted.
-    i, commune_id = utils.search(commune, data['commune_index'],
+    i, commune_id = utils.search(commune,
+                                 data['commune_index'],
                                  data['commune']['normalise'],
                                  sorted=False)
     found = (data['commune']['normalise'][commune_id] == commune)

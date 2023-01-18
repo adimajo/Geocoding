@@ -92,7 +92,7 @@ def binary_search(element, values, start, end, get_index):
             i = mid + 1
         else:
             j = mid
-    return (i, get_index(i))
+    return i, get_index(i)
 
 
 def most_similar(indices, values, similarity):
