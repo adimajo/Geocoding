@@ -43,6 +43,7 @@ geocoder.geocoding.download
 
    .. autosummary::
    
+      ClientError
       InsecureRequestWarning
    
    
