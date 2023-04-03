@@ -12,8 +12,8 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 def long_description():
     with open(os.path.join(here, 'README.md')) as f:
-        long_description = f.read()
-    return long_description
+        description = f.read()
+    return description
 
 
 def find_version(file_path, file_name: str = "__init__.py"):
@@ -35,33 +35,6 @@ def find_version(file_path, file_name: str = "__init__.py"):
     if version_match:
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
-
-
-def get_requirements():
-    """
-    Return requirements as list.
-
-    package1==1.0.3
-    package2==0.0.5
-    """
-    with open('requirements.txt') as f:
-        packages = []
-        try:
-            next(f)
-            for line in f:
-                line = line.strip()
-                # let's also ignore empty lines and comments
-                if not line or line.startswith('#'):
-                    continue
-                if 'https://' in line:
-                    continue
-                    # tail = line.rsplit('/', 1)[1]
-                    # tail = tail.split('#')[0]
-                    # line = tail.replace('@', '==').replace('.git', '')
-                packages.append(line)
-        except StopIteration:
-            pass
-    return packages
 
 
 if __name__ == "__main__":
@@ -92,7 +65,7 @@ if __name__ == "__main__":
         package_data={
             'geocoder': ['**/*.css', '**/*.ico', '**/*.html']
         },
-        install_requires=get_requirements(),
+        install_requires=[],
         test_suite="pytest-runner",
         tests_require=["pytest", "coverage"],
         entry_points={
