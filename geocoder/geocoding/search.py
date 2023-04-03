@@ -86,8 +86,6 @@ def position(code_postal=None, commune=None, adresse=None):
         >>> search.position('91120', 'Palaiseau', '12, Bd des Maréchaux')
 
     """
-    query.setup()
-
     # Input preprocessing.
     code_postal, commune, numero, voie, voie_type = \
         preprocessing(code_postal, commune, adresse)
@@ -171,8 +169,6 @@ def reverse(position):
         >>> search.reverse((2.21, 48))
 
     """
-    query.setup()
-
     if position is None:
         return result.get_output(None, 6)
     node_id, dist = query.nearest_point_from(position)

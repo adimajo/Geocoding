@@ -12,16 +12,12 @@ flake8 = "*"
 numpydoc = "*"
 bandit = "*"
 twine = "*"
+pipenv-setup = {version = "*", extras=["black"]}
 
 [packages]
 boto3 = "*"
-werkzeug = "==2.1.2"
 loguru = "*"
-gunicorn = "*"
 tqdm = "*"
-flask = "*"
-flask_restx = "*"
-flask_wtf = "*"
 kdquery = "*"
 numpy = "*"
 pandas = "*"
@@ -29,3 +25,13 @@ requests = "*"
 sortedcontainers = "*"
 unidecode = "*"
 Geocoding-utils = {git = "https://github.com/chrlryo/Geocoding-utils", ref = "master"}
+
+[api]
+flask = "*"
+flask_restx = "*"
+flask_wtf = "*"
+gunicorn = "*"
+werkzeug = "==2.1.2"
+
+[requires]
+python_version = "3"
