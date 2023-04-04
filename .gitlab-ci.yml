@@ -97,7 +97,7 @@ generate_tag:
     - apk --update add --no-cache git openblas-dev linux-headers build-base libffi-dev
     - pip install pipenv
     - sed -i 's|${PYPI_REMOTE}|'${PYPI_REMOTE}'|g' Pipfile
-    - pipenv install --categories "packages api" --sequential --verbose
+    - pipenv install --categories "packages api"
     - pipenv run python -c 'import geocoder; print(geocoder.__version__)'  # otherwise next line doesn't error
     - echo export APPLICATION_TAG_VERSION=`pipenv run python -c 'import geocoder; print(geocoder.__version__)'` >> build.env
 
@@ -114,7 +114,7 @@ test:
   script:
     - apk --update add --no-cache git openblas-dev linux-headers build-base libffi-dev
     - pip install pipenv
-    - pipenv install --categories "packages api dev-packages" --sequential --verbose --skip-lock
+    - pipenv install --categories "packages api dev-packages" --skip-lock
     - pipenv run coverage run --source geocoder/ -m pytest
     - pipenv run coverage report
     - pipenv run coverage xml
