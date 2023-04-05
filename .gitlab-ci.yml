@@ -116,7 +116,11 @@ test:
     - pip install pipenv
     - rm Pipfile.lock  # weird
     - pipenv install --categories "packages api dev-packages"
-    - PYTHONPATH=. pipenv run python geocoder/geocoding/__main__.py update
+    - PYTHONPATH=. pipenv run python geocoder/geocoding/__main__.py download
+    - PYTHONPATH=. pipenv run python geocoder/geocoding/__main__.py decompress
+    - PYTHONPATH=. pipenv run python geocoder/geocoding/__main__.py index
+    - PYTHONPATH=. pipenv run python geocoder/geocoding/__main__.py reverse
+    - ls -al geocoder/geocoding/database/
     - pipenv run coverage run --source geocoder/ -m pytest
     - pipenv run coverage report
     - pipenv run coverage xml
