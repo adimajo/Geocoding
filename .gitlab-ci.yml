@@ -116,6 +116,7 @@ test:
     - pip install pipenv
     - rm Pipfile.lock  # weird
     - pipenv install --categories "packages api dev-packages"
+    - pipenv run geocoder update
     - pipenv run coverage run --source geocoder/ -m pytest
     - pipenv run coverage report
     - pipenv run coverage xml
