@@ -12,6 +12,7 @@ flake8 = "*"
 numpydoc = "*"
 bandit = "*"
 twine = "*"
+bump2version = "*"
 pipenv-setup = {version = "*", extras=["black"]}
 
 [packages]
