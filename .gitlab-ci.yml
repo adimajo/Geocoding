@@ -112,7 +112,7 @@ test:
   <<: *common_python
   <<: *common_tag
   script:
-    - apk --update add --no-cache git openblas-dev linux-headers build-base libffi-dev
+    - apk --update add --no-cache bump2version git openblas-dev linux-headers build-base libffi-dev
     - pip install pipenv
     - rm Pipfile.lock  # weird
     - pipenv install --categories "packages api dev-packages"
@@ -149,7 +149,7 @@ security:
   <<: *common_python
   <<: *common_tag
   script:
-    - apk --update add --no-cache git openblas-dev linux-headers build-base libffi-dev
+    # - apk --update add --no-cache git openblas-dev linux-headers build-base libffi-dev
     - pip install pipenv
     - pipenv run bandit -r geocoder
   only:
@@ -213,7 +213,7 @@ document_cagip:
   <<: *common_tag
   script:
     - . ./build.env
-    - apk --update add --no-cache make make git
+    - apk --update add --no-cache make git
     - pip install pipenv
     - cd docs
     - pipenv run make clean
