@@ -131,11 +131,11 @@ test:
     - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
     - echo export APPLICATION_TAG_VERSION=`pipenv run python -c 'import geocoder; print(geocoder.__version__)'` > build.env
     - git commit -am "[ci-skip] Bumping to version $APPLICATION_TAG_VERSION"
-#    - GITLAB_REPO=`echo $GITLAB_DOCS_REPO | sed -r 's/_docs.git/.git/'`
-#    - echo $GITLAB_REPO
-    - git push svcsvnpr@gitlab.ca.cib:$CI_PROJECT_PATH.git HEAD:master --force
+    - GITLAB_REPO=`echo https://${GITLAB_REPO} | sed -r 's/_docs.git/.git/'`
+    - echo $GITLAB_REPO
+    - git push https://$GITLAB_SRV_ACCOUNT:$GITLAB_CAGIP_TOKEN@$GITLAB_REPO HEAD:master --force
     - git tag -a $APPLICATION_TAG_VERSION -m "[ci-skip] Tag generation $APPLICATION_TAG_VERSION"
-    - git push --follow-tags svcsvnpr@gitlab.ca.cib:$CI_PROJECT_PATH.git HEAD:$CI_COMMIT_REF_NAME
+    - git push --follow-tags https://$GITLAB_SRV_ACCOUNT:$GITLAB_CAGIP_TOKEN@$GITLAB_REPO HEAD:$CI_COMMIT_REF_NAME
   only:
     refs:
       - branches
