@@ -1,6 +1,6 @@
 [[source]]
 name = "artifactory_mirror"
-url = "${PYPI_REMOTE}"
+url = "https://registry.saas.cagip.group.gca/artifactory/api/pypi/pypi-remote/simple"
 verify_ssl = false
 
 [dev-packages]
