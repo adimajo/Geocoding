@@ -82,7 +82,7 @@ def update_ban_file(url, file_name):
     try:
 
         msg = 'Unable to join BAN address website ({}).'.format(url)
-        r = requests.get(url, verify=SSL_VERIFICATION)
+        r = requests.get(url, verify=SSL_VERIFICATION)  # nosec
         msg += ' Status error code: {}'.format(r.status_code)
         if r.status_code != 200:  # pragma: no cover
             raise ConnectionError(msg)
@@ -144,7 +144,7 @@ def download_ban_dpt_file(ban_dpt_file_name):
     :rtype: bool
     """
     with open(os.path.join(raw_data_folder_path, ban_dpt_file_name), 'wb') as ban_dpt_file:
-        response = requests.get(ban_url.format(ban_dpt_file_name), stream=True,
+        response = requests.get(ban_url.format(ban_dpt_file_name), stream=True,  # nosec
                                 verify=SSL_VERIFICATION)
 
         if not response.ok:  # pragma: no cover
