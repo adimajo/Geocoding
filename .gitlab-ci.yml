@@ -94,7 +94,7 @@ generate_tag:
   only:
    - master
   script:
-    - apk --update add --no-cache openblas-dev linux-headers build-base libffi-dev
+    - apk --update add --no-cache git openblas-dev linux-headers build-base libffi-dev
     - pip install pipenv
     - sed -i 's|${PYPI_REMOTE}|'${PYPI_REMOTE}'|g' Pipfile
     - pipenv install --categories "packages api"
@@ -114,7 +114,7 @@ test:
   <<: *common_deploy
   script:
     - . ./build.env
-    - apk --update add --no-cache openblas-dev linux-headers build-base libffi-dev
+    - apk --update add --no-cache git openblas-dev linux-headers build-base libffi-dev
     - pip install pipenv
     - rm Pipfile.lock  # weird
     - pipenv install --categories "packages api dev-packages"
