@@ -125,7 +125,7 @@ test:
     - pipenv run coverage run --source geocoder/ -m pytest
     - pipenv run coverage report
     - pipenv run coverage xml
-    - pipenv run bump2version --parse "^(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)$" --current-version $APPLICATION_TAG_VERSION patch geocoder/__init__.py
+    - pipenv run bump2version --parse "^(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)$" --current-version $APPLICATION_TAG_VERSION patch geocoder/__init__.py --allow-dirty
     - APPLICATION_TAG_VERSION=`python -c 'import geocoder; print(geocoder.__version__)'`
     - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
     - echo export APPLICATION_TAG_VERSION=`pipenv run python -c 'import geocoder; print(geocoder.__version__)'` > build.env
