@@ -111,7 +111,6 @@ test:
   <<: *global_cache
   <<: *common_python
   <<: *common_tag
-  <<: *common_deploy
   script:
     - . ./build.env
     - apk --update add --no-cache git openblas-dev linux-headers build-base libffi-dev
@@ -130,6 +129,9 @@ test:
     - APPLICATION_TAG_VERSION=`pipenv run python -c 'import geocoder; print(geocoder.__version__)'`
     - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
     - echo export APPLICATION_TAG_VERSION=`pipenv run python -c 'import geocoder; print(geocoder.__version__)'` > build.env
+    - git config --global http.sslverify false
+    - git config --global user.name "$GITLAB_USER_NAME"
+    - git config --global user.email "$GITLAB_USER_EMAIL"
     - git commit -am "[ci-skip] Bumping to version $APPLICATION_TAG_VERSION"
     - GITLAB_REPO=`echo $GITLAB_DOCS_REPO | sed -r 's/_docs.git/.git/'`
     - echo $GITLAB_REPO
