@@ -112,6 +112,7 @@ test:
   <<: *common_python
   <<: *common_tag
   script:
+    - . ./build.env
     - apk --update add --no-cache git openblas-dev linux-headers build-base libffi-dev
     - pip install pipenv
     - rm Pipfile.lock  # weird
