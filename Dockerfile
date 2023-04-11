@@ -11,7 +11,7 @@ COPY Pipfile.lock Pipfile.lock
 RUN apk --update add --no-cache git openblas-dev linux-headers build-base || true &&\
     pip install --upgrade pip &&\
     pip install pipenv
-RUN pipenv install --system --deploy &&\
+RUN pipenv install --categories "packages api" --system --deploy &&\
     python3 -m pip install .
 RUN chown nobody:nogroup /geocoder &&\
     chmod +x geocoder

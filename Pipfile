@@ -13,6 +13,7 @@ numpydoc = "*"
 bandit = "*"
 twine = "*"
 bump2version = "*"
+vistir = {version = "<=0.6.1"}  # https://github.com/Madoshakalaka/pipenv-setup/issues/138
 pipenv-setup = {version = "*", extras=["black"]}
 
 [packages]
