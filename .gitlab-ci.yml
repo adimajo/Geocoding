@@ -98,8 +98,8 @@ generate_tag:
     - pip install pipenv
     - sed -i 's|${PYPI_REMOTE}|'${PYPI_REMOTE}'|g' Pipfile
     - pipenv install --categories "packages api"
-    - pipenv run python -c 'import geocoder; print(geocoder.__version__)'  # otherwise next line doesn't error
-    - echo export APPLICATION_TAG_VERSION=`pipenv run python -c 'import geocoder; print(geocoder.__version__)'` >> build.env
+    - LOGURU_LEVEL="ERROR" pipenv run python -c 'import geocoder; print(geocoder.__version__)'  # otherwise next line doesn't error
+    - LOGURU_LEVEL="ERROR" echo export APPLICATION_TAG_VERSION=`pipenv run python -c 'import geocoder; print(geocoder.__version__)'` >> build.env
 
 test:
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
@@ -107,6 +107,7 @@ test:
     paths:
       - coverage.xml
       - build.env
+      - geocoder/__init__.py
   stage: test
   <<: *global_cache
   <<: *common_python
@@ -337,7 +338,7 @@ deploy_dev_package:
   script:
     - apk --update add --no-cache git openblas-dev linux-headers build-base libffi-dev
     - pip install pipenv
-    - pipenv-setup sync --pipfile
+    - pipenv run pipenv-setup sync --pipfile
     - pipenv run python3 setup.py sdist bdist_wheel
     - python3 setup.py sdist bdist_wheel
     - wget -qO - ${PKI}/cacreditagricoleserver.crt >> cacreditagricoleserver.crt
