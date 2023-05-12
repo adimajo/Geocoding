@@ -33,12 +33,12 @@ jobs:
           export PYPI_REMOTE=https://pypi.org/simple
           echo "PYPI_REMOTE=$PYPI_REMOTE" >> $GITHUB_ENV
           sed -i 's|${PYPI_REMOTE}|'$PYPI_REMOTE'|g' Pipfile
-          pipenv install
-          pipenv install --dev --skip-lock
-          export APPLICATION_TAG_VERSION=`pipenv run python -c 'import geocoder; print(geocoder.__version__)'`
-          echo "APPLICATION_TAG_VERSION=$APPLICATION_TAG_VERSION" >> $GITHUB_ENV
+          pipenv install --categories "packages api"
+          LOGURU_LEVEL="ERROR" pipenv run python -c 'import geocoder; print(geocoder.__version__)'  # otherwise next line doesn't error
+          LOGURU_LEVEL="ERROR" echo export APPLICATION_TAG_VERSION=`pipenv run python -c 'import geocoder; print(geocoder.__version__)'` >> $GITHUB_ENV
       - name: Lint with flake8
         run: |
+          pipenv install --categories "dev-packages" --skip-lock
           pipenv run flake8 geocoder --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=tests/conftest.py
           pipenv run flake8 --ignore=W504 geocoder --max-complexity=10 --max-line-length=120 --statistics --exclude=tests/conftest.py
       - name: Test with coverage and pytest
