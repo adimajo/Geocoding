@@ -87,5 +87,6 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.APPLICATION_TAG_VERSION }}
           build-args: |
-            BASE_IMAGE=python:3.8
+            BASE_IMAGE=python:${{ matrix.python-version }}
+            EMAIL=$LATEST_COMMITTER_EMAIL
             DOCKER_REGISTRY=

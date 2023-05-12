@@ -1,4 +1,5 @@
 ARG DOCKER_REGISTRY
+ARG EMAIL
 ARG BASE_IMAGE
 
 FROM ${DOCKER_REGISTRY}${BASE_IMAGE}
@@ -19,7 +20,7 @@ RUN chown nobody:nogroup /geocoder &&\
 RUN export APPLICATION_TAG_VERSION=`python -c 'import geocoder; print(geocoder.__version__)'`
 
 LABEL da.da/geocoder.version=$APPLICATION_TAG_VERSION \
-      da.da/geocoder.contact=***REMOVED***
+      da.da/geocoder.contact=$EMAIL
 
 RUN rm -rf geocoder && rm -f README.md Pipfile Pipfile.lock setup.py
 ENTRYPOINT geocoder update &&\
