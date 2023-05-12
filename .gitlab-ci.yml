@@ -268,7 +268,7 @@ build geocoder:
        KANIKOCFG="${KANIKOCFG} }"
        echo "${KANIKOCFG}" >> /kaniko/.docker/config.json
     - wget -qO - ${PKI}/cacreditagricoleserver.crt >> /kaniko/ssl/certs/additional-ca-cert-bundle.crt
-    - /kaniko/executor --context . --dockerfile Dockerfile ${KANIKOPROXYBUILDARGS} --build-arg DOCKER_REGISTRY=${DOCKER_REGISTRY} --build-arg BASE_IMAGE=${BASE_IMAGE} --destination ${ARTI_SCRATCH_REGISTRY}.${ARTI_REGISTRY}/${ARTI_REPO}:${APPLICATION_TAG_VERSION}
+    - /kaniko/executor --context . --dockerfile Dockerfile ${KANIKOPROXYBUILDARGS} --build-arg EMAIL=${EMAIL} DOCKER_REGISTRY=${DOCKER_REGISTRY} --build-arg BASE_IMAGE=${BASE_IMAGE} --destination ${ARTI_SCRATCH_REGISTRY}.${ARTI_REGISTRY}/${ARTI_REPO}:${APPLICATION_TAG_VERSION}
   timeout: 2h
 
 build_and_deploy_gitlab_registry:
