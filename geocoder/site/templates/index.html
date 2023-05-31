@@ -86,7 +86,7 @@
               </div>
               <ul id="result_info" class="list-unstyled mt-3 mb-4">
                 <li>Qualité : <span id="quality"></span></li>
-                <li>Temps de calcul : <span id="time_ok"></span> s.</li>
+                <li>Temps de calcul : <span id="time_ok"></span> ms.</li>
               </ul>
             </div>
           </div>
@@ -115,8 +115,9 @@
           var marker = L.marker([lat, lon]).addTo(map);
       }
 
-      function display_result_ok(quality, lat, lon, quality) {
+      function display_result_ok(quality, lat, lon, quality, time_ok) {
           $("#quality").html(quality);
+          $("#time_ok").html(time_ok);
           $("#result_info").slideDown("slow");
           setUpTheMap(lat, lon, quality);
       }
@@ -137,6 +138,7 @@
       var csrf_token = "{{ csrf_token() }}";
 
       function geocode() {
+          var start = new Date().getTime();
           var address = $("#address").val();
           var postal_code = $("#postal_code").val();
           var city = $("#city").val();
@@ -168,8 +170,10 @@
                   var lon = geocoded_data.lon;
                   var quality = geocoded_data.quality;
                   var quality_label = geocoded.quality[quality];
+                  var end = new Date().getTime();
+                  var time_ok = end - start;
 
-                  display_result_ok(quality + ' : ' + quality_label, lat, lon, quality);
+                  display_result_ok(quality + ' : ' + quality_label, lat, lon, quality, time_ok);
                   scrollToAnchor('#result');
               } catch (error) {
                   display_error(error);

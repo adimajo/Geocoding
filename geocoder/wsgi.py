@@ -40,5 +40,5 @@ def runserver(options):
 
 if __name__ == '__main__':  # pragma: no cover
     app.run(host='0.0.0.0',  # nosec
-            port="8000",  # nosec
+            port="8001",  # nosec
             debug=os.environ.get("DEBUG", True))  # nosec
