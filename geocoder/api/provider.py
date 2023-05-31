@@ -25,7 +25,7 @@ def create_app():
                 static_folder=os.path.join(os.path.dirname(here), "site/static"))
     csrf = CSRFProtect()
     app.config['JSON_SORT_KEYS'] = False
-    app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "to_debug")  # nosec
+    app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "")
 
     @app.errorhandler(404)
     def handle_404(error):

@@ -8,12 +8,12 @@ import geocoder
 from geocoder import __version__
 from geocoder.geocoding.activate_reverse import create_kdtree
 from geocoder.geocoding.datapaths import database
-from geocoder.geocoding.download import get_ban_file, decompress, remove_downloaded_raw_ban_files
+from geocoder.geocoding.download import check_ban_version, decompress, remove_downloaded_raw_ban_files
 from geocoder.geocoding.index import process_files, create_database
 from geocoder.wsgi import app
 
-get_ban_file()
-get_ban_file()  # to test "no need to download"
+check_ban_version()
+check_ban_version()  # to test "no need to download"
 decompress()
 process_files()
 create_database()

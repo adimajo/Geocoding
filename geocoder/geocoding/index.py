@@ -24,16 +24,28 @@ file_names = ['departement', 'postal', 'commune', 'voie', 'localisation']
 processed_files = {}
 
 
-def process_files():
-    for file in file_names:
-        processed_files[file] = deque()
-
-    ban_files = defaultdict(list)
-
+def _init_processing():
     # Check if the folder with the data to process exists
     if not os.path.exists(raw_data_folder_path):  # pragma: no cover
         logger.info('Data not found - execute: geocoder download')
         return False
+
+    for file in file_names:
+        processed_files[file] = deque()
+    return True
+
+
+def process_files():
+    """
+    Process all downloaded decompressed files
+
+    :return: if processing was successful
+    :rtype: bool
+    """
+    if not _init_processing():
+        return False
+
+    ban_files = defaultdict(list)
 
     # Open each csv file
     for (dirname, dirs, files) in os.walk(raw_data_folder_path):

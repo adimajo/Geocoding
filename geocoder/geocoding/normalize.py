@@ -70,10 +70,10 @@ def remove_separators(text):
     """Remove some separator symbols that doesn't make sense in an address.
 
     Remove the parenthesis and everything inside if there is, otherwise search
-    for a slash or a vertical slash and return the everything at the its left.
+    for a slash or a vertical slash and return everything at its left.
     """
     # Remove parenthesis
-    text = re.sub(r'[(].*[)]', '', text)
+    text = re.sub(r'(.*)', '', text)
     # The slash
     if re.findall(r'/', text):
         return text.split('/')[0]
@@ -119,7 +119,7 @@ def uniform_adresse(text):
 def uniform_commune(text):
     """Normalization of the city name.
     """
-    return re.sub(r'[0-9]', '', ''.join(uniform_words(text))).strip()
+    return re.sub(r'\d', '', ''.join(uniform_words(text))).strip()
 
 
 def find_voie_type(words):
@@ -161,7 +161,7 @@ def mine(text):
     # Search for the number
     numero, numero_index = None, None
     for i, word in reversed(list(enumerate(words[:numero_limit]))):
-        matches = re.findall(r'[0-9]+', word)
+        matches = re.findall(r'\d+', word)
         if matches:
             numero, numero_index = int(matches[0]), i
             break

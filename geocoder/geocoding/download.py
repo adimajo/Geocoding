@@ -52,7 +52,7 @@ else:  # pragma: no cover
                 "971", "972", "973", "974", "975", "976", "977", "978", "984", "986", "987", "988", "989"]
 
 
-def md5(fname):
+def _md5(fname):
     """
     Calculates md5 hash of file
 
@@ -122,7 +122,7 @@ def need_to_download():
     logger.debug("Local content file exists")
     update_server_content_file()
     logger.debug("Comparing local and server content files")
-    if md5(server_content_file_name) == md5(local_content_file_name) and (
+    if _md5(server_content_file_name) == _md5(local_content_file_name) and (
             (LOCAL_DB and os.path.exists(database)) or (not LOCAL_DB)):
         logger.info('BAN database is already up to date. No need to download it again.')
         if LOCAL_DB:
@@ -134,7 +134,7 @@ def need_to_download():
         return True
 
 
-def download_ban_dpt_file(ban_dpt_file_name):
+def _download_ban_dpt_file(ban_dpt_file_name):
     """
     Downloads a single file from BAN
 
@@ -168,21 +168,11 @@ def download_ban_dpt_file(ban_dpt_file_name):
     return True
 
 
-def get_ban_file():
+def _update_ban_files():
     """
-    Downloads everything if necessary
-
-    Returns: whether a download has been preformed
-    :rtype: bool
+    Downloads everything
     """
-    if LOCAL_DB and not os.path.exists(content_folder_path):
-        os.mkdir(content_folder_path)
-
-    if not need_to_download():
-        return False
-
     logger.info('A new version of BAN base is available.')
-
     update_local_content_file()
 
     if LOCAL_DB and os.path.exists(raw_data_folder_path):
@@ -201,18 +191,30 @@ def get_ban_file():
     for dpt in tqdm(dpt_list, desc="Download raw data"):
         for ban_dpt_gz_file_name_type in ban_dpt_gz_file_name:
             downloading_ban_dpt_gz_file_name = ban_dpt_gz_file_name_type.format(dpt)
-            if not download_ban_dpt_file(downloading_ban_dpt_gz_file_name):
+            if not _download_ban_dpt_file(downloading_ban_dpt_gz_file_name):
                 logger.error('Impossible to download {}'.format(downloading_ban_dpt_gz_file_name))
 
     return True
 
 
-def decompress():
+def check_ban_version():
     """
-    Decompress every downloaded archive
+    Checks BAN version and triggers download if necessary
 
-    Returns: whether decompression was successful
+    Returns: whether a download has been performed
     :rtype: bool
+    """
+    if LOCAL_DB and not os.path.exists(content_folder_path):
+        os.mkdir(content_folder_path)
+
+    if not need_to_download():
+        return False
+    return _update_ban_files()
+
+
+def _eventually_download_files_locally():
+    """
+    If raw files were downloaded to S3, download locally before decompression
     """
     if not LOCAL_DB and not os.path.exists(raw_data_folder_path):
         # retrieve from S3
@@ -225,6 +227,16 @@ def decompress():
             if filename is None or filename == "" or not filename.endswith(".gz"):
                 continue
             s3.download_file('geocoder', obj['Key'], os.path.join(raw_data_folder_path, filename))
+
+
+def decompress():
+    """
+    Decompress every downloaded archive
+
+    Returns: whether decompression was successful
+    :rtype: bool
+    """
+    _eventually_download_files_locally()
 
     count = 0
     for dpt in dpt_list:
@@ -242,14 +254,14 @@ def decompress():
                     with open(dpt_file_path, 'wb') as f_out:
                         shutil.copyfileobj(f_in, f_out)
 
-                remove_file(dpt_gz_file_path)
+                _remove_file(dpt_gz_file_path)
 
     if count:  # pragma: no cover
         return False
     return True
 
 
-def remove_file(file_path):
+def _remove_file(file_path):
     """
     Delete file
 
@@ -272,8 +284,8 @@ def remove_downloaded_raw_ban_files():
     """
     for dpt in dpt_list:
         for ban_dpt_gz_file_name_type in ban_dpt_gz_file_name:
-            remove_file(os.path.join(raw_data_folder_path, ban_dpt_gz_file_name_type.format(dpt)))
+            _remove_file(os.path.join(raw_data_folder_path, ban_dpt_gz_file_name_type.format(dpt)))
         for ban_dpt_file_name_type in ban_dpt_file_name:
-            remove_file(os.path.join(raw_data_folder_path, ban_dpt_file_name_type.format(dpt)))
+            _remove_file(os.path.join(raw_data_folder_path, ban_dpt_file_name_type.format(dpt)))
     shutil.rmtree(raw_data_folder_path)
     return True

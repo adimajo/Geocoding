@@ -10,13 +10,13 @@ from argparse import ArgumentParser
 from geocoder.geocoding import LOCAL_DB
 from geocoder.geocoding.activate_reverse import create_kdtree
 from geocoder.geocoding.datapaths import paths
-from geocoder.geocoding.download import get_ban_file, decompress, remove_downloaded_raw_ban_files
+from geocoder.geocoding.download import check_ban_version, decompress, remove_downloaded_raw_ban_files
 from geocoder.geocoding.index import process_files, create_database
 from geocoder.wsgi import runserver
 
 
 def update():
-    if get_ban_file() or (LOCAL_DB and not all([os.path.exists(path) for path in paths])):
+    if check_ban_version() or (LOCAL_DB and not all([os.path.exists(path) for path in paths])):
         decompress()
         process_files()
         create_database()
@@ -29,7 +29,7 @@ def update():
 
 
 commands = {
-    'download': [get_ban_file],
+    'download': [check_ban_version],
     'decompress': [decompress],
     'index': [process_files, create_database],
     'reverse': [create_kdtree],
