@@ -18,7 +18,7 @@ RUN chown nobody:nogroup /geocoder &&\
     chmod +x geocoder
 
 RUN LOGURU_LEVEL="ERROR" python3 -c 'import geocoder; print(geocoder.__version__)'  # otherwise next line doesn't error
-RUN LOGURU_LEVEL="ERROR" export APPLICATION_TAG_VERSION=`python3 -c 'import geocoder; print(geocoder.__version__)'`
+RUN export APPLICATION_TAG_VERSION=`LOGURU_LEVEL="ERROR" python3 -c 'import geocoder; print(geocoder.__version__)'`
 
 LABEL da.da/geocoder.version=$APPLICATION_TAG_VERSION \
       da.da/geocoder.contact=$EMAIL
