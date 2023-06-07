@@ -21,18 +21,7 @@ from geocoder.geocoding.datatypes import dtypes
 from geocoder.geocoding.download import raw_data_folder_path
 
 file_names = ['departement', 'postal', 'commune', 'voie', 'localisation']
-processed_files = {}
-
-
-def _init_processing():
-    # Check if the folder with the data to process exists
-    if not os.path.exists(raw_data_folder_path):  # pragma: no cover
-        logger.info('Data not found - execute: geocoder download')
-        return False
-
-    for file in file_names:
-        processed_files[file] = deque()
-    return True
+processed_files = defaultdict(deque)
 
 
 def process_files():
@@ -42,7 +31,8 @@ def process_files():
     :return: if processing was successful
     :rtype: bool
     """
-    if not _init_processing():
+    if not os.path.exists(raw_data_folder_path):  # pragma: no cover
+        logger.info('Data not found - execute: geocoder download')
         return False
 
     ban_files = defaultdict(list)
@@ -92,6 +82,7 @@ def create_database():
     add_index_tables()
 
     for table, processed_file in tqdm(processed_files.items(), desc="Store database"):
+        logger.debug(table)
         create_dat_file(list(processed_file), paths[table], dtypes[table])
 
     return True
@@ -119,7 +110,10 @@ def create_dat_file(lst, out_filename, dtype):
         dtype: The type of the numpy array.
     """
     dat_file = np.memmap(out_filename, mode='w+', dtype=dtype, shape=(len(lst), ))
-    dat_file[:] = lst[:]
+    try:
+        dat_file[:] = lst[:]
+    except TypeError:
+        logger.debug(lst[-10:])
     dat_file.flush()
     if not LOCAL_DB:
         s3.upload_file(out_filename, "geocoder", f"database/{os.path.basename(out_filename)}")

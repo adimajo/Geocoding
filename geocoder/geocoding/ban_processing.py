@@ -14,10 +14,13 @@ process decompressed files into a database
     update_voie
     update_localisation
 """
+from typing import Literal
+
 # -*- coding: utf-8 -*-
 import numpy as np
+from loguru import logger
 from sortedcontainers import SortedDict, SortedSet
-from typing import Literal
+
 from geocoder.geocoding import normalize as norm
 from geocoder.geocoding.utils import degree_to_int
 
@@ -33,7 +36,7 @@ line_specs = {
         "nom_commune": 7,
         "nom_complementaire": 16},
     "lieux-dits": {
-        "nom_voie": None,
+        "nom_voie": 1,  # is actually nom_lieu_dit
         "numero": None,
         "repetition": None,
         "code_insee": 3,
@@ -53,7 +56,7 @@ types = {
 
 voie_fields = ['nom_voie']
 
-commune_fields = ['nom_complementaire', 'nom_commune']
+commune_fields = ['nom_commune', 'nom_complementaire']
 
 
 def test(fields: list, lieu: Literal["adresses", "lieux-dits"]):
@@ -65,9 +68,15 @@ def test(fields: list, lieu: Literal["adresses", "lieux-dits"]):
     :rtype: bool
     """
     for field in types:
+        if lieu == "lieux-dits" and field == "numero":
+            continue
         try:
             types[field](fields[line_specs[lieu][field]])
         except ValueError:
+            logger.debug(f"Error reading {field}")
+            logger.debug(f"Line: {fields}")
+            logger.debug(f"Type of lieu: {lieu}")
+            logger.debug(f"Field: {line_specs[lieu][field]}")
             return False
     return True
 
@@ -105,7 +114,7 @@ def get_voie(fields, lieu: Literal["adresses", "lieux-dits"]):
                                              norm.uniform_adresse,
                                              lieu,
                                              47)
-        if voie_nom is not None:
+        if voie_normalise is not None:
             return voie_nom, voie_normalise
     return None, None  # pragma: no cover
 
@@ -119,7 +128,7 @@ def get_commune(fields, lieu: Literal["adresses", "lieux-dits"]):
                                                    fields,
                                                    norm.uniform_commune,
                                                    lieu)
-        if commune_nom is not None:
+        if commune_normalise is not None:
             return commune_nom, commune_normalise
     return None, None  # pragma: no cover
 
@@ -137,22 +146,30 @@ def get_attributes(fields, lieu: Literal["adresses", "lieux-dits"] = "adresses")
 
     commune_nom, commune_normalise = get_commune(fields, lieu)
     if commune_nom is None:
+        logger.debug(f"Error reading commune")
+        logger.debug(f"Line: {fields}")
+        logger.debug(f"Type of lieu: {lieu}")
         return None  # pragma: no cover
 
     voie_nom, voie_normalise = get_voie(fields, lieu)
     if voie_nom is None:
+        logger.debug(f"Error reading voie")
+        logger.debug(f"Line: {fields}")
+        logger.debug(f"Type of lieu: {lieu}")
         return None  # pragma: no cover
 
     code_insee = fields[line_specs[lieu]['code_insee']]
     code_postal = int(fields[line_specs[lieu]['code_postal']])
     lon = degree_to_int(fields[line_specs[lieu]['longitude']])
     lat = degree_to_int(fields[line_specs[lieu]['latitude']])
+    if lon is None or lat is None:
+        return None
 
     try:
         numero = int(fields[line_specs[lieu]['numero']])
         repetition = fields[line_specs[lieu]['repetition']].replace('"', '')
     except TypeError:  # pragma: no cover
-        numero, repetition = None, None
+        numero, repetition = 0, None
 
     return (code_postal, commune_normalise, commune_nom, code_insee,
             voie_normalise, voie_nom, numero, repetition, lon, lat)
@@ -172,10 +189,13 @@ def update(dpt_nom: str, csv_file_path, processed_files: dict):
         try:  # some lieux-dits might be empty
             next(f)
         except StopIteration:  # pragma: no cover
+            logger.debug(f"{csv_file_path} was empty")
             return
         for line in f:
-            attributes = get_attributes(line.strip().split(';'))
+            attributes = get_attributes(line.strip().split(';'),
+                                        "lieux-dits" if "lieux-dits" in csv_file_path else "adresses")
             if attributes is None:
+                logger.debug(f"Failed to parse line")
                 continue
             postal_key = attributes[:1]
             commune_key = attributes[1:4]
@@ -213,6 +233,8 @@ def update_postal(id_ref, processed_files, postal_dict):
         current_id = len(processed_files['postal'])
 
         start = len(processed_files['commune'])
+        logger.debug(key)
+        logger.debug(postal_dict[key])
         update_commune(current_id, processed_files, postal_dict[key])
         end = len(processed_files['commune'])
 
@@ -225,11 +247,15 @@ def update_commune(id_ref, processed_files, commune_dict):
         current_id = len(processed_files['commune'])
 
         start = len(processed_files['voie'])
+        logger.debug(key)
+        logger.debug(commune_dict[key])
         update_voie(current_id, processed_files, commune_dict[key])
         end = len(processed_files['voie'])
 
         localisation_list = [value for k, value in commune_dict[key].items()]
         lon, lat = tuple_list_mean(localisation_list, range(2))
+        if lon is None or lat is None:
+            logger.error(localisation_list)
 
         tuple_value = key + (lon, lat, start, end, id_ref)
         processed_files['commune'].append(tuple_value)
@@ -240,8 +266,12 @@ def update_voie(id_ref, processed_files, voie_dict):
         current_id = len(processed_files['voie'])
 
         start = len(processed_files['localisation'])
+        logger.debug(key)
+        logger.debug(voie_dict[key])
         update_localisation(current_id, processed_files, voie_dict[key])
         lon, lat = tuple_list_mean(voie_dict[key], range(2, 4))
+        if lon is None or lat is None:
+            logger.error(voie_dict[key])
         end = len(processed_files['localisation'])
 
         tuple_value = key + (lon, lat, start, end, id_ref)
@@ -254,6 +284,10 @@ def update_voie(id_ref, processed_files, voie_dict):
 def update_localisation(id_ref, processed_files, localisation_set):
     for localisation in localisation_set:
         tuple_value = localisation + (id_ref, )
+        if localisation[0] is None:
+            logger.error(localisation)
+            logger.error(localisation_set)
+            # raise ValueError
         processed_files['localisation'].append(tuple_value)
 
 

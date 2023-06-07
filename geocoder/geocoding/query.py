@@ -37,7 +37,7 @@ def setup():
                 data[table] = np.memmap(paths[table], dtypes[table])
                 limits[table] = (0, len(data[table]))
             else:
-                logger.info(f"Missing database {table}; geocoder will likely error")
+                logger.error(f"Missing database {table}; geocoder will likely error")
 
 
 def select(table, column, start, end, element):

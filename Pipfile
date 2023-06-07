@@ -29,6 +29,7 @@ unidecode = "*"
 Geocoding-utils = {git = "https://github.com/chrlryo/Geocoding-utils", ref = "master"}
 
 [api]
+click = ">=8.1.3"
 flask = "*"
 flask_restx = "*"
 flask_wtf = "*"
