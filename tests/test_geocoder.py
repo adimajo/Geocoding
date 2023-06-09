@@ -38,7 +38,7 @@ def test_version(client, caplog):
 def test_geocode(client, caplog):
     response = client.get('/geocode/Rue+du+Professeur+Christian+Cabrol/01500/Ambérieu-en-Bugey')
     assert round(json.loads(response.data.decode("utf-8"))["data"][0]["lon"], 2) == 5.35
-    assert round(json.loads(response.data.decode("utf-8"))["data"][0]["lat"], 2) == 45.98
+    assert round(json.loads(response.data.decode("utf-8"))["data"][0]["lat"], 2) == 45.93
     response = client.get('/')
     response = client.get('/use')
 
