@@ -65,7 +65,7 @@ def test_functions():
     query = (2.2099, 48.7099)
     output = geocoder.near(query)
     assert output['commune']['nom'] == "SERMOYER"  # should be "PALAISEAU" with full DB
-    assert output['voie']['nom'] == "ROUTE DE CUISERY"  # should be "BOULEVARD DES MARECHAUX" with full DB
+    assert output['voie']['nom'] == "CORNE DE VACHON"  # should be "BOULEVARD DES MARECHAUX" with full DB
 
 
 def pytest_sessionfinish(session, exitstatus):
