@@ -12,13 +12,13 @@ from geocoder.geocoding.download import check_ban_version, decompress, remove_do
 from geocoder.geocoding.index import process_files, create_database
 from geocoder.wsgi import app
 
-# check_ban_version()
-# check_ban_version()  # to test "no need to download"
-# decompress()
-# process_files()
-# create_database()
-# create_kdtree()
-# remove_downloaded_raw_ban_files()
+check_ban_version()
+check_ban_version()  # to test "no need to download"
+decompress()
+process_files()
+create_database()
+create_kdtree()
+remove_downloaded_raw_ban_files()
 
 
 @pytest.fixture

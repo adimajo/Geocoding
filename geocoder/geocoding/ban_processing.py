@@ -146,14 +146,14 @@ def get_attributes(fields, lieu: Literal["adresses", "lieux-dits"] = "adresses")
 
     commune_nom, commune_normalise = get_commune(fields, lieu)
     if commune_nom is None:
-        logger.debug(f"Error reading commune")
+        logger.debug("Error reading commune")
         logger.debug(f"Line: {fields}")
         logger.debug(f"Type of lieu: {lieu}")
         return None  # pragma: no cover
 
     voie_nom, voie_normalise = get_voie(fields, lieu)
     if voie_nom is None:
-        logger.debug(f"Error reading voie")
+        logger.debug("Error reading voie")
         logger.debug(f"Line: {fields}")
         logger.debug(f"Type of lieu: {lieu}")
         return None  # pragma: no cover
@@ -195,7 +195,7 @@ def update(dpt_nom: str, csv_file_path, processed_files: dict):
             attributes = get_attributes(line.strip().split(';'),
                                         "lieux-dits" if "lieux-dits" in csv_file_path else "adresses")
             if attributes is None:
-                logger.debug(f"Failed to parse line")
+                logger.debug("Failed to parse line")
                 continue
             postal_key = attributes[:1]
             commune_key = attributes[1:4]
