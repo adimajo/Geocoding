@@ -95,7 +95,7 @@ generate_tag:
    - master
   script:
     - apk --update add --no-cache git openblas-dev linux-headers build-base libffi-dev
-    - pip install pipenv
+    - pip install "pipenv<=2023.5.19"
     - sed -i 's|${PYPI_REMOTE}|'${PYPI_REMOTE}'|g' Pipfile
     - pipenv install --categories "packages api"
     - LOGURU_LEVEL="ERROR" pipenv run python -c 'import geocoder; print(geocoder.__version__)'  # otherwise next line doesn't error
@@ -115,7 +115,7 @@ test:
   script:
     - . ./build.env
     - apk --update add --no-cache git openblas-dev linux-headers build-base libffi-dev
-    - pip install pipenv
+    - pip install "pipenv<=2023.5.19"
     - rm Pipfile.lock  # weird
     - pipenv install --categories "packages api dev-packages"
     - PYTHONPATH=. pipenv run python geocoder/geocoding/__main__.py download
@@ -155,7 +155,7 @@ security:
   <<: *common_tag
   script:
     # - apk --update add --no-cache git openblas-dev linux-headers build-base libffi-dev
-    - pip install pipenv
+    - pip install "pipenv<=2023.5.19"
     - pipenv run bandit -r geocoder
   only:
     refs:
@@ -194,7 +194,7 @@ pages:
   script:
     - . ./build.env
     - apk --update add --no-cache make
-    - pip install pipenv
+    - pip install "pipenv<=2023.5.19"
     - cd docs
     - pipenv run make clean
     - pipenv run make html
@@ -219,7 +219,7 @@ document_cagip:
   script:
     - . ./build.env
     - apk --update add --no-cache make git
-    - pip install pipenv
+    - pip install "pipenv<=2023.5.19"
     - cd docs
     - pipenv run make clean
     - pipenv run make html
@@ -337,7 +337,7 @@ deploy_dev_package:
   <<: *common_python
   script:
     - apk --update add --no-cache git openblas-dev linux-headers build-base libffi-dev
-    - pip install pipenv
+    - pip install "pipenv<=2023.5.19"
     - pipenv run pipenv-setup sync --pipfile
     - pipenv run python3 setup.py sdist bdist_wheel
     - python3 setup.py sdist bdist_wheel

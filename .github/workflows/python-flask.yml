@@ -30,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pipenv
+          pip install "pipenv<=2023.5.19"
           sed -i 's|${PYPI_REMOTE}|'$PYPI_REMOTE'|g' Pipfile
           pipenv install --categories "packages api"
           LOGURU_LEVEL="ERROR" pipenv run python -c 'import geocoder; print(geocoder.__version__)'  # otherwise next line doesn't error
