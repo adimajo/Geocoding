@@ -251,6 +251,7 @@ build geocoder:
         - Pipfile
         - setup.py
         - Dockerfile
+        - tests/**/*  # this is needed since tests possibly bump versions
   <<: *common_tag
   image:
     name: ${DOCKER_REGISTRY_BIS}kaniko-project/executor:debug-v1.0.0
