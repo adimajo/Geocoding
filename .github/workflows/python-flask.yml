@@ -39,6 +39,8 @@ jobs:
         run: |
           pipenv install --categories "dev-packages" --skip-lock
           pipenv run pip show click
+          pipenv run pip install click --upgrade
+          pipenv run pip show click
           pipenv run flake8 geocoder --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=tests/conftest.py
           pipenv run flake8 --ignore=W504 geocoder --max-complexity=10 --max-line-length=120 --statistics --exclude=tests/conftest.py
       - name: Test with coverage and pytest
