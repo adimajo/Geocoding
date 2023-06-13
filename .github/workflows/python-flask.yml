@@ -32,16 +32,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install "pipenv<=2023.5.19"
           sed -i 's|${PYPI_REMOTE}|'$PYPI_REMOTE'|g' Pipfile
-          pipenv install --categories "packages api" --skip-lock
+          pipenv install --categories "packages api"
           LOGURU_LEVEL="ERROR" pipenv run python -c 'import geocoder; print(geocoder.__version__)'  # otherwise next line doesn't error
           echo export APPLICATION_TAG_VERSION=`LOGURU_LEVEL="ERROR" pipenv run python -c 'import geocoder; print(geocoder.__version__)'` >> $GITHUB_ENV
       - name: Lint with flake8
         run: |
           pipenv install --categories "dev-packages" --skip-lock
+          pipenv run pip show click
           pipenv run flake8 geocoder --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=tests/conftest.py
           pipenv run flake8 --ignore=W504 geocoder --max-complexity=10 --max-line-length=120 --statistics --exclude=tests/conftest.py
       - name: Test with coverage and pytest
         run: |
+          pipenv run pip show click
           pipenv run coverage run --source geocoder -m pytest
           pipenv run coverage report
           pipenv run coverage xml
