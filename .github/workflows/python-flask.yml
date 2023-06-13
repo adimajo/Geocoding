@@ -32,7 +32,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install "pipenv<=2023.5.19"
           sed -i 's|${PYPI_REMOTE}|'$PYPI_REMOTE'|g' Pipfile
-          pipenv install --categories "packages api"
+          pipenv install --categories "packages api" --skip-lock
           LOGURU_LEVEL="ERROR" pipenv run python -c 'import geocoder; print(geocoder.__version__)'  # otherwise next line doesn't error
           echo export APPLICATION_TAG_VERSION=`LOGURU_LEVEL="ERROR" pipenv run python -c 'import geocoder; print(geocoder.__version__)'` >> $GITHUB_ENV
       - name: Lint with flake8
