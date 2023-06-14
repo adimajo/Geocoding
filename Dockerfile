@@ -17,7 +17,7 @@ RUN apk --update add --no-cache git openblas-dev linux-headers build-base || tru
 RUN pipenv install --categories "packages api" --system --deploy &&\
     python3 -m pip install .
 RUN chown nobody:nogroup /geocoder &&\
-    chmod +x geocoder \
+    chmod +x geocoder
 RUN echo $APPLICATION_TAG_VERSION
 RUN echo $EMAIL
 
