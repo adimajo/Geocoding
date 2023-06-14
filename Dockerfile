@@ -1,8 +1,11 @@
 ARG DOCKER_REGISTRY
 ARG EMAIL
 ARG BASE_IMAGE
+ARG APPLICATION_TAG_VERSION
 
 FROM ${DOCKER_REGISTRY}${BASE_IMAGE}
+ENV EMAIL ${EMAIL}
+ENV APPLICATION_TAG_VERSION ${APPLICATION_TAG_VERSION}
 COPY geocoder geocoder/
 COPY README.md README.md
 COPY setup.py setup.py
@@ -16,9 +19,6 @@ RUN pipenv install --categories "packages api" --system --deploy &&\
     python3 -m pip install .
 RUN chown nobody:nogroup /geocoder &&\
     chmod +x geocoder
-
-RUN LOGURU_LEVEL="ERROR" python3 -c 'import geocoder; print(geocoder.__version__)'  # otherwise next line doesn't error
-RUN export APPLICATION_TAG_VERSION=`LOGURU_LEVEL="ERROR" python3 -c 'import geocoder; print(geocoder.__version__)'`
 
 LABEL da.da/geocoder.version=$APPLICATION_TAG_VERSION \
       da.da/geocoder.contact=$EMAIL
