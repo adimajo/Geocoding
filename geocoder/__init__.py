@@ -11,7 +11,7 @@ geocoder modules and API
 from loguru import logger
 from geocoder.geocoding import search, query
 
-__version__ = "2.1.15"
+__version__ = "2.1.16"
 
 find = search.position
 near = search.reverse
