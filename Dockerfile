@@ -1,11 +1,10 @@
 ARG DOCKER_REGISTRY
-ARG EMAIL
 ARG BASE_IMAGE
-ARG APPLICATION_TAG_VERSION
-
 FROM ${DOCKER_REGISTRY}${BASE_IMAGE}
-ENV EMAIL=${EMAIL}
-ENV APPLICATION_TAG_VERSION=${APPLICATION_TAG_VERSION}
+ARG EMAIL
+ARG APPLICATION_TAG_VERSION
+ENV EMAIL ${EMAIL}
+ENV APPLICATION_TAG_VERSION ${APPLICATION_TAG_VERSION}
 COPY geocoder geocoder/
 COPY README.md README.md
 COPY setup.py setup.py
@@ -18,7 +17,9 @@ RUN apk --update add --no-cache git openblas-dev linux-headers build-base || tru
 RUN pipenv install --categories "packages api" --system --deploy &&\
     python3 -m pip install .
 RUN chown nobody:nogroup /geocoder &&\
-    chmod +x geocoder
+    chmod +x geocoder \
+RUN echo $APPLICATION_TAG_VERSION
+RUN echo $EMAIL
 
 LABEL da.da/geocoder.version=$APPLICATION_TAG_VERSION \
       da.da/geocoder.contact=$EMAIL
