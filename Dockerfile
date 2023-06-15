@@ -18,8 +18,6 @@ RUN pipenv install --categories "packages api" --system --deploy &&\
     python3 -m pip install .
 RUN chown nobody:nogroup /geocoder &&\
     chmod +x geocoder
-RUN echo $APPLICATION_TAG_VERSION
-RUN echo $EMAIL
 
 LABEL da.da/geocoder.version=$APPLICATION_TAG_VERSION \
       da.da/geocoder.contact=$EMAIL
