@@ -13,10 +13,10 @@ geocoder.geocoding.\_\_main\_\_
 
    .. autosummary::
    
+      check_ban_version
       create_database
       create_kdtree
       decompress
-      get_ban_file
       main
       process_files
       remove_downloaded_raw_ban_files

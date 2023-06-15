@@ -1,96 +1,50 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>geocoder.geocoding.download &mdash; Geocoder 2.1.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>geocoder.geocoding.download &mdash; Geocoder 2.1.17 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="geocoder.geocoding.index" href="geocoder.geocoding.index.html" />
     <link rel="prev" title="geocoder.geocoding.distance" href="geocoder.geocoding.distance.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../index.html" class="icon icon-home"> Geocoder
           
-
-          
+          <a href="../index.html" class="icon icon-home">
+            Geocoder
           </a>
-
-          
-            
-            
               <div class="version">
-                2.1.0
+                2.1.17
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="geocoder.html">geocoder</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="geocoder.api.html">geocoder.api</a></li>
@@ -102,13 +56,10 @@
 <li class="toctree-l3"><a class="reference internal" href="geocoder.geocoding.datatypes.html">geocoder.geocoding.datatypes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="geocoder.geocoding.distance.html">geocoder.geocoding.distance</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">geocoder.geocoding.download</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.download.check_ban_version"><code class="docutils literal notranslate"><span class="pre">check_ban_version()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.download.decompress"><code class="docutils literal notranslate"><span class="pre">decompress()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.download.download_ban_dpt_file"><code class="docutils literal notranslate"><span class="pre">download_ban_dpt_file()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.download.get_ban_file"><code class="docutils literal notranslate"><span class="pre">get_ban_file()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.download.md5"><code class="docutils literal notranslate"><span class="pre">md5()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.download.need_to_download"><code class="docutils literal notranslate"><span class="pre">need_to_download()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.download.remove_downloaded_raw_ban_files"><code class="docutils literal notranslate"><span class="pre">remove_downloaded_raw_ban_files()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.download.remove_file"><code class="docutils literal notranslate"><span class="pre">remove_file()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geocoder.geocoding.download.update_ban_file"><code class="docutils literal notranslate"><span class="pre">update_ban_file()</span></code></a></li>
 </ul>
 </li>
@@ -126,95 +77,46 @@
 </li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Geocoder</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
-          <li><a href="geocoder.html">geocoder</a> &raquo;</li>
-        
-          <li><a href="geocoder.geocoding.html">geocoder.geocoding</a> &raquo;</li>
-        
-      <li>geocoder.geocoding.download</li>
-    
-    
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="geocoder.html">geocoder</a></li>
+          <li class="breadcrumb-item"><a href="geocoder.geocoding.html">geocoder.geocoding</a></li>
+      <li class="breadcrumb-item active">geocoder.geocoding.download</li>
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/_autosummary/geocoder.geocoding.download.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <section id="module-geocoder.geocoding.download">
-<span id="geocoder-geocoding-download"></span><h1>geocoder.geocoding.download<a class="headerlink" href="#module-geocoder.geocoding.download" title="Permalink to this heading">¶</a></h1>
+<span id="geocoder-geocoding-download"></span><h1>geocoder.geocoding.download<a class="headerlink" href="#module-geocoder.geocoding.download" title="Permalink to this heading"></a></h1>
 <p>Update the raw data used as the main source of information.</p>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.download.decompress" title="geocoder.geocoding.download.decompress"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decompress</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.download.check_ban_version" title="geocoder.geocoding.download.check_ban_version"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_ban_version</span></code></a>()</p></td>
+<td><p>Checks BAN version and triggers download if necessary</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#geocoder.geocoding.download.decompress" title="geocoder.geocoding.download.decompress"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decompress</span></code></a>()</p></td>
 <td><p>Decompress every downloaded archive</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">disable_warnings</span></code>([category])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">disable_warnings</span></code>([category])</p></td>
 <td><p>Helper for quickly disabling all urllib3 warnings.</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.download.download_ban_dpt_file" title="geocoder.geocoding.download.download_ban_dpt_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_ban_dpt_file</span></code></a>(ban_dpt_file_name)</p></td>
-<td><p>Downloads a single file from BAN</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#geocoder.geocoding.download.get_ban_file" title="geocoder.geocoding.download.get_ban_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_ban_file</span></code></a>()</p></td>
-<td><p>Downloads everything if necessary</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.download.md5" title="geocoder.geocoding.download.md5"><code class="xref py py-obj docutils literal notranslate"><span class="pre">md5</span></code></a>(fname)</p></td>
-<td><p>Calculates md5 hash of file</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#geocoder.geocoding.download.need_to_download" title="geocoder.geocoding.download.need_to_download"><code class="xref py py-obj docutils literal notranslate"><span class="pre">need_to_download</span></code></a>()</p></td>
 <td><p>Defines whether new data needs to be downloaded</p></td>
@@ -222,16 +124,13 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.download.remove_downloaded_raw_ban_files" title="geocoder.geocoding.download.remove_downloaded_raw_ban_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_downloaded_raw_ban_files</span></code></a>()</p></td>
 <td><p>Removes all raw files (compressed and uncompressed)</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#geocoder.geocoding.download.remove_file" title="geocoder.geocoding.download.remove_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_file</span></code></a>(file_path)</p></td>
-<td><p>Delete file</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.download.update_ban_file" title="geocoder.geocoding.download.update_ban_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_ban_file</span></code></a>(url, file_name)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#geocoder.geocoding.download.update_ban_file" title="geocoder.geocoding.download.update_ban_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_ban_file</span></code></a>(url, file_name)</p></td>
 <td><p>Check which files are present</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_local_content_file</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_local_content_file</span></code>()</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_server_content_file</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_server_content_file</span></code>()</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -256,49 +155,24 @@
 </tbody>
 </table>
 <dl class="py function">
+<dt class="sig sig-object py" id="geocoder.geocoding.download.check_ban_version">
+<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.download.</span></span><span class="sig-name descname"><span class="pre">check_ban_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/download.html#check_ban_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.download.check_ban_version" title="Permalink to this definition"></a></dt>
+<dd><p>Checks BAN version and triggers download if necessary</p>
+<p>Returns: whether a download has been performed
+:rtype: bool</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="geocoder.geocoding.download.decompress">
-<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.download.</span></span><span class="sig-name descname"><span class="pre">decompress</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/download.html#decompress"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.download.decompress" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.download.</span></span><span class="sig-name descname"><span class="pre">decompress</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/download.html#decompress"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.download.decompress" title="Permalink to this definition"></a></dt>
 <dd><p>Decompress every downloaded archive</p>
 <p>Returns: whether decompression was successful
 :rtype: bool</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="geocoder.geocoding.download.download_ban_dpt_file">
-<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.download.</span></span><span class="sig-name descname"><span class="pre">download_ban_dpt_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ban_dpt_file_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/download.html#download_ban_dpt_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.download.download_ban_dpt_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Downloads a single file from BAN</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>ban_dpt_file_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – name of file to download</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geocoder.geocoding.download.get_ban_file">
-<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.download.</span></span><span class="sig-name descname"><span class="pre">get_ban_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/download.html#get_ban_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.download.get_ban_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Downloads everything if necessary</p>
-<p>Returns: whether a download has been preformed
-:rtype: bool</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geocoder.geocoding.download.md5">
-<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.download.</span></span><span class="sig-name descname"><span class="pre">md5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/download.html#md5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.download.md5" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates md5 hash of file</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>fname</strong> – file path</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="geocoder.geocoding.download.need_to_download">
-<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.download.</span></span><span class="sig-name descname"><span class="pre">need_to_download</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/download.html#need_to_download"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.download.need_to_download" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.download.</span></span><span class="sig-name descname"><span class="pre">need_to_download</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/download.html#need_to_download"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.download.need_to_download" title="Permalink to this definition"></a></dt>
 <dd><p>Defines whether new data needs to be downloaded</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -309,26 +183,15 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="geocoder.geocoding.download.remove_downloaded_raw_ban_files">
-<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.download.</span></span><span class="sig-name descname"><span class="pre">remove_downloaded_raw_ban_files</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/download.html#remove_downloaded_raw_ban_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.download.remove_downloaded_raw_ban_files" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.download.</span></span><span class="sig-name descname"><span class="pre">remove_downloaded_raw_ban_files</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/download.html#remove_downloaded_raw_ban_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.download.remove_downloaded_raw_ban_files" title="Permalink to this definition"></a></dt>
 <dd><p>Removes all raw files (compressed and uncompressed)</p>
 <p>Returns: whether removing was successful
 :rtype: bool</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="geocoder.geocoding.download.remove_file">
-<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.download.</span></span><span class="sig-name descname"><span class="pre">remove_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/download.html#remove_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.download.remove_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Delete file</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>file_path</strong> (<em>os.Path</em>) – path to file to be deleted</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="geocoder.geocoding.download.update_ban_file">
-<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.download.</span></span><span class="sig-name descname"><span class="pre">update_ban_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/download.html#update_ban_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.download.update_ban_file" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.download.</span></span><span class="sig-name descname"><span class="pre">update_ban_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/download.html#update_ban_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.download.update_ban_file" title="Permalink to this definition"></a></dt>
 <dd><p>Check which files are present</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -344,50 +207,33 @@
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="geocoder.geocoding.index.html" class="btn btn-neutral float-right" title="geocoder.geocoding.index" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="geocoder.geocoding.distance.html" class="btn btn-neutral float-left" title="geocoder.geocoding.distance" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="geocoder.geocoding.index.html" class="btn btn-neutral float-right" title="geocoder.geocoding.index" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2022, GRO.
-
-    </p>
+    <p>&#169; Copyright 2022, GRO.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

@@ -13,14 +13,11 @@ geocoder.geocoding.download
 
    .. autosummary::
    
+      check_ban_version
       decompress
       disable_warnings
-      download_ban_dpt_file
-      get_ban_file
-      md5
       need_to_download
       remove_downloaded_raw_ban_files
-      remove_file
       update_ban_file
       update_local_content_file
       update_server_content_file
