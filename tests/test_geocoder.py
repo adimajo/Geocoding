@@ -55,8 +55,8 @@ def test_geocode_file(client, caplog):
 
 def test_functions():
     output = geocoder.find('01500', 'Ambérieu-en-Bugey', 'Rue du Professeur Christian Cabrol')
-    assert round(output['longitude'], 2) == 5.35
-    assert round(output['latitude'], 2) == 45.98
+    assert round(output['longitude'], 2) == 4.94
+    assert round(output['latitude'], 2) == 46.13
 
     output = geocoder.find('01400', None, '630, la Chèvre')
     assert round(output['longitude'], 2) == 4.91

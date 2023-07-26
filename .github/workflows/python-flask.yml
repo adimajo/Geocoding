@@ -43,12 +43,12 @@ jobs:
           pipenv run flake8 --ignore=W504 geocoder --max-complexity=10 --max-line-length=120 --statistics --exclude=tests/conftest.py
       - name: Test with coverage and pytest
         run: |
+          pipenv run pip install attrs
           PYTHONPATH=. pipenv run python geocoder/geocoding/__main__.py download
           PYTHONPATH=. pipenv run python geocoder/geocoding/__main__.py decompress
           PYTHONPATH=. pipenv run python geocoder/geocoding/__main__.py index
           PYTHONPATH=. pipenv run python geocoder/geocoding/__main__.py reverse
           ls -al geocoder/geocoding/database/
-          pipenv run pip install attrs
           pipenv run coverage run --source geocoder -m pytest
           pipenv run coverage report
           pipenv run coverage xml
