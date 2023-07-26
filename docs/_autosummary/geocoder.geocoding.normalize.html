@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>geocoder.geocoding.normalize &mdash; Geocoder 2.1.18 documentation</title>
+  <title>geocoder.geocoding.normalize &mdash; Geocoder 2.1.20 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -35,7 +35,7 @@
             Geocoder
           </a>
               <div class="version">
-                2.1.18
+                2.1.20
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -188,7 +188,7 @@ information to distinguish one address from another.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#geocoder.geocoding.normalize.uniform_commune" title="geocoder.geocoding.normalize.uniform_commune"><code class="xref py py-obj docutils literal notranslate"><span class="pre">uniform_commune</span></code></a>(text)</p></td>
 <td><p>Normalization of the city name.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.normalize.uniform_words" title="geocoder.geocoding.normalize.uniform_words"><code class="xref py py-obj docutils literal notranslate"><span class="pre">uniform_words</span></code></a>(text)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geocoder.geocoding.normalize.uniform_words" title="geocoder.geocoding.normalize.uniform_words"><code class="xref py py-obj docutils literal notranslate"><span class="pre">uniform_words</span></code></a>(text[, delete_meanless])</p></td>
 <td><p>Return a normalized list of words from text.</p></td>
 </tr>
 </tbody>
@@ -257,7 +257,7 @@ variable dictionary.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="geocoder.geocoding.normalize.uniform_words">
-<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.normalize.</span></span><span class="sig-name descname"><span class="pre">uniform_words</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/normalize.html#uniform_words"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.normalize.uniform_words" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">geocoder.geocoding.normalize.</span></span><span class="sig-name descname"><span class="pre">uniform_words</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delete_meanless</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/geocoder/geocoding/normalize.html#uniform_words"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geocoder.geocoding.normalize.uniform_words" title="Permalink to this definition"></a></dt>
 <dd><p>Return a normalized list of words from text.</p>
 <p>Split the normalized text in words and select those that aren’t in the
 module level variable meanless_words set.</p>
