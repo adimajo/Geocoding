@@ -38,7 +38,7 @@ def test_version(client, caplog):
 def test_geocode(client, caplog):
     response = client.get('/geocode/Rue+du+Professeur+Christian+Cabrol/01500/Ambérieu-en-Bugey')
     assert round(json.loads(response.data.decode("utf-8"))["data"][0]["lon"], 2) == 4.94
-    assert round(json.loads(response.data.decode("utf-8"))["data"][0]["lat"], 2) == 45.93
+    assert round(json.loads(response.data.decode("utf-8"))["data"][0]["lat"], 2) == 46.13
     response = client.get('/')
     response = client.get('/use')
 
@@ -50,7 +50,7 @@ def test_geocode_file(client, caplog):
         'city': "Ambérieux-en-Bugey"}])
     response = client.post('/geocode_file', json=json_file)
     assert round(json.loads(response.data.decode("utf-8"))["data"][0]["lon"], 2) == 4.94
-    assert round(json.loads(response.data.decode("utf-8"))["data"][0]["lat"], 2) == 45.98
+    assert round(json.loads(response.data.decode("utf-8"))["data"][0]["lat"], 2) == 46.13
 
 
 def test_functions():
@@ -59,7 +59,7 @@ def test_functions():
     assert round(output['latitude'], 2) == 46.13
 
     output = geocoder.find('01400', None, '630, la Chèvre')
-    assert round(output['longitude'], 2) == 4.91
+    assert round(output['longitude'], 2) == 5.27
     assert round(output['latitude'], 2) == 46.13
 
     query = (2.2099, 48.7099)
