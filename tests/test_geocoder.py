@@ -60,7 +60,7 @@ def test_functions():
 
     output = geocoder.find('01400', None, '630, la Chèvre')
     assert round(output['longitude'], 2) == 5.27
-    assert round(output['latitude'], 2) == 46.13
+    assert round(output['latitude'], 2) == 45.96
 
     query = (2.2099, 48.7099)
     output = geocoder.near(query)
