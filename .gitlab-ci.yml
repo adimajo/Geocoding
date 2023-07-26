@@ -534,7 +534,7 @@ promote_stable_forced:
   only:
     - master
   needs:
-    - job: generate_tag
+    - job: test
       artifacts: true
     - job: promote_stable_api
   when: on_failure

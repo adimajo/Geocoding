@@ -46,18 +46,14 @@ dictionary = {
     "VLGE": "VILLAGE"
 }
 
-voie_type_1 = set(["ALLEE", "AVENUE", "BOULEVARD", "CITE", "CHEMIN", "CENTRE",
-                   "CLOS", "COURS", "DOMAINE", "GALERIE", "HAMEAU", "HLM",
-                   "IMPASSE", "LIEUDIT", "LOTISSEMENT", "MAIL", "QUAI",
-                   "QUARTIER", "PASSAGE", "PLACE", "RONDPOINT",
-                   "ROUTE", "RUE", "RUELLE", "SQUARE", "TRAVERSE", "VOIE",
-                   "VILLAGE", "ZONE"])
+voie_type_1 = {"ALLEE", "AVENUE", "BOULEVARD", "CITE", "CHEMIN", "CENTRE", "CLOS", "COURS", "DOMAINE", "GALERIE",
+               "HAMEAU", "HLM", "IMPASSE", "LIEUDIT", "LOTISSEMENT", "MAIL", "QUAI", "QUARTIER", "PASSAGE", "PLACE",
+               "RONDPOINT", "ROUTE", "RUE", "RUELLE", "SQUARE", "TRAVERSE", "VOIE", "VILLAGE", "ZONE"}
 
-voie_type_2 = set([("CHEF", "LIEU"), ("LIEU", "DIT"), ("GRANDE", "RUE"),
-                   ("GRAND", "RUE"), ("GRANDE", "PLACE"), ("ROND", "POINT")])
+voie_type_2 = {("CHEF", "LIEU"), ("LIEU", "DIT"), ("GRANDE", "RUE"), ("GRAND", "RUE"), ("GRANDE", "PLACE"),
+               ("ROND", "POINT")}
 
-meanless_words = set(["DE", "DES", "DU", "D", "LE", "LES", "LA", "L",
-                      "A", "AU", "AUX", "ET", "EN", "SUR", "SOUS", "CEDEX"])
+meanless_words = {"DE", "DES", "DU", "D", "LE", "LES", "LA", "L", "A", "AU", "AUX", "ET", "EN", "SUR", "SOUS", "CEDEX"}
 
 
 def uniform(text):
@@ -83,7 +79,7 @@ def remove_separators(text):
     return text
 
 
-def uniform_words(text):
+def uniform_words(text, delete_meanless: bool = False):
     """Return a normalized list of words from text.
 
     Split the normalized text in words and select those that aren't in the
@@ -96,7 +92,9 @@ def uniform_words(text):
     text = text.replace('"', '')
     text = text.replace('-', ' ')
 
-    return [word for word in translate(text) if word not in meanless_words]
+    if delete_meanless:
+        return [word for word in translate(text) if word not in meanless_words]
+    return [word for word in translate(text)]
 
 
 def translate(text):
@@ -172,6 +170,6 @@ def mine(text):
     elif voie_type_index is None:
         voie_type_index = 0
 
-    voie = ''.join(words[voie_type_index:])
+    voie = ' '.join(words[voie_type_index:])
     voie_type = words[voie_type_index]
     return numero, voie, voie_type

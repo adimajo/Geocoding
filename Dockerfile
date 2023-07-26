@@ -6,22 +6,21 @@ ARG APPLICATION_TAG_VERSION
 ENV EMAIL ${EMAIL}
 ENV APPLICATION_TAG_VERSION ${APPLICATION_TAG_VERSION}
 COPY geocoder geocoder/
-COPY README.md README.md
-COPY setup.py setup.py
-COPY Pipfile Pipfile
-COPY Pipfile.lock Pipfile.lock
+COPY README.md setup.py Pipfile Pipfile.lock ./
 
 RUN apk --update add --no-cache git openblas-dev linux-headers build-base || true &&\
     pip install --upgrade pip &&\
     pip install pipenv
 RUN pipenv install --categories "packages api" --system --deploy &&\
     python3 -m pip install .
-RUN chown nobody:nogroup /geocoder &&\
-    chmod +x geocoder
+RUN chmod +x geocoder &&\
+    rm -rf geocoder &&\
+    rm -f README.md Pipfile Pipfile.lock setup.py
 
 LABEL da.da/geocoder.version=$APPLICATION_TAG_VERSION \
       da.da/geocoder.contact=$EMAIL
 
-RUN rm -rf geocoder && rm -f README.md Pipfile Pipfile.lock setup.py
+USER nobody
+
 ENTRYPOINT geocoder update &&\
     geocoder runserver
