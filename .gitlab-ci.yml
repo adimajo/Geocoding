@@ -375,7 +375,6 @@ promote_staging_api:
     - . ./build.env
     - 'echo GENERATED TAG : $APPLICATION_TAG_VERSION'
     - 'curl -S -k -u ${CREDS} -XPOST https://$ARTI_REGISTRY/artifactory/api/docker/$SOURCE_REPO/v2/promote -H "Content-Type: application/json" -d"{\"targetRepo\":\"${TARGET_REPO}\",\"dockerRepository\":\"${ARTI_REPO}\",\"tag\":\"${APPLICATION_TAG_VERSION}\",\"copy\":true}" > promote_output.txt'
-    - cat promote_output.txt
     - grep "successfully" promote_output.txt
 
 promote_staging_package:
