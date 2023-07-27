@@ -219,7 +219,7 @@ document_cagip:
   <<: *common_tag
   script:
     - . ./build.env
-    - apk --update add --no-cache make git
+    - apk --update add --no-cache git openblas-dev linux-headers build-base libffi-dev make git
     - pip install "pipenv<=2023.5.19"
     - cd docs
     - pipenv run make clean
