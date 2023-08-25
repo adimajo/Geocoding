@@ -36,7 +36,7 @@ elif not os.environ.get("LOGURU_LEVEL"):  # pragma: no cover
 
 if not LOCAL_DB:
     s3 = boto3.client('s3',
-                      endpoint_url='https://browser.s3.prodinfo.gca/',
+                      endpoint_url=os.environ.get("S3_ENDPOINT_URL", 'https://browser.s3.prodinfo.gca/'),
                       use_ssl=True,
                       verify=False)
 else:

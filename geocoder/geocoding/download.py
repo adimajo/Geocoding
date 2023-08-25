@@ -80,7 +80,6 @@ def update_ban_file(url, file_name):
         file_name (os.Path): name of the file to write
     """
     try:
-
         msg = 'Unable to join BAN address website ({}).'.format(url)
         r = requests.get(url, verify=SSL_VERIFICATION)  # nosec
         msg += ' Status error code: {}'.format(r.status_code)
